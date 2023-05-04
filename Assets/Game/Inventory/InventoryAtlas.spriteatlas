@@ -52,6 +52,7 @@ SpriteAtlas:
   m_PackedSprites:
   - {fileID: 21300000, guid: cd806b6065e242241a2aca03a3c34464, type: 3}
   - {fileID: 21300000, guid: b3a84eb010030704a9dbff797e24b370, type: 3}
+  - {fileID: 21300000, guid: 15e844d0c299b4d36a8cf540759bab64, type: 3}
   - {fileID: 21300000, guid: d453c0f0cb66ea345b8f57dfbfe7c122, type: 3}
   - {fileID: 21300000, guid: 92271031da468814da0e3096a5a116a5, type: 3}
   - {fileID: 21300000, guid: 004fc181b8727fa4d94f991626b1afd1, type: 3}
@@ -61,6 +62,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: c38fba680eab5fb4b88c22d3d9013293, type: 3}
   - {fileID: 21300000, guid: 3922c0a8c80dd8f4099e6aaa35b4cde7, type: 3}
   - {fileID: 21300000, guid: 1744e6a839a0a8b4fbb613a7bf51e636, type: 3}
+  - {fileID: 21300000, guid: 91f9ed39450224b42b2de13b459ca423, type: 3}
   - {fileID: 21300000, guid: 92d6e8e94d4ba1141954063e34890398, type: 3}
   - {fileID: 21300000, guid: 68239c3b6ce2a7548893e26b49103e60, type: 3}
   - {fileID: 21300000, guid: ec776f3b5fec3a941ab98531e422d41c, type: 3}
@@ -70,6 +72,7 @@ SpriteAtlas:
   m_PackedSpriteNamesToIndex:
   - handle
   - bucket
+  - washer
   - hoseM
   - handleS
   - pizzabeer
@@ -79,6 +82,7 @@ SpriteAtlas:
   - repair_kit
   - beerIcon
   - handleL
+  - wrench
   - handleM
   - hoseL
   - phone

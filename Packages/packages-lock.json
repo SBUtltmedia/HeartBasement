@@ -206,13 +206,6 @@
         "com.unity.modules.imgui": "1.0.0"
       }
     },
-    "net.gree.unity-webview": {
-      "version": "https://github.com/gree/unity-webview.git?path=/dist/package",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "3647674386e3c844aa416fc744905b8286c56616"
-    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,

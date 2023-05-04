@@ -49,8 +49,32 @@ SpriteAtlas:
     isAtlasV2: 0
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
-  m_PackedSprites: []
-  m_PackedSpriteNamesToIndex: []
+  m_PackedSprites:
+  - {fileID: 21300000, guid: cb43d4e1013304a1cbd65b944e815dd5, type: 3}
+  - {fileID: 21300000, guid: 11641ae1171f840ae85d9a16a855104c, type: 3}
+  - {fileID: 21300000, guid: 4da4c003b78fa4f518d98bf66ec7a6e9, type: 3}
+  - {fileID: 21300000, guid: dcebf473906a94910b76039b5da90be9, type: 3}
+  - {fileID: 21300000, guid: 2c63817456e8e42509b41232eca8bf43, type: 3}
+  - {fileID: 21300000, guid: 5acb3dc5875fc4fc39e3768c7b2d38ad, type: 3}
+  - {fileID: 21300000, guid: 4b0175668ff5b4a8c9adb0a948b5f664, type: 3}
+  - {fileID: 21300000, guid: 6fd60d863ee0b4418a6345350d43292d, type: 3}
+  - {fileID: 21300000, guid: 950b88578a9f647168aadc194f680629, type: 3}
+  - {fileID: 21300000, guid: 60286cec7f37948768304db4b75cce33, type: 3}
+  - {fileID: 21300000, guid: a996375d4b23946afb72f61f1c0515dd, type: 3}
+  - {fileID: 21300000, guid: 915bf5fdbe591419c9680623854e7c98, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Slide7
+  - Slide5
+  - Slide2
+  - Slide8
+  - Slide9
+  - Slide6
+  - Slide1
+  - Slide4
+  - Screen Shot 2023-01-26 at 5.32.41 PM
+  - Slide10
+  - chap2
+  - Slide3
   m_RenderDataMap: {}
   m_Tag: GuiExplanationAtlas
   m_IsVariant: 0
