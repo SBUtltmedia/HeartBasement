@@ -186,7 +186,7 @@ public class RoomHome : RoomScript<RoomHome>
 			Globals.rained = true;
 			C.Dave.Visible = true;
 			yield return E.WaitSkip();
-			yield return C.Dave.Say(" Not again!");
+			yield return C.Dave.Say(" Not again!", 3);
 			yield return E.WaitSkip();
 		  G.Explanation.Show();
 			yield return E.Break;
@@ -409,8 +409,8 @@ public class RoomHome : RoomScript<RoomHome>
 			C.Dave.StopAnimation();
 			Prop("Pump").Visible = true;
 			Prop("Handle").Visible = true;
-			yield return C.Dave.Say("This water ain't goin nowhere!");
-			yield return C.Dave.Say("I'm gonna need a better pump.");
+			yield return C.Dave.Say("This water ain't goin nowhere!", 31);
+			yield return C.Dave.Say("I'm gonna need a better pump.", 33);
 		}
 		else if (Globals.gameStage >= gameProgress.RightParts) {
 			C.Dave.StopAnimation();
@@ -604,11 +604,11 @@ public class RoomHome : RoomScript<RoomHome>
 		yield return C.Tony.Say(" Phew... I'm wiped out. Got any grub?", 4);
 		}
 		else {
-			  yield return C.Dave.Say(" Gee Tony, I haven't got any food");
+			  yield return C.Dave.Say(" Gee Tony, I haven't got any food", 34);
 		
-			  yield return C.Tony.Say(" Why don't you give that pizza place a call?");
+			  yield return C.Tony.Say(" Why don't you give that pizza place a call?", 2);
 		
-			  yield return C.Tony.Say(" I could eat an entire pie");
+			  yield return C.Tony.Say(" I could eat an entire pie", 7);
 		
 		  }
 		yield return E.Break;
@@ -631,7 +631,7 @@ public class RoomHome : RoomScript<RoomHome>
 			yield return C.Dave.Say(" There it is! Now I can scoop up some of this water.", 42);
 			yield return E.WaitSkip();
 			yield return C.Display(" Click on the bucket icon in your toolbox to select it.", 32);
-			yield return C.Display("You also have a cell phone, which you can use to call the Hint Hotline.");
+			yield return C.Display("You also have a cell phone, which you can use to call the Hint Hotline.", 60);
 		}
 		
 		yield return E.Break;
@@ -718,7 +718,7 @@ public class RoomHome : RoomScript<RoomHome>
 	{
 		yield return C.Dave.Say(" It’s my trusty old washing machine.", 52);
 		
-		yield return C.Dave.Say(" Although at this point I probably could just throw some detergent in the water and make my whole basement the washing machine.");
+		yield return C.Dave.Say(" Although at this point I probably could just throw some detergent in the water and make my whole basement the washing machine.", 35);
 		
 		yield return E.Break;
 	}
@@ -727,7 +727,7 @@ public class RoomHome : RoomScript<RoomHome>
 	{
 		yield return C.Dave.Say("This clunker of a boiler is from the 1940’s.", 53);
 		
-		 yield return C.Dave.Say("  It works, but it makes the worst darn noises you’ve ever dun heard.");
+		 yield return C.Dave.Say("  It works, but it makes the worst darn noises you’ve ever dun heard.", 36);
 		yield return E.Break;
 	}
 
@@ -735,7 +735,7 @@ public class RoomHome : RoomScript<RoomHome>
 	{
 		yield return C.Dave.Say("Haven’t used this in a while.", 54);
 		
-		yield return C.Dave.Say("For all you kids out there, this is what TV’s looked like in the stone age.");
+		yield return C.Dave.Say("For all you kids out there, this is what TV’s looked like in the stone age.", 37);
 		
 		yield return E.Break;
 	}
@@ -946,9 +946,9 @@ public class RoomHome : RoomScript<RoomHome>
 		Prop("Box").Disable();
 		Prop("ElectricPump").Enable();
 		Prop("Hose").Enable();
-		yield return C.Dave.Say(" It's beautiful!");
+		yield return C.Dave.Say(" It's beautiful!", 38);
 		yield return E.WaitSkip();
-		yield return C.Dave.Say("What's this?");
+		yield return C.Dave.Say("What's this?", 39);
 		C.Dave.AddInventory(I.RepairKit);
 		yield return C.Display("Repair Kit added to your toolbox.", 54);
 		
@@ -970,14 +970,14 @@ public class RoomHome : RoomScript<RoomHome>
 		Audio.Stop("Motor");
 		Globals.gameStage = gameProgress.UsedElectricPump;
 		  G.Explanation.Show();
-		  yield return C.Dave.Say("Like a charm!");
+		  yield return C.Dave.Say("Like a charm!", 40);
 		yield return E.FadeOut();
-		yield return C.Display("6 months later...");
+		yield return C.Display("6 months later...", 61);
 		yield return FloodBasement();
 		yield return E.FadeIn();
-		yield return C.Dave.Say(" Another flood?");
+		yield return C.Dave.Say(" Another flood?", 113);
 		yield return E.WaitSkip();
-		yield return C.Dave.Say("Nothing my Pump-o-matic 5000 can't handle!");
+		yield return C.Dave.Say("Nothing my Pump-o-matic 5000 can't handle!", 114);
 		//LowerWater(4);
 		} else if (Globals.gameStage == gameProgress.UsedElectricPump){
 		
@@ -988,25 +988,25 @@ public class RoomHome : RoomScript<RoomHome>
 			  Audio.Stop("Motor");
 			  Globals.gameStage = gameProgress.RepairedPump;
 			  G.Explanation.Show();
-			  yield return C.Dave.Say(" Phew!");
+			  yield return C.Dave.Say(" Phew!", 115);
 			  yield return E.WaitSkip();
-			  yield return C.Dave.Say(" The pump works again!");
+			  yield return C.Dave.Say(" The pump works again!", 116);
 		
 		  } else {
 			  Audio.Play("MotorFailure");
 			  if (pumpRepairs == 0){
 		
 		
-				  yield return C.Dave.Say("Seriously?!");
+				  yield return C.Dave.Say("Seriously?!", 117);
 				  yield return E.WaitSkip();
-				  yield return C.Dave.Say("It's broken!");
+				  yield return C.Dave.Say("It's broken!", 118);
 					yield return E.WaitSkip(1.0f);
-				  yield return C.Dave.Say(" It looks like there's a rusty washer.");
+				  yield return C.Dave.Say(" It looks like there's a rusty washer.", 119);
 		
 			  }  else if (pumpRepairs == 1){
-				  yield return C.Dave.Say(" I'd better replace the washer.");
+				  yield return C.Dave.Say(" I'd better replace the washer.", 120);
 			  } else if (pumpRepairs == 2){
-				  yield return C.Dave.Say(" Whoops, forgot to tighten the washer!");
+				  yield return C.Dave.Say(" Whoops, forgot to tighten the washer!", 121);
 			  }
 		  }
 		}
@@ -1018,22 +1018,22 @@ public class RoomHome : RoomScript<RoomHome>
 		if(Globals.gameStage == gameProgress.UsedElectricPump ) {
 			if (item == I.Wrench) {
 				if (pumpRepairs == 0) {
-					yield return C.Display(" Rusty washer removed.");
+					yield return C.Display(" Rusty washer removed.", 62);
 					 pumpRepairs++;
 				} else if (pumpRepairs == 1) {
-					yield return C.Dave.Say(" Where's that new washer?");
+					yield return C.Dave.Say(" Where's that new washer?", 122);
 				}  else if (pumpRepairs == 2) {
-					yield return C.Dave.Say(" That should do it!");
+					yield return C.Dave.Say(" That should do it!", 123);
 					pumpRepairs++;
 				}
 			} if (item == I.Washer){
 		
 				if (pumpRepairs == 0) {
-					yield return C.Dave.Say(" Whoop, gotta take that rusty old washer off before I can put this shiny new one on.");
+					yield return C.Dave.Say(" Whoop, gotta take that rusty old washer off before I can put this shiny new one on.", 124);
 				} else if (pumpRepairs == 1) {
 					pumpRepairs++;
 					item.Remove();
-					yield return C.Display(" New washer placed on pump.");
+					yield return C.Display(" New washer placed on pump.", 63);
 				}
 			}
 		}
@@ -1042,7 +1042,7 @@ public class RoomHome : RoomScript<RoomHome>
 
 	IEnumerator OnLookAtPropElectricPump( IProp prop )
 	{
-		yield return C.Dave.Say(" Ain't she a beauty?");
+		yield return C.Dave.Say(" Ain't she a beauty?", 125);
 		yield return E.Break;
 	}
 

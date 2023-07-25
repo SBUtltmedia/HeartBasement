@@ -71,6 +71,7 @@ public partial class GlobalScript : GlobalScriptBase<GlobalScript>
 	{     
 		// GAME STAGE
 		Globals.gameStage = gameProgress.None;
+		Settings.LanguageId = 0;
 		E.DeleteSave(1);
 		
 		
@@ -84,7 +85,7 @@ public partial class GlobalScript : GlobalScriptBase<GlobalScript>
 		// GUI
 		//G.Toolbar.Hide();
 		//G.Explanation.Show();
-		SetPhase(1,false);
+		// SetPhase(1,false);
 		
 		// temporary
 		
@@ -122,7 +123,7 @@ public partial class GlobalScript : GlobalScriptBase<GlobalScript>
 	public void OnEnterRoom()
 	{
 		
-		if (Settings.LanguageId == 0) SetPhase(1);
+		// if (Settings.LanguageId == 0) SetPhase(1);
 	}
 
 	/// Blocking script called whenever you enter a room, after fade in is complete

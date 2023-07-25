@@ -48,9 +48,6 @@ MonoBehaviour:
   - m_code: EN
     m_description: English
     m_customData: []
-  - m_code: P1
-    m_description: PhaseOne
-    m_customData: []
   - m_code: P2
     m_description: PhaseTwo
     m_customData: []
@@ -68,7 +65,7 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 41
     m_orderId: 1
@@ -81,7 +78,7 @@ MonoBehaviour:
       would improve urine output
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 30
     m_orderId: 2
@@ -93,11 +90,21 @@ MonoBehaviour:
     - The diuretic is over on the shelf. Click on it to add it to your inventory.
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 3
+    m_orderId: 3
+    m_string: ' Not again!'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnEnterRoomAfterFade
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 2
-    m_orderId: 3
-    m_string: It's a door to the outside.
+    m_orderId: 4
+    m_string: ' It''s a door to the outside.'
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtHotspotDoor
     m_translations:
@@ -105,10 +112,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 44
-    m_orderId: 4
+    m_orderId: 5
     m_string: Oh man... this is going to take forever.
     m_sourceFile: Room- Home
     m_sourceFunction: OnUseInvPropWater
@@ -117,10 +124,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 45
-    m_orderId: 5
+    m_orderId: 6
     m_string: Maybe there's something at Doc's hardware store that can help.
     m_sourceFile: Room- Home
     m_sourceFunction: OnUseInvPropWater
@@ -129,11 +136,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 28
-    m_orderId: 6
-    m_string: Click on a space in the room to walk to it.
+    m_orderId: 7
+    m_string: Click on the door to the right to leave your basement.
     m_sourceFile: Room- Home
     m_sourceFunction: OnUseInvPropWater
     m_translations:
@@ -141,11 +148,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 6
-    m_orderId: 7
-    m_string: This bucket ain't gonna cut it...
+    m_orderId: 8
+    m_string: ' This bucket ain''t gonna cut it...'
     m_sourceFile: Room- Home
     m_sourceFunction: OnUseInvPropWater
     m_translations:
@@ -153,10 +160,10 @@ MonoBehaviour:
     - Looks like the patient will need more than a diuretic
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 2
-    m_orderId: 8
+    m_orderId: 9
     m_string: Congratulations! The water level has decreased. However, it is not
       enough...
     m_sourceFile: Room- Home
@@ -166,10 +173,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 4
-    m_orderId: 9
+    m_orderId: 10
     m_string: This is too hard! I think the handle is too short and the diameter
       of the hose is too small, I need to go back to the hardware store.
     m_sourceFile: Room- Home
@@ -179,10 +186,10 @@ MonoBehaviour:
     - The stroke volume isn't enough! What about afterload??
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 5
-    m_orderId: 10
+    m_orderId: 11
     m_string: That's a lot of water!
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtPropWater
@@ -191,11 +198,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 36
-    m_orderId: 11
-    m_string: Walk all the way to the right and click the door to leave your basement.
+    m_orderId: 12
+    m_string: Click the door to leave your basement.
     m_sourceFile: Room- Home
     m_sourceFunction: UpdateBlocking
     m_translations:
@@ -203,11 +210,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 46
-    m_orderId: 12
-    m_string: Finally! We got that dang water outta my dang basement!
+    m_orderId: 13
+    m_string: ' Finally! We got that dang water outta my dang basement!'
     m_sourceFile: Room- Home
     m_sourceFunction: UpdateBlocking
     m_translations:
@@ -215,11 +222,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 47
-    m_orderId: 13
-    m_string: I sure hope that never happens again!
+    m_orderId: 14
+    m_string: ' I sure hope that never happens again!'
     m_sourceFile: Room- Home
     m_sourceFunction: UpdateBlocking
     m_translations:
@@ -227,11 +234,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 53
-    m_orderId: 14
-    m_string: Two weeks later...
+    m_orderId: 15
+    m_string: ' Two weeks later...'
     m_sourceFile: Room- Home
     m_sourceFunction: UpdateBlocking
     m_translations:
@@ -239,10 +246,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 2
-    m_orderId: 15
+    m_orderId: 16
     m_string: Congratulations! The water level has decreased. However, it is not
       enough...
     m_sourceFile: Room- Home
@@ -255,7 +262,7 @@ MonoBehaviour:
     m_changedSinceImport: 1
   - m_character: Dave
     m_id: 4
-    m_orderId: 16
+    m_orderId: 17
     m_string: This is too hard! I think the handle is too short and the diameter
       of the hose is too small, I need to go back to the hardware store.
     m_sourceFile: Room- Home
@@ -267,8 +274,28 @@ MonoBehaviour:
     m_phonesCharacter: 
     m_changedSinceImport: 1
   - m_character: Dave
+    m_id: 31
+    m_orderId: 18
+    m_string: This water ain't goin nowhere!
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 33
+    m_orderId: 19
+    m_string: I'm gonna need a better pump.
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
     m_id: 25
-    m_orderId: 17
+    m_orderId: 20
     m_string: I'm pooped! I need some extra muscle.
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractPropPump
@@ -277,10 +304,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 26
-    m_orderId: 18
+    m_orderId: 21
     m_string: I bet my friend Tony could help out, I should give him a call.
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractPropPump
@@ -289,10 +316,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 3
-    m_orderId: 19
+    m_orderId: 22
     m_string: You've chosen the correct parts for the pump and the water level has
       decreased.
     m_sourceFile: Room- Home
@@ -303,10 +330,10 @@ MonoBehaviour:
       (heart)
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 7
-    m_orderId: 20
+    m_orderId: 23
     m_string: Still not enough... I could use some extra hands.
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractPropPump
@@ -316,11 +343,11 @@ MonoBehaviour:
       or other methods
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 8
-    m_orderId: 21
-    m_string: This isn't any better. I should try different parts.
+    m_orderId: 24
+    m_string: ' This isn''t any better. I should try different parts.'
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractPropPump
     m_translations:
@@ -328,10 +355,10 @@ MonoBehaviour:
     - Physiologically speaking, what else can you do to improve heart function?
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Tony
     m_id: 0
-    m_orderId: 22
+    m_orderId: 25
     m_string: Here goes nothing!
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractCharacterTony
@@ -340,11 +367,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 4
-    m_orderId: 23
-    m_string: The recruited muscle has helped bring the water level down.
+    m_orderId: 26
+    m_string: ' The recruited muscle has helped bring the water level down.'
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractCharacterTony
     m_translations:
@@ -353,11 +380,11 @@ MonoBehaviour:
       heart muscle (improving pumping efficiency)
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Tony
     m_id: 4
-    m_orderId: 24
-    m_string: Phew... I'm wiped out. Got any grub?
+    m_orderId: 27
+    m_string: ' Phew... I''m wiped out. Got any grub?'
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractCharacterTony
     m_translations:
@@ -365,59 +392,40 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Narr
-    m_id: 5
-    m_orderId: 25
-    m_string: Jim helps get some more water out by scooping it out the window with
-      his bucket. Equivalent to using a diuretic.
-    m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractCharacterNeighbor2
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Narr
-    m_id: 6
-    m_orderId: 26
-    m_string: 30 minutes later...
-    m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractCharacterNeighbor2
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Neighbor2
-    m_id: 0
-    m_orderId: 27
-    m_string: Phew, I'm exhausted
-    m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractCharacterNeighbor2
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
-    m_id: 9
+    m_id: 34
     m_orderId: 28
-    m_string: Me too. We could use some extra muscle.
+    m_string: ' Gee Tony, I haven''t got any food'
     m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractCharacterNeighbor2
-    m_translations:
-    - 
-    - 
+    m_sourceFunction: OnInteractCharacterTony
+    m_translations: []
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
+  - m_character: Tony
+    m_id: 2
+    m_orderId: 29
+    m_string: ' Why don''t you give that pizza place a call?'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractCharacterTony
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Tony
+    m_id: 7
+    m_orderId: 30
+    m_string: ' I could eat an entire pie'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractCharacterTony
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 34
-    m_orderId: 29
+    m_orderId: 31
     m_string: Bucket added to your toolbox.
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractPropBucket
@@ -426,11 +434,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 42
-    m_orderId: 30
-    m_string: There it is! Now I can scoop up some of this water.
+    m_orderId: 32
+    m_string: ' There it is! Now I can scoop up some of this water.'
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractPropBucket
     m_translations:
@@ -438,11 +446,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 32
-    m_orderId: 31
-    m_string: Click on the bucket icon in your toolbox to select it.
+    m_orderId: 33
+    m_string: ' Click on the bucket icon in your toolbox to select it.'
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractPropBucket
     m_translations:
@@ -450,11 +458,21 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
+  - m_character: Narr
+    m_id: 60
+    m_orderId: 34
+    m_string: You also have a cell phone, which you can use to call the Hint Hotline.
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropBucket
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 43
-    m_orderId: 32
-    m_string: There's my bucket! I can use that to scoop out the water.
+    m_orderId: 35
+    m_string: ' There''s my bucket! I can use that to scoop out the water.'
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtPropBucket
     m_translations:
@@ -463,10 +481,10 @@ MonoBehaviour:
       of excess fluid)
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 44
-    m_orderId: 33
+    m_orderId: 36
     m_string: Oh man... this is going to take forever.
     m_sourceFile: Room- Home
     m_sourceFunction: OnUseInvHotspotWindow
@@ -478,7 +496,7 @@ MonoBehaviour:
     m_changedSinceImport: 1
   - m_character: Dave
     m_id: 45
-    m_orderId: 34
+    m_orderId: 37
     m_string: Maybe there's something at Doc's hardware store that can help.
     m_sourceFile: Room- Home
     m_sourceFunction: OnUseInvHotspotWindow
@@ -490,7 +508,7 @@ MonoBehaviour:
     m_changedSinceImport: 1
   - m_character: Narr
     m_id: 37
-    m_orderId: 35
+    m_orderId: 38
     m_string: Click on a space in the room to walk to it.
     m_sourceFile: Room- Home
     m_sourceFunction: OnUseInvHotspotWindow
@@ -499,11 +517,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 30
-    m_orderId: 36
-    m_string: This bucket aint going to cut it...
+    m_orderId: 39
+    m_string: ' This bucket aint going to cut it...'
     m_sourceFile: Room- Home
     m_sourceFunction: OnUseInvHotspotWindow
     m_translations:
@@ -511,11 +529,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 48
-    m_orderId: 37
-    m_string: It's a window. Yup.
+    m_orderId: 40
+    m_string: " It\u2019s a window. Yup."
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtHotspotWindow
     m_translations:
@@ -523,11 +541,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 49
-    m_orderId: 38
-    m_string: It's bleach, fer cleanin' yer clothes.
+    m_orderId: 41
+    m_string: "It\u2019s bleach, fer cleanin\u2019 yer clothes."
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtHotspotBleach
     m_translations:
@@ -535,23 +553,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 50
-    m_orderId: 39
-    m_string: It's a can of Mach brand orange spray paint.
-    m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractHotspotSprayPaint
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 51
-    m_orderId: 40
-    m_string: It's a can of Mach brand orange spray paint.
+    m_orderId: 42
+    m_string: "It\u2019s a can of Mach brand orange spray paint."
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtHotspotSprayPaint
     m_translations:
@@ -559,13 +565,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 52
-    m_orderId: 41
-    m_string: It's my trusty old washing machine. Although at this point I probably
-      could just throw some detergent in the water and make my whole basement the
-      washing machine.
+    m_orderId: 43
+    m_string: " It\u2019s my trusty old washing machine."
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtHotspotWashingMachine
     m_translations:
@@ -573,12 +577,22 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 35
+    m_orderId: 44
+    m_string: ' Although at this point I probably could just throw some detergent
+      in the water and make my whole basement the washing machine.'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnLookAtHotspotWashingMachine
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 53
-    m_orderId: 42
-    m_string: This clunker of a boiler is from the 1940's. It works, but it makes
-      the worst darn noises you've ever dun heard.
+    m_orderId: 45
+    m_string: "This clunker of a boiler is from the 1940\u2019s."
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtHotspotBoiler
     m_translations:
@@ -586,12 +600,22 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 36
+    m_orderId: 46
+    m_string: "  It works, but it makes the worst darn noises you\u2019ve ever dun
+      heard."
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnLookAtHotspotBoiler
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 54
-    m_orderId: 43
-    m_string: Haven't used this in a while. For all you kids out there, this is what
-      TV's looked like in the stone age.
+    m_orderId: 47
+    m_string: "Haven\u2019t used this in a while."
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtHotspotTV
     m_translations:
@@ -599,11 +623,22 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 37
+    m_orderId: 48
+    m_string: "For all you kids out there, this is what TV\u2019s looked like in
+      the stone age."
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnLookAtHotspotTV
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 55
-    m_orderId: 44
-    m_string: I can't believe I thought this looked good.
+    m_orderId: 49
+    m_string: " I can\u2019t believe I thought this looked good."
     m_sourceFile: Room- Home
     m_sourceFunction: OnLookAtHotspotCouch
     m_translations:
@@ -611,71 +646,7 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 56
-    m_orderId: 45
-    m_string: It's bleach, fer cleanin' yer clothes.
-    m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractHotspotBleach
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 57
-    m_orderId: 46
-    m_string: It's my trusty old washing machine. Although at this point I probably
-      could just throw some detergent in the water and make my whole basement the
-      washing machine.
-    m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractHotspotWashingMachine
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 58
-    m_orderId: 47
-    m_string: This clunker of a boiler is from the 1940's. It works, but it makes
-      the worst darn noises you've ever dun heard.
-    m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractHotspotBoiler
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 59
-    m_orderId: 48
-    m_string: Haven't used this in a while. For all you kids out there, this is what
-      TV's looked like in the stone age.
-    m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractHotspotTV
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 60
-    m_orderId: 49
-    m_string: I can't believe I thought this looked good.
-    m_sourceFile: Room- Home
-    m_sourceFunction: OnInteractHotspotCouch
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Tony
     m_id: 5
     m_orderId: 50
@@ -687,7 +658,7 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Tony
     m_id: 6
     m_orderId: 51
@@ -699,10 +670,30 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 38
+    m_orderId: 52
+    m_string: ' It''s beautiful!'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropBox
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 39
+    m_orderId: 53
+    m_string: What's this?
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropBox
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 54
-    m_orderId: 52
+    m_orderId: 54
     m_string: Repair Kit added to your toolbox.
     m_sourceFile: Room- Home
     m_sourceFunction: OnInteractPropBox
@@ -711,23 +702,194 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 40
+    m_orderId: 55
+    m_string: Like a charm!
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Narr
+    m_id: 61
+    m_orderId: 56
+    m_string: 6 months later...
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 113
+    m_orderId: 57
+    m_string: ' Another flood?'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 114
+    m_orderId: 58
+    m_string: Nothing my Pump-o-matic 5000 can't handle!
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 115
+    m_orderId: 59
+    m_string: ' Phew!'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 116
+    m_orderId: 60
+    m_string: ' The pump works again!'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 117
+    m_orderId: 61
+    m_string: Seriously?!
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 118
+    m_orderId: 62
+    m_string: It's broken!
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 119
+    m_orderId: 63
+    m_string: ' It looks like there''s a rusty washer.'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 120
+    m_orderId: 64
+    m_string: ' I''d better replace the washer.'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 121
+    m_orderId: 65
+    m_string: ' Whoops, forgot to tighten the washer!'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnInteractPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Narr
+    m_id: 62
+    m_orderId: 66
+    m_string: ' Rusty washer removed.'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnUseInvPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 122
+    m_orderId: 67
+    m_string: ' Where''s that new washer?'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnUseInvPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 123
+    m_orderId: 68
+    m_string: ' That should do it!'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnUseInvPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 124
+    m_orderId: 69
+    m_string: ' Whoop, gotta take that rusty old washer off before I can put this
+      shiny new one on.'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnUseInvPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Narr
+    m_id: 63
+    m_orderId: 70
+    m_string: ' New washer placed on pump.'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnUseInvPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 125
+    m_orderId: 71
+    m_string: ' Ain''t she a beauty?'
+    m_sourceFile: Room- Home
+    m_sourceFunction: OnLookAtPropElectricPump
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 32
-    m_orderId: 53
-    m_string: What a trip!
+    m_orderId: 72
+    m_string: ' What a trip!'
     m_sourceFile: Room- Map
-    m_sourceFunction: OnInteractPropBox
+    m_sourceFunction: OnLookAtPropHose
     m_translations:
     - 
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 7
-    m_orderId: 54
-    m_string: The Hardware Store
+    m_orderId: 73
+    m_string: ' The Hardware Store'
     m_sourceFile: Room- Map
     m_sourceFunction: OnLookAtPropHardware
     m_translations:
@@ -735,11 +897,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 8
-    m_orderId: 55
-    m_string: Home
+    m_orderId: 74
+    m_string: ' Home'
     m_sourceFile: Room- Map
     m_sourceFunction: OnLookAtPropHome
     m_translations:
@@ -747,11 +909,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 9
-    m_orderId: 56
-    m_string: Jim's House
+    m_orderId: 75
+    m_string: ' Jim''s House'
     m_sourceFile: Room- Map
     m_sourceFunction: OnLookAtPropNeighbor1
     m_translations:
@@ -759,22 +921,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Narr
-    m_id: 10
-    m_orderId: 57
-    m_string: Bob's House
-    m_sourceFile: Room- Map
-    m_sourceFunction: OnLookAtPropNeighbor2
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 10
-    m_orderId: 58
+    m_orderId: 76
     m_string: Let's take this back home and see how it works!
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotDoor
@@ -783,10 +933,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 11
-    m_orderId: 59
+    m_orderId: 77
     m_string: I need to buy a pump.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotDoor
@@ -795,11 +945,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 11
-    m_orderId: 60
-    m_string: Beer has been added to your inventory.
+    m_orderId: 78
+    m_string: ' Beer has been added to your inventory.'
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractPropBeerPack
     m_translations:
@@ -807,10 +957,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 61
-    m_orderId: 61
+    m_orderId: 79
     m_string: Used paint?! For only a dollar?! What a steal!
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotPaint
@@ -819,11 +969,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 62
-    m_orderId: 62
-    m_string: I wonder what's in there.
+    m_orderId: 80
+    m_string: "I wonder what\u2019s in there."
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotQuestionBox
     m_translations:
@@ -831,10 +981,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 63
-    m_orderId: 63
+    m_orderId: 81
     m_string: Poke a man? Now why would I do that?
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotPokeball
@@ -843,10 +993,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 64
-    m_orderId: 64
+    m_orderId: 82
     m_string: Poke a man? Now why would I do that?
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotPokeball
@@ -855,11 +1005,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 65
-    m_orderId: 65
-    m_string: I wonder what's in there.
+    m_orderId: 83
+    m_string: "I wonder what\u2019s in there."
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotQuestionBox
     m_translations:
@@ -867,10 +1017,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 66
-    m_orderId: 66
+    m_orderId: 84
     m_string: Used paint?! For only a dollar?! What a steal!
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotPaint
@@ -879,11 +1029,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 67
-    m_orderId: 67
-    m_string: Looks POWerful.
+    m_orderId: 85
+    m_string: ' Looks POWerful.'
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotPOWBlock
     m_translations:
@@ -891,11 +1041,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 68
-    m_orderId: 68
-    m_string: Looks POWerful.
+    m_orderId: 86
+    m_string: ' Looks POWerful.'
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotPOWBlock
     m_translations:
@@ -903,10 +1053,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 69
-    m_orderId: 69
+    m_orderId: 87
     m_string: Blue rodent not included.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotGoldRing
@@ -915,10 +1065,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 70
-    m_orderId: 70
+    m_orderId: 88
     m_string: Blue rodent not included.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotGoldRing
@@ -927,11 +1077,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 71
-    m_orderId: 71
-    m_string: Oh. That?s a pipe bomb.
+    m_orderId: 89
+    m_string: "Oh. That\u2019s a pipe bomb."
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotPipeBomb
     m_translations:
@@ -939,11 +1089,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 72
-    m_orderId: 72
-    m_string: Oh. That's a pipe bomb.
+    m_orderId: 90
+    m_string: "Oh. That\u2019s a pipe bomb."
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotPipeBomb
     m_translations:
@@ -951,10 +1101,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 73
-    m_orderId: 73
+    m_orderId: 91
     m_string: Lugging that hunk of iron around would be a work out in itself.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotBusterSword
@@ -963,10 +1113,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 74
-    m_orderId: 74
+    m_orderId: 92
     m_string: Lugging that hunk of iron around would be a work out in itself.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotBusterSword
@@ -975,10 +1125,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 75
-    m_orderId: 75
+    m_orderId: 93
     m_string: Why so glum, chum?
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotGhost
@@ -987,10 +1137,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 76
-    m_orderId: 76
+    m_orderId: 94
     m_string: Why so glum, chum?
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnInteractHotspotGhost
@@ -999,10 +1149,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 77
-    m_orderId: 77
+    m_orderId: 95
     m_string: A box of peanuts, walnuts, and pistachios.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotNuts
@@ -1011,23 +1161,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 78
-    m_orderId: 78
-    m_string: A box of peanuts, walnuts, and pistachios.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotNuts
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 79
-    m_orderId: 79
-    m_string: It's filled to the brim with lightning bolts.
+    m_orderId: 96
+    m_string: "It\u2019s filled to the brim with lightning bolts."
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotBolts
     m_translations:
@@ -1035,23 +1173,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 80
-    m_orderId: 80
-    m_string: It's filled to the brim with lightning bolts.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotBolts
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 81
-    m_orderId: 81
-    m_string: It's filled with banjos and kazoos. My favorite instruments!
+    m_orderId: 97
+    m_string: "It\u2019s filled with banjos and kazoos. My favorite instruments!"
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotBanjosAndKazoos
     m_translations:
@@ -1059,22 +1185,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 82
-    m_orderId: 82
-    m_string: It's filled with banjos and kazoos. My favorite instruments!
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotBanjosAndKazoos
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 83
-    m_orderId: 83
+    m_orderId: 98
     m_string: A can of red paint. Definitely my favorite color.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotRedPaint
@@ -1083,22 +1197,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 84
-    m_orderId: 84
-    m_string: A can of red paint. Definitely my favorite color.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotRedPaint
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 85
-    m_orderId: 85
+    m_orderId: 99
     m_string: A can of orange paint. Definitely my favorite color.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotOrangePaint
@@ -1107,22 +1209,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 86
-    m_orderId: 86
-    m_string: A can of orange paint. Definitely my favorite color.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotOrangePaint
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 87
-    m_orderId: 87
+    m_orderId: 100
     m_string: A can of yellow paint. Definitely my favorite color.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotYellowPaint
@@ -1131,22 +1221,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 88
-    m_orderId: 88
-    m_string: A can of yellow paint. Definitely my favorite color.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotYellowPaint
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 89
-    m_orderId: 89
+    m_orderId: 101
     m_string: A can of green paint. Definitely my favorite color.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotGreenPaint
@@ -1155,22 +1233,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 90
-    m_orderId: 90
-    m_string: A can of green paint. Definitely my favorite color.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotGreenPaint
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 91
-    m_orderId: 91
+    m_orderId: 102
     m_string: A can of blue paint. Definitely my favorite color.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotBluePaint
@@ -1179,22 +1245,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 92
-    m_orderId: 92
-    m_string: A can of blue paint. Definitely my favorite color.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotBluePaint
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 93
-    m_orderId: 93
+    m_orderId: 103
     m_string: A can of purple paint. Definitely my favorite color.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotPurplePaint
@@ -1203,22 +1257,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 94
-    m_orderId: 94
-    m_string: A can of purple paint. Definitely my favorite color.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotPurplePaint
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 95
-    m_orderId: 95
+    m_orderId: 104
     m_string: Lamp Oil.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotLampOil
@@ -1227,22 +1269,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 96
-    m_orderId: 96
-    m_string: Lamp Oil.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotLampOil
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 97
-    m_orderId: 97
+    m_orderId: 105
     m_string: It's rope. What did you expect?
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotRope
@@ -1251,22 +1281,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 98
-    m_orderId: 98
-    m_string: It's rope. What did you expect?
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotRope
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 99
-    m_orderId: 99
+    m_orderId: 106
     m_string: I hope he has the correct permits to sell these.
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotBombs
@@ -1275,22 +1293,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 100
-    m_orderId: 100
-    m_string: I hope he has the correct permits to sell these.
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotBombs
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 101
-    m_orderId: 101
+    m_orderId: 107
     m_string: Hey! I'm no chump...
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotSign
@@ -1299,10 +1305,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 102
-    m_orderId: 102
+    m_orderId: 108
     m_string: Am I?
     m_sourceFile: Room- Hardware
     m_sourceFunction: OnLookAtHotspotSign
@@ -1311,35 +1317,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 103
-    m_orderId: 103
-    m_string: Hey! I'm no chump...
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotSign
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 104
-    m_orderId: 104
-    m_string: Am I?
-    m_sourceFile: Room- Hardware
-    m_sourceFunction: OnInteractHotspotSign
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 12
-    m_orderId: 105
-    m_string: My lucky day...
+    m_orderId: 109
+    m_string: ' My lucky day...'
     m_sourceFile: Character- Dave
     m_sourceFunction: OnLookAt
     m_translations:
@@ -1347,11 +1329,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 13
-    m_orderId: 106
-    m_string: It's my buddy Tony. Maybe he can help.
+    m_orderId: 110
+    m_string: ' It''s my buddy Tony. Maybe he can help.'
     m_sourceFile: Character- Tony
     m_sourceFunction: OnLookAt
     m_translations:
@@ -1359,10 +1341,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 14
-    m_orderId: 107
+    m_orderId: 111
     m_string: There's Doc, the titular owner of Doc's Hardware
     m_sourceFile: Character- HardwareClerk
     m_sourceFunction: OnLookAt
@@ -1371,10 +1353,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 0
-    m_orderId: 108
+    m_orderId: 112
     m_string: Good luck.
     m_sourceFile: Character- HardwareClerk
     m_sourceFunction: OnInteract
@@ -1383,23 +1365,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
-  - m_character: Dave
-    m_id: 15
-    m_orderId: 109
-    m_string: That's my friend Jim.
-    m_sourceFile: Character- Neighbor2
-    m_sourceFunction: OnLookAt
-    m_translations:
-    - 
-    - 
-    m_phonesTime: []
-    m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 16
-    m_orderId: 110
-    m_string: Maybe I could call my friend Jim to come help out.
+    m_orderId: 113
+    m_string: ' Maybe I could call my friend Jim to come help out. '
     m_sourceFile: Item- CellPhone
     m_sourceFunction: OnLookAtInventory
     m_translations:
@@ -1409,11 +1379,11 @@ MonoBehaviour:
       name too)
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 17
-    m_orderId: 111
-    m_string: Thats my cell phone.
+    m_orderId: 114
+    m_string: ' Thats my cell phone. '
     m_sourceFile: Item- CellPhone
     m_sourceFunction: OnLookAtInventory
     m_translations:
@@ -1421,11 +1391,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 33
-    m_orderId: 112
-    m_string: Click on the water with the bucket to scoop it up.
+    m_orderId: 115
+    m_string: ' Click on the water with the bucket to scoop it up.'
     m_sourceFile: Item- Bucket
     m_sourceFunction: OnInteractInventory
     m_translations:
@@ -1433,10 +1403,30 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 126
+    m_orderId: 116
+    m_string: ' Oh boy!'
+    m_sourceFile: Item- RepairKit
+    m_sourceFunction: OnInteractInventory
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
+  - m_character: Dave
+    m_id: 127
+    m_orderId: 117
+    m_string: ' A washer and a wrench!'
+    m_sourceFile: Item- RepairKit
+    m_sourceFunction: OnInteractInventory
+    m_translations: []
+    m_phonesTime: []
+    m_phonesCharacter: 
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 1
-    m_orderId: 113
+    m_orderId: 118
     m_string: Sure, I have this bilge pump. It's hand operated.
     m_sourceFile: Dialog- DialogWithClerk
     m_sourceFunction: Option1
@@ -1445,10 +1435,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 18
-    m_orderId: 114
+    m_orderId: 119
     m_string: Is that the only one you have?
     m_sourceFile: Dialog- DialogWithClerk
     m_sourceFunction: Option1
@@ -1457,11 +1447,12 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 2
-    m_orderId: 115
-    m_string: Oh. That's a pipe bomb.
+    m_orderId: 120
+    m_string: "We\u2019ve got a special Pumps 4 Chumps promotion going on! It\u2019ll
+      be sure to unflood your flood, no money back guarantee!"
     m_sourceFile: Dialog- DialogWithClerk
     m_sourceFunction: Option1
     m_translations:
@@ -1470,10 +1461,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 19
-    m_orderId: 116
+    m_orderId: 121
     m_string: OK, I will take it.
     m_sourceFile: Dialog- DialogWithClerk
     m_sourceFunction: Option1
@@ -1482,10 +1473,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 12
-    m_orderId: 117
+    m_orderId: 122
     m_string: Pump added to inventory
     m_sourceFile: Dialog- DialogWithClerk
     m_sourceFunction: Option1
@@ -1494,11 +1485,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 20
-    m_orderId: 118
-    m_string: I am having a hard time pumping the water out of my basement.
+    m_orderId: 123
+    m_string: ' I am having a hard time pumping the water out of my basement.'
     m_sourceFile: Dialog- DialogWithClerk
     m_sourceFunction: Option2
     m_translations:
@@ -1506,10 +1497,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 3
-    m_orderId: 119
+    m_orderId: 124
     m_string: You may want to consider some options for the pump.
     m_sourceFile: Dialog- DialogWithClerk
     m_sourceFunction: Option2
@@ -1519,10 +1510,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 4
-    m_orderId: 120
+    m_orderId: 125
     m_string: We have handles and hoses in stock.
     m_sourceFile: Dialog- DialogWithClerk
     m_sourceFunction: Option2
@@ -1531,10 +1522,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 21
-    m_orderId: 121
+    m_orderId: 126
     m_string: I'll take a medium handle.
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option1
@@ -1543,11 +1534,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 13
-    m_orderId: 122
-    m_string: Medium Handle added to your inventory.
+    m_orderId: 127
+    m_string: Medium Handle added to  your inventory.
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option1
     m_translations:
@@ -1555,10 +1546,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 5
-    m_orderId: 123
+    m_orderId: 128
     m_string: Anything else?
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option1
@@ -1567,10 +1558,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 22
-    m_orderId: 124
+    m_orderId: 129
     m_string: I'll take a large handle.
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option2
@@ -1579,11 +1570,11 @@ MonoBehaviour:
     - Good choice, this is physiologically equivalent to improving stroke volume
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 14
-    m_orderId: 125
-    m_string: Large Handle added to your inventory.
+    m_orderId: 130
+    m_string: Large Handle added to  your inventory.
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option2
     m_translations:
@@ -1592,10 +1583,10 @@ MonoBehaviour:
       output = stroke volume x heart rate
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 6
-    m_orderId: 126
+    m_orderId: 131
     m_string: Anything else?
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option2
@@ -1604,10 +1595,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 23
-    m_orderId: 127
+    m_orderId: 132
     m_string: I'll take a medium diameter hose.
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option3
@@ -1617,11 +1608,11 @@ MonoBehaviour:
       against which the heart is pumping
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 15
-    m_orderId: 128
-    m_string: Medium Hose added to your inventory.
+    m_orderId: 133
+    m_string: Medium Hose added to  your inventory.
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option3
     m_translations:
@@ -1629,10 +1620,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 7
-    m_orderId: 129
+    m_orderId: 134
     m_string: Anything else?
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option3
@@ -1641,10 +1632,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 24
-    m_orderId: 130
+    m_orderId: 135
     m_string: I'll take a large diameter hose.
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option4
@@ -1653,11 +1644,11 @@ MonoBehaviour:
     - Excellent choice, this is equivlent physiologically to AFTERLOAD REDUCTION
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 16
-    m_orderId: 131
-    m_string: Large Hose added to your inventory.
+    m_orderId: 136
+    m_string: Large Hose added to  your inventory.
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option4
     m_translations:
@@ -1666,10 +1657,10 @@ MonoBehaviour:
       heart must do to pump blood)
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 8
-    m_orderId: 132
+    m_orderId: 137
     m_string: Anything else?
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option4
@@ -1678,11 +1669,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 106
-    m_orderId: 133
-    m_string: Do you have any larger options?
+    m_orderId: 138
+    m_string: ' Do you have any larger options?'
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option6
     m_translations:
@@ -1690,10 +1681,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 9
-    m_orderId: 134
+    m_orderId: 139
     m_string: Nope.
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option6
@@ -1702,10 +1693,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 107
-    m_orderId: 135
+    m_orderId: 140
     m_string: Can you check the back?
     m_sourceFile: Dialog- BuyOptions
     m_sourceFunction: Option6
@@ -1714,10 +1705,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: HardwareClerk
     m_id: 10
-    m_orderId: 136
+    m_orderId: 141
     m_string: Alright, alright, you got me. These are the biggest handles and hoses
       we have in stock.
     m_sourceFile: Dialog- BuyOptions
@@ -1727,10 +1718,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 27
-    m_orderId: 137
+    m_orderId: 142
     m_string: Hey Tony. My basement is flooded, I've got this pump but I need more
       muscle!
     m_sourceFile: Dialog- UsePhone
@@ -1740,10 +1731,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 17
-    m_orderId: 138
+    m_orderId: 143
     m_string: Again?! Alright, I'll be right over
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option1
@@ -1752,10 +1743,10 @@ MonoBehaviour:
     - This would be like increasing the dose of the diuretic
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Tony
     m_id: 1
-    m_orderId: 139
+    m_orderId: 144
     m_string: Ay Dave, I'm here to he-
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option1
@@ -1764,10 +1755,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Tony
     m_id: 3
-    m_orderId: 140
+    m_orderId: 145
     m_string: Oh boy.
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option1
@@ -1776,10 +1767,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 29
-    m_orderId: 141
+    m_orderId: 146
     m_string: The bucket is located on the shelf above the laundry machine. Click
       on it to add it to your toolbox.
     m_sourceFile: Dialog- UsePhone
@@ -1789,10 +1780,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 31
-    m_orderId: 142
+    m_orderId: 147
     m_string: Your toolbox is located at the bottom left. Move the mouse down to
       the lower left, and the toolbox will slide up. Then, click on the bucket icon
       to select it.
@@ -1803,10 +1794,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 35
-    m_orderId: 143
+    m_orderId: 148
     m_string: With the bucket selected, use it on the water by clicking anywhere
       on the water.
     m_sourceFile: Dialog- UsePhone
@@ -1816,10 +1807,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 38
-    m_orderId: 144
+    m_orderId: 149
     m_string: To move around the room, click the spot you would like to walk to.
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option3
@@ -1828,10 +1819,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 39
-    m_orderId: 145
+    m_orderId: 150
     m_string: Now the fun begins!
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option3
@@ -1840,10 +1831,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 40
-    m_orderId: 146
+    m_orderId: 151
     m_string: Try scooping up some of the water with a bucket.
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option3
@@ -1852,12 +1843,12 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 41
-    m_orderId: 147
-    m_string: Now that you have a pump, you can select it from your toolbox and use
-      it on the water in your basement.
+    m_orderId: 152
+    m_string: ' Now that you have a pump, you can select it from your toolbox and
+      use it on the water in your basement.'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option3
     m_translations:
@@ -1865,12 +1856,12 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 42
-    m_orderId: 148
-    m_string: You should go back home. Walk all the way to the left and click on
-      the door.
+    m_orderId: 153
+    m_string: ' You should go back home. Walk all the way to the left and click on
+      the door.'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option3
     m_translations:
@@ -1878,10 +1869,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 43
-    m_orderId: 149
+    m_orderId: 154
     m_string: Now that you've placed the pump, time to try it out! Click on the pump
       to give it a go.
     m_sourceFile: Dialog- UsePhone
@@ -1891,10 +1882,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 44
-    m_orderId: 150
+    m_orderId: 155
     m_string: I hear Doc over at the hardware store is running a big sale on pumps.
       I bet one of those would help you.
     m_sourceFile: Dialog- UsePhone
@@ -1904,12 +1895,12 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 45
-    m_orderId: 151
-    m_string: You can leave your basement by clicking on the door, located all the
-      way to the right. If you cannot see it, keep walking to the right.
+    m_orderId: 156
+    m_string: ' You can leave your basement by clicking on the door, located all
+      the way to the right. If you cannot see it, keep walking to the right.'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option3
     m_translations:
@@ -1917,10 +1908,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 46
-    m_orderId: 152
+    m_orderId: 157
     m_string: You should go back to Doc at his hardware store. Maybe he has something
       else that could help.
     m_sourceFile: Dialog- UsePhone
@@ -1930,10 +1921,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 47
-    m_orderId: 153
+    m_orderId: 158
     m_string: You could use some extra muscle. Try calling a friend, maybe they could
       help out.
     m_sourceFile: Dialog- UsePhone
@@ -1943,10 +1934,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 48
-    m_orderId: 154
+    m_orderId: 159
     m_string: Tony is tired, he needs something to boost his energy. That pizza place
       delivers, try giving them a call.
     m_sourceFile: Dialog- UsePhone
@@ -1956,10 +1947,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 49
-    m_orderId: 155
+    m_orderId: 160
     m_string: Thank for for calling the Hint Hotline. Our lines our busy at the moment,
       please call back later.
     m_sourceFile: Dialog- UsePhone
@@ -1969,10 +1960,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 28
-    m_orderId: 156
+    m_orderId: 161
     m_string: Hi, I'd like to order a large cheese and pepporini pizza for delivery
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option2
@@ -1982,11 +1973,11 @@ MonoBehaviour:
       feed them)
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 18
-    m_orderId: 157
-    m_string: Okay, anything else?
+    m_orderId: 162
+    m_string: ' Okay, anything else?'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option2
     m_translations:
@@ -1994,10 +1985,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 105
-    m_orderId: 158
+    m_orderId: 163
     m_string: Yeah, a 6 pack of beer.
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option2
@@ -2006,10 +1997,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 50
-    m_orderId: 159
+    m_orderId: 164
     m_string: Got it, what is the address?
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option2
@@ -2018,11 +2009,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 29
-    m_orderId: 160
-    m_string: 22 Hart Street
+    m_orderId: 165
+    m_string: ' 22 Hart Street'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option2
     m_translations:
@@ -2030,11 +2021,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 19
-    m_orderId: 161
-    m_string: Your order will be there in 30 minutes.
+    m_orderId: 166
+    m_string: ' Your order will be there in 30 minutes.'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option2
     m_translations:
@@ -2042,10 +2033,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 51
-    m_orderId: 162
+    m_orderId: 167
     m_string: 30 minutes later...
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option2
@@ -2055,10 +2046,10 @@ MonoBehaviour:
       to recruitment of more cardiac muscle physiologically
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 52
-    m_orderId: 163
+    m_orderId: 168
     m_string: Pizza & Beer have been added to your inventory
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option2
@@ -2067,10 +2058,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 55
-    m_orderId: 164
+    m_orderId: 169
     m_string: You've reached PumpCo, how may I help you?
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
@@ -2079,11 +2070,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 108
-    m_orderId: 165
-    m_string: I need the biggest, baddest pump you've got.
+    m_orderId: 170
+    m_string: ' I need the biggest, baddest pump you''ve got.'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
     m_translations:
@@ -2091,11 +2082,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 56
-    m_orderId: 166
-    m_string: That would be the Pump-o-matic 5000.
+    m_orderId: 171
+    m_string: ' That would be the Pump-o-matic 5000.'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
     m_translations:
@@ -2103,11 +2094,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 57
-    m_orderId: 167
-    m_string: It's our top of the line model, all electric.
+    m_orderId: 172
+    m_string: ' It''s our top of the line model, all electric.'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
     m_translations:
@@ -2115,11 +2106,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 109
-    m_orderId: 168
-    m_string: I'll take it.
+    m_orderId: 173
+    m_string: ' I''ll take it.'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
     m_translations:
@@ -2127,11 +2118,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 110
-    m_orderId: 169
-    m_string: And make that express delivery.
+    m_orderId: 174
+    m_string: ' And make that express delivery.'
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
     m_translations:
@@ -2139,10 +2130,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 58
-    m_orderId: 170
+    m_orderId: 175
     m_string: Ok, it will be there pronto.
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
@@ -2151,10 +2142,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 59
-    m_orderId: 171
+    m_orderId: 176
     m_string: 3 minutes later
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
@@ -2163,10 +2154,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 111
-    m_orderId: 172
+    m_orderId: 177
     m_string: Wow.
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
@@ -2175,10 +2166,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Dave
     m_id: 112
-    m_orderId: 173
+    m_orderId: 178
     m_string: That was fast.
     m_sourceFile: Dialog- UsePhone
     m_sourceFunction: Option5
@@ -2187,10 +2178,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 20
-    m_orderId: 174
+    m_orderId: 179
     m_string: You can't use that
     m_sourceFile: Global Script
     m_sourceFunction: UnhandledInteract
@@ -2199,10 +2190,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 21
-    m_orderId: 175
+    m_orderId: 180
     m_string: That doesn't work
     m_sourceFile: Global Script
     m_sourceFunction: UnhandledInteract
@@ -2211,10 +2202,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 22
-    m_orderId: 176
+    m_orderId: 181
     m_string: Nothing happened
     m_sourceFile: Global Script
     m_sourceFunction: UnhandledInteract
@@ -2223,11 +2214,11 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 23
-    m_orderId: 177
-    m_string: It's nothing interesting
+    m_orderId: 182
+    m_string: 'It''s nothing interesting '
     m_sourceFile: Global Script
     m_sourceFunction: UnhandledLookAt
     m_translations:
@@ -2235,10 +2226,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 24
-    m_orderId: 178
+    m_orderId: 183
     m_string: You don't see anything
     m_sourceFile: Global Script
     m_sourceFunction: UnhandledLookAt
@@ -2247,10 +2238,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 25
-    m_orderId: 179
+    m_orderId: 184
     m_string: The "+ mouseOver.Description.ToLower() + " isn't very interesting
     m_sourceFile: Global Script
     m_sourceFunction: UnhandledLookAt
@@ -2259,10 +2250,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 26
-    m_orderId: 180
+    m_orderId: 185
     m_string: You can't use those together
     m_sourceFile: Global Script
     m_sourceFunction: UnhandledUseInvInv
@@ -2271,10 +2262,10 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1
   - m_character: Narr
     m_id: 27
-    m_orderId: 181
+    m_orderId: 186
     m_string: You can't use that
     m_sourceFile: Global Script
     m_sourceFunction: UnhandledUseInv
@@ -2283,4 +2274,4 @@ MonoBehaviour:
     - 
     m_phonesTime: []
     m_phonesCharacter: 
-    m_changedSinceImport: 0
+    m_changedSinceImport: 1

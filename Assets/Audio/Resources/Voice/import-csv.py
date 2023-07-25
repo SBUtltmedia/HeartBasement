@@ -24,7 +24,7 @@ preload_models()
 
 
 # os.chdir(os.path.dirname(sys.argv[0]))
-charMap={"Narr":"Allison","Dave":"Tom","Tony":"Alex","Neighbor2":"Tom",'HardwareClerk':"Oliver"}
+#charMap={"Narr":"Allison","Dave":"Tom","Tony":"Alex","Neighbor2":"Tom",'HardwareClerk':"Oliver"}
 charMap={"Narr":"en_speaker_9","Dave":"en_speaker_4","Tony":"en_speaker_1","Neighbor2":"it_speaker_en",'HardwareClerk':"hi_speaker_5"}
 phaseMap={"English":"","PhaseOne":"P1/", "PhaseTwo":"P2/"}
 input_file = csv.DictReader(open("CHFDialog.csv"))

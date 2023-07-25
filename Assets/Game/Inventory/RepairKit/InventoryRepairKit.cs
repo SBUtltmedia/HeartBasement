@@ -13,8 +13,8 @@ public class InventoryRepairKit : InventoryScript<InventoryRepairKit>
 		C.Dave.AddInventory(I.Wrench);
 		C.Dave.AddInventory(I.Washer);
 		C.Dave.RemoveInventory(I.RepairKit);
-		yield return C.Dave.Say(" Oh boy!");
-		yield return C.Dave.Say(" A washer and a wrench!");
+		yield return C.Dave.Say(" Oh boy!", 126);
+		yield return C.Dave.Say(" A washer and a wrench!", 127);
 		yield return E.Break;
 	}
 }
