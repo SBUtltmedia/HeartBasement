@@ -87,7 +87,7 @@ MonoBehaviour:
   m_chorusFilter: {fileID: 0}
   m_sounds:
   - m_sound: {fileID: 8300000, guid: 9d6a38d34f2232c4a99d460fad3dabd6, type: 3}
-    m_weight: 100
+    m_weight: 1.44
     m_loop: 0
     m_volume:
       m_min: 1
