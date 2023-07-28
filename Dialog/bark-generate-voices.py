@@ -20,10 +20,10 @@ else:
 os.environ["SUNO_ENABLE_MPS"] = "True"
 preload_models()
 
-charMap={"Narr":"en_speaker_9","Dave":"en_speaker_4","Tony":"en_speaker_1","Neighbor2":"it_speaker_en",'HardwareClerk':"hi_speaker_5"}
+charMap={"Narr":"en_speaker_9","Dave":"en_speaker_1","Tony":"en_speaker_2","Neighbor2":"it_speaker_en",'HardwareClerk':"hi_speaker_5"}
 
 phaseMap={"English":"","PhaseOne":"P1/", "PhaseTwo":"P2/"}
-input_file = csv.DictReader(open("CHFDialogTest.csv"))
+input_file = csv.DictReader(open("CHFDialog.csv"))
 for row in input_file:
   bias = "MAN"
   if (row["Character"] == "Narr"):
