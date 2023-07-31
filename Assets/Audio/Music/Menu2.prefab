@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_type: 2
-  m_loop: 0
+  m_loop: 1
   m_loopSection:
     m_startTime: 0
     m_endTime: 0
