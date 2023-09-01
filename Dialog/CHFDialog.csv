@@ -147,7 +147,7 @@ Character,ID,File,Context,English
 "HardwareClerk","10","Dialog- BuyOptions","Option6","Alright, alright, you got me. These are the biggest handles and hoses we have in stock.","",""
 "Dave","27","Dialog- UsePhone","Option1","Hey Tony. My basement is flooded, I've got this pump but I need more muscle!","",""
 "Narr","17","Dialog- UsePhone","Option1","Again?! Alright, I'll be right over","","This would be like increasing the dose of the diuretic"
-"Tony","1","Dialog- UsePhone","Option1","Ay Dave, I'm here to he-","",""
+"Tony","1","Dialog- UsePhone","Option1","Ay Dave, I'm here to help","",""
 "Tony","3","Dialog- UsePhone","Option1","Oh boy.","",""
 "Narr","29","Dialog- UsePhone","Option3","The bucket is located on the shelf above the laundry machine. Click on it to add it to your toolbox.","",""
 "Narr","31","Dialog- UsePhone","Option3","Your toolbox is located at the bottom left. Move the mouse down to the lower left, and the toolbox will slide up. Then, click on the bucket icon to select it.","",""
