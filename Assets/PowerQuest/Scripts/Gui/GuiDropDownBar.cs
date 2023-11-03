@@ -8,6 +8,11 @@ namespace PowerTools.Quest
 [AddComponentMenu("Quest Gui Layout/Dropdown Bar")]
 public class GuiDropDownBar : MonoBehaviour 
 {
+	public static GuiDropDownBar Instance;
+    private void Awake()
+    {
+        Instance = this;
+    }
 	static readonly float BLEND_TIME = 0.1f;
 
 	enum eScreenEdgeX { Left, Right, Center };

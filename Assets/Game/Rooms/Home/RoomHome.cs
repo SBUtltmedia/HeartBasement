@@ -81,6 +81,7 @@ public class RoomHome : RoomScript<RoomHome>
 			// Disable bucket if past tutorial
 			if (Globals.gameStage > gameProgress.None){
 				Prop("Bucket").Disable();
+				C.Dave.Moveable = true;
 			} else {
 				Prop("Bucket").Enable();
 			}
@@ -786,7 +787,7 @@ public class RoomHome : RoomScript<RoomHome>
 
 	IEnumerator OnInteractHotspotSprayPaint( IHotspot hotspot )
 	{
-		
+		G.Inventory.Show();
 		yield return E.Break;
 	}
 
@@ -830,6 +831,7 @@ public class RoomHome : RoomScript<RoomHome>
 
 	IEnumerator OnInteractHotspotBleach( IHotspot hotspot )
 	{
+		G.Inventory.Hide();
 		yield return E.Break;
 	}
 

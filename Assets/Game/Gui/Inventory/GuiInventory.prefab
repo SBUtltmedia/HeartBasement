@@ -266,6 +266,8 @@ GameObject:
   - component: {fileID: 11483974}
   - component: {fileID: 2013673349996146082}
   - component: {fileID: -226205771321706595}
+  - component: {fileID: 3111794603021360356}
+  - component: {fileID: 3861552940242513020}
   m_Layer: 5
   m_Name: GuiInventory
   m_TagString: Untagged
@@ -481,3 +483,49 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
+--- !u!114 &3111794603021360356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 191832}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccab69301e60f4a94acf056b54544927, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toolboxToggle: {fileID: 0}
+--- !u!114 &3861552940242513020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 191832}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3931ceb8eb0d2d54aaafc24c1a87dc29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_mouseEdgeDistanceShow: {x: 1, y: 1}
+  m_mouseEdgeDistanceHide: {x: 1, y: 1}
+  m_edgeX: 0
+  m_edgeY: 1
+  m_pauseWhenVisible: 1
+  m_hideDuringCutscenes: 0
+  m_dropDownDistance: 1
+  m_curveIn:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  m_curveOut:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  m_soundShow: {fileID: 0}
+  m_soundHide: {fileID: 0}
