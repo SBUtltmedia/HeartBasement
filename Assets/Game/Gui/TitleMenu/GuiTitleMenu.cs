@@ -26,4 +26,24 @@ public class GuiTitleMenu : GuiScript<GuiTitleMenu>
 		
 		yield return E.Break;
 	}
+
+	IEnumerator OnClickRestartGame( IGuiControl control )
+	{
+		
+		E.Restart();
+		yield return E.Break;
+	}
+
+	void OnShow()
+	{
+		if (!Globals.testflag) {
+			G.TitleMenu.GetControl("ChapterSelect").Hide();
+		}
+		
+		if (E.GetSaveSlotData().Count ==0 ){
+			G.TitleMenu.GetControl("RestartGame").Hide();
+		} else {
+			G.TitleMenu.GetControl("RestartGame").Show();
+		}
+	}
 }

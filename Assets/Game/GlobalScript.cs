@@ -30,8 +30,8 @@ public partial class GlobalScript : GlobalScriptBase<GlobalScript>
 		TonyPumped,
 		TonyAte,
 		SecondFlood,
-		FixedPump, 
-		BoughtHouse, 
+		FixedPump,
+		BoughtHouse,
 		UsedElectricPump,
 		WonGame
 	};
@@ -47,6 +47,8 @@ public partial class GlobalScript : GlobalScriptBase<GlobalScript>
 	public int ChapterToLoad = -1;
 	
 	public bool rained = false;
+	
+	public bool testflag = true;
 	
 	/// Just an example of using a global variable that can be accessed in any room with `Globals.m_spokeToBarney`.
 	/// All variables like this in Quest Scripts are automatically saved
