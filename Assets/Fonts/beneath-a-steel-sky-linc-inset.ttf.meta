@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 9bfc53a14025788469f6f9870d73e7a0
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 11
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Beneath A Steel Sky - LINC - Inset
+  fontNames:
+  - Beneath A Steel Sky - LINC - Inset
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

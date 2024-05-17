@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RoomHomeAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 0
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 0
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 45f20a5449443c542a8e594e8de9c5b7, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 7a785040b5041074f82f5bc8e6000f89, type: 3}
+  - {fileID: 21300000, guid: 2cdc31b04a3259041a9c5e83380b8535, type: 3}
+  - {fileID: 21300000, guid: f91541f0cac0aab4bbc83cdc29dcaf4d, type: 3}
+  - {fileID: 21300000, guid: 6c1caa11e15b5f94e9b11093def6ffce, type: 3}
+  - {fileID: 21300000, guid: 503043b105d90c246aea9c2ef830e2cb, type: 3}
+  - {fileID: 21300000, guid: 8bee6fb12b1d9a1468cbec8256730e3f, type: 3}
+  - {fileID: 21300000, guid: dabd26027ceda99409d2e3db5e5fd58b, type: 3}
+  - {fileID: 21300000, guid: e83faf52015c1d346a6fb8384d2f011f, type: 3}
+  - {fileID: 21300000, guid: b63540a2604fd634997261fc0ef7aca1, type: 3}
+  - {fileID: 21300000, guid: 458a51a3696dd8f4eb06b48e784e37d6, type: 3}
+  - {fileID: 21300000, guid: 6c7e97d64a5959d4089d8b060a9ceb1e, type: 3}
+  - {fileID: 21300000, guid: 6b57e9d69efd7874b85344820123c333, type: 3}
+  - {fileID: 21300000, guid: 60c28e0742b68654aa298c13f96334ac, type: 3}
+  - {fileID: 21300000, guid: eb62ba372c96458488929258a04abb7b, type: 3}
+  - {fileID: 21300000, guid: 0c433d284cc34d943897631e3ec27099, type: 3}
+  - {fileID: 21300000, guid: f0f11138c9e9ce14fb23c5f295280cd9, type: 3}
+  - {fileID: 21300000, guid: fa7968a833b52dc4eb46681c9dd2d1ab, type: 3}
+  - {fileID: 21300000, guid: 9141eda9909308b439ff9188f24a86b8, type: 3}
+  - {fileID: 21300000, guid: 8069c82af9d18c342aabbf3aba5c597c, type: 3}
+  - {fileID: 21300000, guid: 3997823a3f2e57440ad75b27868f505e, type: 3}
+  - {fileID: 21300000, guid: 066332ac11248034fb2210ef00424ff3, type: 3}
+  - {fileID: 21300000, guid: fbe2501dec7194b488f544437167acda, type: 3}
+  - {fileID: 21300000, guid: 26b9f68dd2e1a724c8cc8d8f018e13cd, type: 3}
+  - {fileID: 21300000, guid: 70337a9d792736244af9099aa00187a6, type: 3}
+  - {fileID: 21300000, guid: 845e6dad78aa6134aa8a0d045feccd21, type: 3}
+  - {fileID: 21300000, guid: 38cdaffd5e75f3a4d955ed2bea8aeef9, type: 3}
+  - {fileID: 21300000, guid: d6de054fb763f0141916e4755d58e8f2, type: 3}
+  - {fileID: 21300000, guid: 995e78df5e844a649a2ce3ce2f3f7b1e, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - BucketSprite
+  - Water Levels_6
+  - PumpBase
+  - Water Levels_2
+  - Water Levels_7
+  - Water Levels_1
+  - Water Levels_3
+  - Water Levels_18
+  - Water Levels_16
+  - Water Levels_4
+  - Water Levels_17
+  - Water Levels_0
+  - Water Levels_12
+  - water
+  - Water Levels_15
+  - BoxProp
+  - Water Levels_11
+  - Water Levels_9
+  - Water Levels_10
+  - Water Levels_5
+  - Water Levels_13
+  - Water_0
+  - BasementBackgroundSquashed
+  - Water Levels_14
+  - Back_0
+  - Water Levels_8
+  - Water Levels_19
+  - electricpump_placeholder
+  m_RenderDataMap: {}
+  m_Tag: RoomHomeAtlas
+  m_IsVariant: 0

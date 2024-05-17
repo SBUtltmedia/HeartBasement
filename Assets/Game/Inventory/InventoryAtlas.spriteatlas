@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: InventoryAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 0
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 0
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 37f6ada2ecf514d43b8058e006148770, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: cd806b6065e242241a2aca03a3c34464, type: 3}
+  - {fileID: 21300000, guid: b3a84eb010030704a9dbff797e24b370, type: 3}
+  - {fileID: 21300000, guid: 15e844d0c299b4d36a8cf540759bab64, type: 3}
+  - {fileID: 21300000, guid: d453c0f0cb66ea345b8f57dfbfe7c122, type: 3}
+  - {fileID: 21300000, guid: 92271031da468814da0e3096a5a116a5, type: 3}
+  - {fileID: 21300000, guid: 004fc181b8727fa4d94f991626b1afd1, type: 3}
+  - {fileID: 21300000, guid: 179eed34d3c4b7141a068a013240456f, type: 3}
+  - {fileID: 21300000, guid: 715f2475c5ab93b468836b59ddd3dcb5, type: 3}
+  - {fileID: 21300000, guid: 1061dc069dcba0047a6738bdeb8dd2a9, type: 3}
+  - {fileID: 21300000, guid: 8dee974776641e041aa830c2ec6a50ae, type: 3}
+  - {fileID: 21300000, guid: 4a3f33c75adf4894887b3ffa8bc6e845, type: 3}
+  - {fileID: 21300000, guid: c38fba680eab5fb4b88c22d3d9013293, type: 3}
+  - {fileID: 21300000, guid: 3922c0a8c80dd8f4099e6aaa35b4cde7, type: 3}
+  - {fileID: 21300000, guid: 1744e6a839a0a8b4fbb613a7bf51e636, type: 3}
+  - {fileID: 21300000, guid: 91f9ed39450224b42b2de13b459ca423, type: 3}
+  - {fileID: 21300000, guid: 92d6e8e94d4ba1141954063e34890398, type: 3}
+  - {fileID: 21300000, guid: 68239c3b6ce2a7548893e26b49103e60, type: 3}
+  - {fileID: 21300000, guid: ec776f3b5fec3a941ab98531e422d41c, type: 3}
+  - {fileID: 21300000, guid: 3128a95e76c6adf44a7ffde8daa56743, type: 3}
+  - {fileID: 21300000, guid: 432ac43fde257e944978d6ff27dda1bf, type: 3}
+  - {fileID: 21300000, guid: 5f59617f85a0b3f4f9e5765c92254ace, type: 3}
+  - {fileID: 21300000, guid: 0a555dffd00b58a40925aa5c8391ec54, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - handle
+  - bucket
+  - washer
+  - hoseM
+  - handleS
+  - pizzabeer
+  - hose
+  - bucketFull
+  - box
+  - RepairKitSprite
+  - WrenchSprite
+  - repair_kit
+  - beerIcon
+  - handleL
+  - wrench
+  - handleM
+  - hoseL
+  - phone
+  - oldbucket
+  - WasherSprite
+  - pump
+  - hoseS
+  m_RenderDataMap: {}
+  m_Tag: InventoryAtlas
+  m_IsVariant: 0

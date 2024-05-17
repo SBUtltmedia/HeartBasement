@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a16e9f9c6db14b418901a66d60f8d1b, type: 3}
+  m_Name: CharacterDaveImporter
+  m_EditorClassIdentifier: 
+  m_animations:
+  - m_name: IdleR
+    m_firstFrame: 1
+    m_loop: 1
+    m_length: 15
+    m_frameDurations: d00700006400000064000000640000006400000064000000640000006400000064000000640000006400000064000000640000006400000064000000
+  - m_name: TalkR
+    m_firstFrame: 16
+    m_loop: 1
+    m_length: 3
+    m_frameDurations: 640000006400000064000000
+  - m_name: WalkR
+    m_firstFrame: 19
+    m_loop: 1
+    m_length: 5
+    m_frameDurations: 5500000055000000550000005500000055000000
+  - m_name: IdleUR
+    m_firstFrame: 24
+    m_loop: 0
+    m_length: 1
+    m_frameDurations: 64000000
+  - m_name: TalkUR
+    m_firstFrame: 25
+    m_loop: 1
+    m_length: 2
+    m_frameDurations: 7800000078000000
+  - m_name: WalkUR
+    m_firstFrame: 27
+    m_loop: 0
+    m_length: 3
+    m_frameDurations: 7d000000640000007d000000
+  - m_name: IdleU
+    m_firstFrame: 30
+    m_loop: 0
+    m_length: 1
+    m_frameDurations: 78000000
+  - m_name: TalkU
+    m_firstFrame: 31
+    m_loop: 0
+    m_length: 2
+    m_frameDurations: 7800000078000000
+  - m_name: IdleD
+    m_firstFrame: 33
+    m_loop: 0
+    m_length: 14
+    m_frameDurations: 6400000064000000640000006400000064000000640000006400000064000000640000006400000064000000640000006400000064000000
+  - m_name: TalkD
+    m_firstFrame: 47
+    m_loop: 0
+    m_length: 3
+    m_frameDurations: 640000006400000064000000
+  - m_name: WalkD
+    m_firstFrame: 50
+    m_loop: 0
+    m_length: 3
+    m_frameDurations: 7d000000640000007d000000
+  - m_name: Pumping
+    m_firstFrame: 53
+    m_loop: 0
+    m_length: 25
+    m_frameDurations: 4b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b0000004b000000
+  m_packingTag: CharacterDave
+  m_pixelsPerUnit: 1
+  m_filterMode: 0
+  m_compression: 0
+  m_crunchedCompression: 0
+  m_sourcePSD: ../Downloads/HeartBasementDave_Final.aseprite
+  m_sourceDirectory: C:\Users\lukek\Desktop
+  m_deleteImportedPngs: 1
+  m_spriteDirectory: Sprites
+  m_gui: 0
+  m_isAseprite: 1

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a16e9f9c6db14b418901a66d60f8d1b, type: 3}
+  m_Name: RoomHomePSDImporter
+  m_EditorClassIdentifier: 
+  m_animations:
+  - m_name: Back
+    m_firstFrame: 2
+    m_length: 1
+  - m_name: Bucket
+    m_firstFrame: 3
+    m_length: 1
+  - m_name: Well
+    m_firstFrame: 4
+    m_length: 1
+  - m_name: Foreground
+    m_firstFrame: 5
+    m_length: 1
+  - m_name: ForegroundL
+    m_firstFrame: 6
+    m_length: 1
+  - m_name: ForegroundR
+    m_firstFrame: 7
+    m_length: 1
+  m_packingTag: RoomForest
+  m_pixelsPerUnit: 1
+  m_filterMode: 0
+  m_compression: 0
+  m_crunchedCompression: 0
+  m_sourcePSD: Art/RoomForest.psd
+  m_sourceDirectory: Art/Export
+  m_deleteImportedPngs: 1
+  m_spriteDirectory: Sprites
+  m_gui: 0

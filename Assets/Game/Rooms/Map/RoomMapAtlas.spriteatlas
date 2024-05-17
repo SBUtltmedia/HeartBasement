@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RoomMapAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 0
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 0
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 1b499eed24e8bb8489e829bb7cb8f6d8, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 3edd7587fc834a240b42af6f3286cc72, type: 3}
+  - {fileID: 6285279276293884653, guid: e9a7c009e8bd944db9e08546972d9fef, type: 3}
+  - {fileID: 4620599527784502767, guid: e9a7c009e8bd944db9e08546972d9fef, type: 3}
+  - {fileID: -7672687199303312756, guid: e9a7c009e8bd944db9e08546972d9fef, type: 3}
+  - {fileID: 5203703017128292093, guid: e9a7c009e8bd944db9e08546972d9fef, type: 3}
+  - {fileID: 21300000, guid: ce74a75ac981648bf985be47cd60afec, type: 3}
+  - {fileID: 21300000, guid: 91107fbd5a7d7498e8f2ec46890dd137, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - HeartBasementMap
+  - X
+  - sign
+  - HeartBasementMap2
+  - Layer 2
+  - HeartBasementMapNew
+  - HeartBasementMapFlooded
+  m_RenderDataMap: {}
+  m_Tag: RoomMapAtlas
+  m_IsVariant: 0

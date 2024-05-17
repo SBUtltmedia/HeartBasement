@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1963543755271046
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4277538832327286}
+  - component: {fileID: 114281990419900940}
+  m_Layer: 0
+  m_Name: DialogChatWithBarney
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4277538832327286
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963543755271046}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114281990419900940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963543755271046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e86cb530816edbf41b6daa364f3a3311, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_data:
+    m_options:
+    - m_name: 1
+      m_text: I would like to buy a pump
+      m_visible: 1
+      m_disabled: 0
+      m_used: 0
+      m_timesUsed: 0
+    - m_name: 2
+      m_text: What's with this forest anyway?
+      m_visible: 0
+      m_disabled: 0
+      m_used: 0
+      m_timesUsed: 0
+    - m_name: 3
+      m_text: Nice well there, huh?
+      m_visible: 0
+      m_disabled: 0
+      m_used: 0
+      m_timesUsed: 0
+    - m_name: Tree
+      m_text: The trees are cool
+      m_visible: 0
+      m_disabled: 0
+      m_used: 0
+      m_timesUsed: 0
+    - m_name: Leaf
+      m_text: I like the foliage
+      m_visible: 0
+      m_disabled: 0
+      m_used: 0
+      m_timesUsed: 0
+    - m_name: ForestDone
+      m_text: Enough about forests
+      m_visible: 0
+      m_disabled: 0
+      m_used: 0
+      m_timesUsed: 0
+    - m_name: Bye
+      m_text: Bye!
+      m_visible: 1
+      m_disabled: 0
+      m_used: 0
+      m_timesUsed: 0
+    m_scriptName: ChatWithBarney
+    m_scriptClass: DialogChatWithBarney

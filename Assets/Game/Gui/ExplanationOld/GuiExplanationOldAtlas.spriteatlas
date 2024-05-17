@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: GuiExplanationOldAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 0
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 0
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 37eed582cc8da400289e89a548564199, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: b5a0c2d0d95336b4287c3b4cf85cebed, type: 3}
+  - {fileID: 21300000, guid: 64c54701d5dd33a4a9778be6439e4efa, type: 3}
+  - {fileID: 21300000, guid: bb39f6522b8df8a4191bf060540c54b7, type: 3}
+  - {fileID: 21300000, guid: 42db0033422982848af4b30139d033b3, type: 3}
+  - {fileID: 21300000, guid: 77b6a1c547c2e844f99ed6f8313cddee, type: 3}
+  - {fileID: 21300000, guid: 51be641aaaac75a4d9a8164cefda4f08, type: 3}
+  - {fileID: 21300000, guid: b72bc28a4e63e944c8dc20123dae1b2b, type: 3}
+  - {fileID: 21300000, guid: d9c8a7eb1b9d0d048b23be875bfc729b, type: 3}
+  - {fileID: 21300000, guid: a996375d4b23946afb72f61f1c0515dd, type: 3}
+  - {fileID: 21300000, guid: f813da5d5a6d41941855662d14128ceb, type: 3}
+  - {fileID: 21300000, guid: f39e4e7e6e6b7df44a1d47e766adb38b, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Slide3
+  - Slide10
+  - Slide5
+  - Slide6
+  - Slide9
+  - Slide2
+  - Slide7
+  - Slide8
+  - chap2
+  - Slide1
+  - Slide4
+  m_RenderDataMap: {}
+  m_Tag: GuiExplanationOldAtlas
+  m_IsVariant: 0

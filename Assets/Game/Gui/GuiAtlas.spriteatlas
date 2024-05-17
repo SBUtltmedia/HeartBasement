@@ -1,0 +1,128 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: GuiAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 0
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 0
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 271d48509b6f6ef42af530e0a33950d2, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 7f351560cce760e4cbbfd4e68783aa2f, type: 3}
+  - {fileID: 21300000, guid: e4bab7b0a74f942e681b9fa7171934e2, type: 3}
+  - {fileID: 21300000, guid: c01909c00b16e574f9b30f48d0558f09, type: 3}
+  - {fileID: 21300000, guid: 92baf0d008939fb4b9ac768925cd54d9, type: 3}
+  - {fileID: 21300000, guid: 2d4b4441c8db4b04f983998b482b052c, type: 3}
+  - {fileID: 21300000, guid: 0cd89461f0440654d8d6fa3f0d57b2da, type: 3}
+  - {fileID: 21300000, guid: e165f5a1449e0304d94fd819b3591890, type: 3}
+  - {fileID: 21300000, guid: be5f95c309555b649a13ed0ec550229b, type: 3}
+  - {fileID: 21300000, guid: 5371cf6554fb9fa4e9f737f4a896e2fb, type: 3}
+  - {fileID: 21300000, guid: 6a87f4e540b9ead4ab036f0197dec31e, type: 3}
+  - {fileID: 21300000, guid: 0480e5a6a888ba04186dcbbf7f97a95e, type: 3}
+  - {fileID: 21300000, guid: 5a2e190714fb1234585290ae1f061236, type: 3}
+  - {fileID: 21300000, guid: e77667d7313e2774da2db4ccfac83dd7, type: 3}
+  - {fileID: 21300000, guid: fc0da8083e0244849b976c448d72b832, type: 3}
+  - {fileID: 21300000, guid: 85065218b5bf1e04cb1f617edcf7fd69, type: 3}
+  - {fileID: 21300000, guid: 3af2f7780225f4241bb8f2f4e6df2df9, type: 3}
+  - {fileID: 21300000, guid: 9dac2c880ff5371489281cb91189e2ca, type: 3}
+  - {fileID: 21300000, guid: e31c96c8f6357814395347553215fcd5, type: 3}
+  - {fileID: 21300000, guid: f975e7391b536bc4b9ff41157217fed0, type: 3}
+  - {fileID: 21300000, guid: 361e9f69559850748975cee62ad79b4d, type: 3}
+  - {fileID: 21300000, guid: 82023b3a22f3f6b40a6c7c67eaba273d, type: 3}
+  - {fileID: 21300000, guid: 6d16576aecafbaa438914748812151f5, type: 3}
+  - {fileID: 21300000, guid: 637d9daa0d84a694e902e84c1e635f07, type: 3}
+  - {fileID: 21300000, guid: c56b900b5816915419bea449e94bdd35, type: 3}
+  - {fileID: 21300000, guid: 4dc1822b79bf80544bc9ba12716865fd, type: 3}
+  - {fileID: 21300000, guid: 226dc3bbf0b172443b82f5616c847fda, type: 3}
+  - {fileID: 21300000, guid: 762bcdcb4ddb8164f94a792b70b4383b, type: 3}
+  - {fileID: 21300000, guid: 37a7c7eb7f36a044797d75088405b5ec, type: 3}
+  - {fileID: 21300000, guid: 6fb4c35d9be51f0428737aa9614faadf, type: 3}
+  - {fileID: 21300000, guid: bd6c099d11f93da4686822f8e11959c0, type: 3}
+  - {fileID: 21300000, guid: f763acbdf6bda63479c203e7794aa158, type: 3}
+  - {fileID: 21300000, guid: 96862acd3afb13f45b5836b67ad82e1b, type: 3}
+  - {fileID: 21300000, guid: fe42a9dd43370af45a4eb190ca79f4c4, type: 3}
+  - {fileID: 21300000, guid: 5054005f787ba6c4ea3f745cd1e2585f, type: 3}
+  - {fileID: 21300000, guid: 74907f7fdddeaee4ba583e4ebb32a0f6, type: 3}
+  - {fileID: 21300000, guid: 5349c2df1fa31f74dbc66c2ba9ed929f, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - HeartBasementInventory
+  - HeartBasementInventory2
+  - Border2
+  - BtnOver
+  - Square
+  - BtnDown
+  - ToolbarBtnSound_2
+  - ScrollArrowDown
+  - GuiBackground
+  - Bg
+  - ToolbarFore_0
+  - Border
+  - ToolbarBtnText_2
+  - BtnArrowUp
+  - ToolbarBtnSound_1
+  - ToolbarBtnSound_3
+  - Btn
+  - Slider
+  - ToolbarBtnText_0
+  - DialogOptionPoint
+  - BtnOff
+  - BtnArrowDown
+  - SliderHover
+  - ScrollArrowUp
+  - SliderOff
+  - InventoryBack_0
+  - ToolbarBtnSound_0
+  - BtnArrowOver
+  - ToolbarBack_0
+  - ToolbarBtnText_1
+  - ToolbarBtnPower_0
+  - SliderHandle
+  - SliderHandleOff
+  - InventoryFront_0
+  - SliderHandleHover
+  - Pixel
+  m_RenderDataMap: {}
+  m_Tag: GuiAtlas
+  m_IsVariant: 0

@@ -1,0 +1,188 @@
+Character,ID,File,Context,English
+Dave,0,Room- Home,OnEnterRoomAfterFade,Gosh Durnit! My basement flooded again!
+Dave,41,Room- Home,OnEnterRoomAfterFade,I think I have a bucket 'round here somewhere...
+Narr,30,Room- Home,OnEnterRoomAfterFade,Your bucket is over on the shelf. Click on it to add it to your toolbox.
+Dave,3,Room- Home,OnEnterRoomAfterFade, Not again!
+Dave,2,Room- Home,OnLookAtHotspotDoor, It's a door to the outside.
+Dave,44,Room- Home,OnUseInvPropWater,Oh man... this is going to take forever.
+Dave,45,Room- Home,OnUseInvPropWater,Maybe there's something at Doc's hardware store that can help.
+Narr,28,Room- Home,OnUseInvPropWater,Click on the door to the right to leave your basement.
+Dave,6,Room- Home,OnUseInvPropWater, This bucket ain't gonna cut it...
+Narr,2,Room- Home,OnUseInvPropWater,"Congratulations! The water level has decreased. However, it is not enough..."
+Dave,4,Room- Home,OnUseInvPropWater,"This is too hard! I think the handle is too short and the diameter of the hose is too small, I need to go back to the hardware store."
+Dave,5,Room- Home,OnLookAtPropWater,That's a lot of water!
+Narr,36,Room- Home,UpdateBlocking,Click the door to leave your basement.
+Dave,46,Room- Home,UpdateBlocking, Finally! We got that dang water outta my dang basement!
+Dave,47,Room- Home,UpdateBlocking, I sure hope that never happens again!
+Narr,53,Room- Home,UpdateBlocking, Two weeks later...
+Narr,2,Room- Home,OnInteractPropPump,"Congratulations! The water level has decreased. However, it is not enough..."
+Dave,4,Room- Home,OnInteractPropPump,"This is too hard! I think the handle is too short and the diameter of the hose is too small, I need to go back to the hardware store."
+Dave,31,Room- Home,OnInteractPropPump,This water ain't goin nowhere!
+Dave,33,Room- Home,OnInteractPropPump,I'm gonna need a better pump.
+Dave,25,Room- Home,OnInteractPropPump,I'm pooped! I need some extra muscle.
+Dave,26,Room- Home,OnInteractPropPump,"I bet my friend Tony could help out, I should give him a call."
+Narr,3,Room- Home,OnInteractPropPump,You've chosen the correct parts for the pump and the water level has decreased.
+Dave,7,Room- Home,OnInteractPropPump,Still not enough... I could use some extra hands.
+Dave,8,Room- Home,OnInteractPropPump, This isn't any better. I should try different parts.
+Tony,0,Room- Home,OnInteractCharacterTony,Here goes nothing!
+Narr,4,Room- Home,OnInteractCharacterTony, The recruited muscle has helped bring the water level down.
+Tony,4,Room- Home,OnInteractCharacterTony, Phew... I'm wiped out. Got any grub?
+Dave,34,Room- Home,OnInteractCharacterTony," Gee Tony, I haven't got any food"
+Tony,2,Room- Home,OnInteractCharacterTony, Why don't you give that pizza place a call?
+Tony,7,Room- Home,OnInteractCharacterTony, I could eat an entire pie
+Narr,34,Room- Home,OnInteractPropBucket,Bucket added to your toolbox.
+Dave,42,Room- Home,OnInteractPropBucket, There it is! Now I can scoop up some of this water.
+Narr,32,Room- Home,OnInteractPropBucket, Click on the bucket icon in your toolbox at the bottom left to select it.
+Narr,60,Room- Home,OnInteractPropBucket,"You also have a cell phone, which you can use to call the Hint Hotline."
+Dave,43,Room- Home,OnLookAtPropBucket, There's my bucket! I can use that to scoop out the water.
+Dave,44,Room- Home,OnUseInvHotspotWindow,Oh man... this is going to take forever.
+Dave,45,Room- Home,OnUseInvHotspotWindow,Maybe there's something at Doc's hardware store that can help.
+Narr,37,Room- Home,OnUseInvHotspotWindow,Click on a space in the room to walk to it.
+Dave,30,Room- Home,OnUseInvHotspotWindow, This bucket aint going to cut it...
+Dave,48,Room- Home,OnLookAtHotspotWindow, It's a window. Yup.
+Dave,49,Room- Home,OnLookAtHotspotBleach,"It's bleach, fer cleanin' yer clothes."
+Dave,51,Room- Home,OnLookAtHotspotSprayPaint,It's a can of Mach brand orange spray paint.
+Dave,52,Room- Home,OnLookAtHotspotWashingMachine, It's my trusty old washing machine.
+Dave,35,Room- Home,OnLookAtHotspotWashingMachine, Although at this point I probably could just throw some detergent in the water and make my whole basement the washing machine.
+Dave,53,Room- Home,OnLookAtHotspotBoiler,This clunker of a boiler is from the 1940's.
+Dave,36,Room- Home,OnLookAtHotspotBoiler,"  It works, but it makes the worst darn noises you've ever dun heard."
+Dave,54,Room- Home,OnLookAtHotspotTV,Haven't used this in a while.
+Dave,37,Room- Home,OnLookAtHotspotTV,"For all you kids out there, this is what TV's looked like in the stone age."
+Dave,55,Room- Home,OnLookAtHotspotCouch, I can't believe I thought this looked good.
+Tony,5,Room- Home,OnUseInvCharacterTony,Pizza AND beer?!
+Tony,6,Room- Home,OnUseInvCharacterTony,Just what I needed!
+Dave,38,Room- Home,OnInteractPropBox, It's beautiful!
+Dave,39,Room- Home,OnInteractPropBox,What's this?
+Narr,54,Room- Home,OnInteractPropBox,Repair Kit added to your toolbox.
+Dave,40,Room- Home,OnInteractPropElectricPump,Like a charm!
+Narr,61,Room- Home,OnInteractPropElectricPump,6 months later...
+Dave,113,Room- Home,OnInteractPropElectricPump, Another flood?
+Dave,114,Room- Home,OnInteractPropElectricPump,Nothing my Pump-o-matic 5000 can't handle!
+Dave,115,Room- Home,OnInteractPropElectricPump, Phew!
+Dave,116,Room- Home,OnInteractPropElectricPump, The pump works again!
+Dave,117,Room- Home,OnInteractPropElectricPump,Seriously?!
+Dave,118,Room- Home,OnInteractPropElectricPump,It's broken!
+Dave,119,Room- Home,OnInteractPropElectricPump, It looks like there's a rusty washer.
+Dave,120,Room- Home,OnInteractPropElectricPump, I'd better replace the washer.
+Dave,121,Room- Home,OnInteractPropElectricPump," Whoops, forgot to tighten the washer!"
+Narr,62,Room- Home,OnUseInvPropElectricPump, Rusty washer removed.
+Dave,122,Room- Home,OnUseInvPropElectricPump, Where's that new washer?
+Dave,123,Room- Home,OnUseInvPropElectricPump, That should do it!
+Dave,124,Room- Home,OnUseInvPropElectricPump," Whoop, gotta take that rusty old washer off before I can put this shiny new one on."
+Narr,63,Room- Home,OnUseInvPropElectricPump, New washer placed on pump.
+Dave,125,Room- Home,OnLookAtPropElectricPump, Ain't she a beauty?
+Dave,32,Room- Map,OnLookAtPropHose, What a trip!
+Narr,7,Room- Map,OnLookAtPropHardware, The Hardware Store
+Narr,8,Room- Map,OnLookAtPropHome, Home
+Narr,9,Room- Map,OnLookAtPropNeighbor1, Jim's House
+Dave,10,Room- Hardware,OnInteractHotspotDoor,Let's take this back home and see how it works!
+Dave,11,Room- Hardware,OnInteractHotspotDoor,I ain't leavin' til I've got somethin' to get that water outta my basement!
+Narr,11,Room- Hardware,OnInteractPropBeerPack, Beer has been added to your toolbolx.
+Dave,61,Room- Hardware,OnLookAtHotspotPaint,Used paint?! For only a dollar?! What a steal!
+Dave,62,Room- Hardware,OnLookAtHotspotQuestionBox,I wonder what's in there.
+Dave,63,Room- Hardware,OnLookAtHotspotPokeball,Poke a man? Now why would I do that?
+Dave,64,Room- Hardware,OnInteractHotspotPokeball,Poke a man? Now why would I do that?
+Dave,65,Room- Hardware,OnInteractHotspotQuestionBox,I wonder what's in there.
+Dave,66,Room- Hardware,OnInteractHotspotPaint,Used paint?! For only a dollar?! What a steal!
+Dave,67,Room- Hardware,OnLookAtHotspotPOWBlock, Looks POWerful.
+Dave,68,Room- Hardware,OnInteractHotspotPOWBlock, Looks POWerful.
+Dave,69,Room- Hardware,OnLookAtHotspotGoldRing,Blue rodent not included.
+Dave,70,Room- Hardware,OnInteractHotspotGoldRing,Blue rodent not included.
+Dave,71,Room- Hardware,OnLookAtHotspotPipeBomb,Oh. That's a pipe bomb.
+Dave,72,Room- Hardware,OnInteractHotspotPipeBomb,Oh. That's a pipe bomb.
+Dave,73,Room- Hardware,OnLookAtHotspotBusterSword,Lugging that hunk of iron around would be a work out in itself.
+Dave,74,Room- Hardware,OnInteractHotspotBusterSword,Lugging that hunk of iron around would be a work out in itself.
+Dave,75,Room- Hardware,OnLookAtHotspotGhost,"Why so glum, chum?"
+Dave,76,Room- Hardware,OnInteractHotspotGhost,"Why so glum, chum?"
+Dave,77,Room- Hardware,OnLookAtHotspotNuts,"A box of peanuts, walnuts, and pistachios."
+Dave,79,Room- Hardware,OnLookAtHotspotBolts,It's filled to the brim with lightning bolts.
+Dave,81,Room- Hardware,OnLookAtHotspotBanjosAndKazoos,It's filled with banjos and kazoos. My favorite instruments!
+Dave,83,Room- Hardware,OnLookAtHotspotRedPaint,A can of red paint. Definitely my favorite color.
+Dave,85,Room- Hardware,OnLookAtHotspotOrangePaint,A can of orange paint. Definitely my favorite color.
+Dave,87,Room- Hardware,OnLookAtHotspotYellowPaint,A can of yellow paint. Definitely my favorite color.
+Dave,89,Room- Hardware,OnLookAtHotspotGreenPaint,A can of green paint. Definitely my favorite color.
+Dave,91,Room- Hardware,OnLookAtHotspotBluePaint,A can of blue paint. Definitely my favorite color.
+Dave,93,Room- Hardware,OnLookAtHotspotPurplePaint,A can of purple paint. Definitely my favorite color.
+Dave,95,Room- Hardware,OnLookAtHotspotLampOil,Lamp Oil.
+Dave,97,Room- Hardware,OnLookAtHotspotRope,It's rope. What did you expect?
+Dave,99,Room- Hardware,OnLookAtHotspotBombs,I hope he has the correct permits to sell these.
+Dave,101,Room- Hardware,OnLookAtHotspotSign,Hey! I'm no chump...
+Dave,102,Room- Hardware,OnLookAtHotspotSign,Am I?
+Dave,12,Character- Dave,OnLookAt, My lucky day...
+Dave,13,Character- Tony,OnLookAt, It's my buddy Tony. Maybe he can help.
+Dave,14,Character- HardwareClerk,OnLookAt,"There's Doc, the titular owner of Doc's Hardware"
+HardwareClerk,0,Character- HardwareClerk,OnInteract,Good luck.
+Dave,16,Item- CellPhone,OnLookAtInventory, Maybe I could call my friend Jim to come help out. 
+Dave,17,Item- CellPhone,OnLookAtInventory, Thats my cell phone. 
+Narr,33,Item- Bucket,OnInteractInventory, Click on the water with the bucket to scoop it up.
+Dave,126,Item- RepairKit,OnInteractInventory, Oh boy!
+Dave,127,Item- RepairKit,OnInteractInventory, A washer and a wrench!
+HardwareClerk,1,Dialog- DialogWithClerk,Option1,"Hello valued customer, what can I do for you?"
+Dave,18,Dialog- DialogWithClerk,Option1,My basement's flooded. Got anything to help with that'
+HardwareClerk,2,Dialog- DialogWithClerk,Option1,"We've got a special Pumps 4 Chumps promotion going on! It'll be sure to unflood your flood, no money back guarantee!"
+Dave,19,Dialog- DialogWithClerk,Option1,"I hate everything you just said, but I guess I'll take it."
+Narr,12,Dialog- DialogWithClerk,Option1,Pump added to you toolbox.
+Dave,20,Dialog- DialogWithClerk,Option2,"Cut the crap, carpetbagger! That pump didn't do squat!"
+HardwareClerk,3,Dialog- DialogWithClerk,Option2,I'm so sorry to hear that! I recommend upgrading to a higher end model handle and hose. We're running a 25% off special on all pump accessories!
+HardwareClerk,4,Dialog- DialogWithClerk,Option2,We have handles and hoses in stock.
+Dave,21,Dialog- BuyOptions,Option1,I'll take a medium handle.
+Narr,13,Dialog- BuyOptions,Option1,Medium Handle added to your toolbox.
+HardwareClerk,5,Dialog- BuyOptions,Option1,An excellent choice sir! Anything else?
+Dave,22,Dialog- BuyOptions,Option2,I'll take a large handle.
+Narr,14,Dialog- BuyOptions,Option2,Large Handle added to  your toolbox.
+HardwareClerk,6,Dialog- BuyOptions,Option2,An excellent choice sir! Anything else?
+Dave,23,Dialog- BuyOptions,Option3,I'll take a medium diameter hose.
+Narr,15,Dialog- BuyOptions,Option3,Medium Hose added to  your toolbox.
+HardwareClerk,7,Dialog- BuyOptions,Option3,An excellent choice sir! Anything else?
+Dave,24,Dialog- BuyOptions,Option4,I'll take a large diameter hose.
+Narr,16,Dialog- BuyOptions,Option4,Large Hose added to  your toolbox.
+HardwareClerk,8,Dialog- BuyOptions,Option4,An excellent choice sir! Anything else?
+Dave,106,Dialog- BuyOptions,Option6, Do you have any larger options?
+HardwareClerk,9,Dialog- BuyOptions,Option6,Nope.
+Dave,107,Dialog- BuyOptions,Option6,Can you check the back?
+HardwareClerk,10,Dialog- BuyOptions,Option6,"Alright, alright, you got me. These are the biggest handles and hoses we have in stock."
+Dave,27,Dialog- UsePhone,Option1,"Hey Tony. My basement is flooded, I've got this pump but I need more muscle!"
+Narr,17,Dialog- UsePhone,Option1,"Again?! Alright, I'll be right over"
+Tony,1,Dialog- UsePhone,Option1,"Ay Dave, I'm here to he-"
+Tony,3,Dialog- UsePhone,Option1,Oh boy.
+Narr,29,Dialog- UsePhone,Option3,The bucket is located on the shelf above the laundry machine. Click on it to add it to your toolbox.
+Narr,31,Dialog- UsePhone,Option3,"Your toolbox is located at the bottom left. Move the mouse down to the lower left, and the toolbox will slide up. Then, click on the bucket icon to select it."
+Narr,35,Dialog- UsePhone,Option3,"With the bucket selected, use it on the water by clicking anywhere on the water."
+Narr,38,Dialog- UsePhone,Option3,"To move around the room, click the spot you would like to walk to."
+Narr,39,Dialog- UsePhone,Option3,Now the fun begins!
+Narr,40,Dialog- UsePhone,Option3,Try scooping up some of the water with a bucket.
+Narr,41,Dialog- UsePhone,Option3," Now that you have a pump, you can select it from your toolbox and use it on the water in your basement."
+Narr,42,Dialog- UsePhone,Option3, You should go back home. Walk all the way to the left and click on the door.
+Narr,43,Dialog- UsePhone,Option3,"Now that you've placed the pump, time to try it out! Click on the pump to give it a go."
+Narr,44,Dialog- UsePhone,Option3,I hear Doc over at the hardware store is running a big sale on pumps. I bet one of those would help you.
+Narr,45,Dialog- UsePhone,Option3," You can leave your basement by clicking on the door, located all the way to the right. If you cannot see it, keep walking to the right."
+Narr,46,Dialog- UsePhone,Option3,You should go back to Doc at his hardware store. Maybe he has something else that could help.
+Narr,47,Dialog- UsePhone,Option3,"You could use some extra muscle. Try calling a friend, maybe they could help out."
+Narr,48,Dialog- UsePhone,Option3,"Tony is tired, he needs something to boost his energy. That pizza place delivers, try giving them a call."
+Narr,49,Dialog- UsePhone,Option3,"Thank for for calling the Hint Hotline. Our lines our busy at the moment, please call back later."
+Dave,28,Dialog- UsePhone,Option2,"Hi, I'd like to order a large cheese and pepporini pizza for delivery"
+Narr,18,Dialog- UsePhone,Option2," Okay, anything else?"
+Dave,105,Dialog- UsePhone,Option2,"Yeah, a 6 pack of beer."
+Narr,50,Dialog- UsePhone,Option2,"Got it, what is the address?"
+Dave,29,Dialog- UsePhone,Option2, 22 Hart Street
+Narr,19,Dialog- UsePhone,Option2, Your order will be there in 30 minutes.
+Narr,51,Dialog- UsePhone,Option2,30 minutes later...
+Narr,52,Dialog- UsePhone,Option2,Pizza & Beer added to your toolbox
+Narr,55,Dialog- UsePhone,Option5,"You've reached PumpCo, how may I help you?"
+Dave,108,Dialog- UsePhone,Option5," I need the biggest, baddest pump you've got."
+Narr,56,Dialog- UsePhone,Option5, That would be the Pump-o-matic 5000.
+Narr,57,Dialog- UsePhone,Option5," It's our top of the line model, all electric."
+Dave,109,Dialog- UsePhone,Option5, I'll take it.
+Dave,110,Dialog- UsePhone,Option5, And make that express delivery.
+Narr,58,Dialog- UsePhone,Option5,"Ok, it will be there pronto."
+Narr,59,Dialog- UsePhone,Option5,3 minutes later
+Dave,111,Dialog- UsePhone,Option5,Wow.
+Dave,112,Dialog- UsePhone,Option5,That was fast.
+Narr,20,Global Script,UnhandledInteract,You can't use that
+Narr,21,Global Script,UnhandledInteract,That doesn't work
+Narr,22,Global Script,UnhandledInteract,Nothing happened
+Narr,23,Global Script,UnhandledLookAt,It's nothing interesting 
+Narr,24,Global Script,UnhandledLookAt,You don't see anything
+Narr,25,Global Script,UnhandledLookAt,"The ""+ mouseOver.Description.ToLower() + "" isn't very interesting"
+Narr,26,Global Script,UnhandledUseInvInv,You can't use those together
+Narr,27,Global Script,UnhandledUseInv,You can't use that

@@ -1,0 +1,39 @@
+-------
+FONT NOTES and Licence Information
+-------
+
+The fonts in the demo are all intended for pixel art games-
+For high res games, set "Font Size" higher in the Text Mesh, and change "Character Size" to 1 (or down until it's crisp enough)
+
+-------
+
+Monkey Island font - Best used at 16pt
+   from https://www.ptless.org/sfomi/
+   © 1990 Lucasfilm Games
+
+Munro - Best used at 10pt
+
+Crawl fonts - Best used at 16pt
+
+-------
+Fonts by Goatmeal- 
+	from https://fontstruct.com/fontstructors/140159/goatmeal
+	(CC licence- See LicenceReadMe.txt and licence.txt)
+
+Beneath-a-steel-sky-inset - 10pt
+Beneath-a-steel-sky-linc-inset - 11pt
+Lucasarts-scumm-menu-solid - 16pt
+Lucasarts-scumm-solid - 8pt
+Sierra-agi-font - 8pt
+Sierra-font-004 - 8pt
+Sierra-sci-menu-font - 8pt
+
+-------
+
+Fonts by “Patrick Lauke.” 
+	from https://fontstruct.com/fontstructors/140159/goatmeal)
+	(CC licence- See LicenceReadMe.txt and licence.txt)
+	
+Lucasfont-alternate - 8pt
+
+-------

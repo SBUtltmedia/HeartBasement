@@ -1,0 +1,130 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: CharacterHardwareClerkAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 0
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 0
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: a82ea0c786a3ff8439ecd97e084c3794, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 4b26bb107dcb0ba4099afaec6d13d9e4, type: 3}
+  - {fileID: 21300000, guid: 3aeebd50e443b27499fdaf05e68e8b39, type: 3}
+  - {fileID: 21300000, guid: c8339a1199210ae46b4736de56a91f99, type: 3}
+  - {fileID: 21300000, guid: c4b7a591f0ba800459deba2211ede75f, type: 3}
+  - {fileID: 21300000, guid: d6131991f159b5e4b96b9908eb858d14, type: 3}
+  - {fileID: 21300000, guid: 81a194c164faa1848be26decd55b67fb, type: 3}
+  - {fileID: 21300000, guid: fb6b4d0390e475344b8e499b00adcf18, type: 3}
+  - {fileID: 21300000, guid: f2e87f23290930c4e8ffa6fbc07266d3, type: 3}
+  - {fileID: 21300000, guid: 03d20873c44bc6b47b40b350410fa899, type: 3}
+  - {fileID: 21300000, guid: 8dfd8b64eaec19c4a970b469176b18a6, type: 3}
+  - {fileID: 21300000, guid: cc85b3740da9f8543a7d5aee242e61f7, type: 3}
+  - {fileID: 21300000, guid: 83ad2d85a2289cc4bb42c5549118bb6c, type: 3}
+  - {fileID: 21300000, guid: 5d5e07261b49f11498a4bad9046679a7, type: 3}
+  - {fileID: 21300000, guid: c64308d6de69b714abf401b41e25a708, type: 3}
+  - {fileID: 21300000, guid: 89e348d68e0df1c4ebe968d3e5ae7f12, type: 3}
+  - {fileID: 21300000, guid: 248a59576caab9148beb3d60d981c033, type: 3}
+  - {fileID: 21300000, guid: 262e10d77dbd6324a9650c4cf69a44df, type: 3}
+  - {fileID: 21300000, guid: 73f577e7fa122364db8e29eb12fb8937, type: 3}
+  - {fileID: 21300000, guid: 779889e7b6b96d3498c7c2f1838b341a, type: 3}
+  - {fileID: 21300000, guid: 48c2b5a88f4dcdd48abdb7bc7ef9d14e, type: 3}
+  - {fileID: 21300000, guid: d600a7a8e53c8854f9085745bb9f8fde, type: 3}
+  - {fileID: 21300000, guid: a734c719884e83949950e25ee55dbaad, type: 3}
+  - {fileID: 21300000, guid: d8003ba9fd0365645ae8bde76e201315, type: 3}
+  - {fileID: 21300000, guid: 938d315a58128cc498562b650177c7d1, type: 3}
+  - {fileID: 21300000, guid: 503df09a2add19f4f924f1c31423bb24, type: 3}
+  - {fileID: 21300000, guid: ccf0d11bcb579e14f81b10333ae26800, type: 3}
+  - {fileID: 21300000, guid: 60d60eabf5029d748b0186b37f24b363, type: 3}
+  - {fileID: 21300000, guid: 635777db4821f184b83984d270c3b876, type: 3}
+  - {fileID: 21300000, guid: 47e47bbc5cbcb86498858894085b4f19, type: 3}
+  - {fileID: 21300000, guid: f9af003d51f43b84db0933948a72c8ef, type: 3}
+  - {fileID: 21300000, guid: 59f97a4d05165c84d947086ba61a2414, type: 3}
+  - {fileID: 21300000, guid: acc5238dadac739479648f50ab34dce4, type: 3}
+  - {fileID: 21300000, guid: 33c6ed8d690addf4ba822f8a690ebf8e, type: 3}
+  - {fileID: 21300000, guid: 6dc64ecd5c289ad42bf91944d0031b7b, type: 3}
+  - {fileID: 21300000, guid: 4c40131e45e963042a58a4a1f6f87889, type: 3}
+  - {fileID: 21300000, guid: dce75eeff4b63ae488594f42fb592044, type: 3}
+  - {fileID: 21300000, guid: b49444ffb4f8e4b4287575abd5a7feda, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Idle_8
+  - Idle_16
+  - Idle_0
+  - Idle_27
+  - Idle_12
+  - Idle_11
+  - Idle_17
+  - Idle_7
+  - Idle_20
+  - Idle_4
+  - Idle_19
+  - Idle_14
+  - Idle_13
+  - Idle_29
+  - Idle_1
+  - Idle_15
+  - Talk_0
+  - Idle_28
+  - Idle_23
+  - Idle_3
+  - Idle_25
+  - Idle_33
+  - Idle_22
+  - Idle_5
+  - Talk_1
+  - Idle_30
+  - Idle_6
+  - Idle_10
+  - Idle_32
+  - Idle_26
+  - Idle_9
+  - Idle_2
+  - Idle_31
+  - Talk_2
+  - Idle_18
+  - Idle_24
+  - Idle_21
+  m_RenderDataMap: {}
+  m_Tag: CharacterHardwareClerkAtlas
+  m_IsVariant: 0
