@@ -9,8 +9,12 @@ public class QueryString : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-  Debug.Log(getQueryString());
-   
+      //Debug.Log(getQueryString());
+      Globals.urlQuery = getQueryString();
+      Debug.Log(Globals.urlQuery); 
+      if (Globals.urlQuey.contains("test")){
+        Globals.testflag = true;
+      }
     }
 
     // Update is called once per frame
