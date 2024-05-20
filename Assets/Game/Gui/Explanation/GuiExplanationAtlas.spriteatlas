@@ -49,8 +49,28 @@ SpriteAtlas:
     isAtlasV2: 0
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
-  m_PackedSprites: []
-  m_PackedSpriteNamesToIndex: []
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 560dd695c97f248b996cc4bacea04989, type: 3}
+  - {fileID: 21300000, guid: a017cc36441d34ec3b52fce28b298fc3, type: 3}
+  - {fileID: 21300000, guid: bd3331286f4ea4d27b524f67f0e4f34d, type: 3}
+  - {fileID: 21300000, guid: 08accd8a8411840298c04e9b74b142d2, type: 3}
+  - {fileID: 21300000, guid: 1419410cac1b04c5ca5d4825005fddd0, type: 3}
+  - {fileID: 21300000, guid: 648d4d6c9d10041779f581fcde9651e3, type: 3}
+  - {fileID: 21300000, guid: f33d813d4500d47e6907511ff5d91bf2, type: 3}
+  - {fileID: 21300000, guid: aa0766fd081dd44d29c3e7aa9ea16307, type: 3}
+  - {fileID: 21300000, guid: 0dca9e3e6f56747deae849fd13c85330, type: 3}
+  - {fileID: 21300000, guid: 968abcae67187406d86d31fc8f4b8160, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Slide10
+  - Slide7
+  - Slide6
+  - Slide2
+  - Slide8
+  - Slide3
+  - Slide5
+  - Slide4
+  - Slide1
+  - Slide9
   m_RenderDataMap: {}
-  m_Tag: GuiSlidesAtlas
+  m_Tag: GuiExplanationAtlas
   m_IsVariant: 0
