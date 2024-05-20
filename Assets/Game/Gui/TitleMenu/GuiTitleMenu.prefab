@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7703832089585770173}
   - component: {fileID: 6021329301086262416}
   - component: {fileID: 8374855785029871866}
-  - component: {fileID: 5323696315620879541}
   m_Layer: 5
   m_Name: GuiTitleMenu
   m_TagString: Untagged
@@ -97,18 +96,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 200, y: 100}
   m_EdgeRadius: 0
---- !u!114 &5323696315620879541
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6818762724057468239}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ce123002a4334457a1d640ca785fb6a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &2480776389757442508
 PrefabInstance:
   m_ObjectHideFlags: 0
