@@ -15,8 +15,8 @@ public class GuiExplanation : GuiScript<GuiExplanation>
 		string image = "Slide" + ((int) Globals.gameStage+1) ;
 		
 		
-		if (Gobals.conciseflag){
-			image = Concise + image;
+		if (Globals.conciseflag){
+			image = "Concise" + image;
 		}
 		
 		
