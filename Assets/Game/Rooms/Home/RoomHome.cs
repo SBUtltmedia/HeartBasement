@@ -154,8 +154,6 @@ public class RoomHome : RoomScript<RoomHome>
 		
 		//Globals.gameStage = gameProgress.UsedBucket;
 		
-		//yield return E.WaitForGui(G.Explanation);
-		
 		
 		// Put things here that happen when you enter a room
 		if ((Globals.gameStage <= gameProgress.UsedBucket))
@@ -165,7 +163,7 @@ public class RoomHome : RoomScript<RoomHome>
 			Prop("Handle").Disable();
 			Prop("Hose").Disable();
 		
-			  Prop("ElectricPump").Disable();
+			Prop("ElectricPump").Disable();
 			Prop("Box").Disable();
 		
 		
@@ -175,8 +173,13 @@ public class RoomHome : RoomScript<RoomHome>
 		if ((Globals.gameStage < gameProgress.UsedBucket)) // Only run this part the first time you visit
 		{
 		
+		
 			C.Dave.SetPosition(Point("StartPosition"));
 			C.Dave.Moveable = false;
+		
+			yield return E.WaitForGui(G.Explanation);
+		
+		
 			yield return E.WaitSkip();
 			yield return C.Dave.Say("Gosh Durnit! My basement flooded again!", 0);
 			yield return E.WaitSkip();

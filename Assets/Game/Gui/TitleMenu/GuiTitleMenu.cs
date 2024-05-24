@@ -24,6 +24,7 @@ public class GuiTitleMenu : GuiScript<GuiTitleMenu>
 		IButton startButton = (IButton) G.TitleMenu.GetControl("StartGame");
 		startButton.Text = "Continue";
 		
+		
 		yield return E.Break;
 	}
 
