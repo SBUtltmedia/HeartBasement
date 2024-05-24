@@ -50,27 +50,51 @@ SpriteAtlas:
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
+  - {fileID: 21300000, guid: 7b024b21cbd484fc2b644ccba96b651b, type: 3}
+  - {fileID: 21300000, guid: 4136edd12916c4332b3e4aa27c1de5ba, type: 3}
+  - {fileID: 21300000, guid: 5cfc74f11133c4371a164df8a40acd58, type: 3}
+  - {fileID: 21300000, guid: f4e1cc6267078433b9b2d5a86dc184d2, type: 3}
+  - {fileID: 21300000, guid: 3f918934ddd974dff9492ffc9d33deb4, type: 3}
+  - {fileID: 21300000, guid: 36aaee940025645bc98709d5fa690443, type: 3}
+  - {fileID: 21300000, guid: 36d97b85f9f384b96a2f3585db792b3f, type: 3}
+  - {fileID: 21300000, guid: f9579c851eda24585a266ccb9eba562b, type: 3}
   - {fileID: 21300000, guid: 560dd695c97f248b996cc4bacea04989, type: 3}
   - {fileID: 21300000, guid: a017cc36441d34ec3b52fce28b298fc3, type: 3}
   - {fileID: 21300000, guid: bd3331286f4ea4d27b524f67f0e4f34d, type: 3}
+  - {fileID: 21300000, guid: 83922439c06584c5693c73dee9e9112a, type: 3}
+  - {fileID: 21300000, guid: 5a95f739ef9fd4730b9e10c7211d75dc, type: 3}
   - {fileID: 21300000, guid: 08accd8a8411840298c04e9b74b142d2, type: 3}
   - {fileID: 21300000, guid: 1419410cac1b04c5ca5d4825005fddd0, type: 3}
   - {fileID: 21300000, guid: 648d4d6c9d10041779f581fcde9651e3, type: 3}
   - {fileID: 21300000, guid: f33d813d4500d47e6907511ff5d91bf2, type: 3}
   - {fileID: 21300000, guid: aa0766fd081dd44d29c3e7aa9ea16307, type: 3}
   - {fileID: 21300000, guid: 0dca9e3e6f56747deae849fd13c85330, type: 3}
+  - {fileID: 21300000, guid: 73fbf57e6fec34d85bababca6956e8c8, type: 3}
   - {fileID: 21300000, guid: 968abcae67187406d86d31fc8f4b8160, type: 3}
+  - {fileID: 21300000, guid: 32ea726fbafbb4aa5835807eed05f05a, type: 3}
   m_PackedSpriteNamesToIndex:
+  - ConciseSlide7
+  - ConciseSlide6
+  - ConciseSlide2
+  - ConciseSlide11
+  - Slide11
+  - ConciseSlide8
+  - ConciseSlide4
+  - ConciseSlide10
   - Slide10
   - Slide7
   - Slide6
+  - ConciseSlide9
+  - ConciseSlide5
   - Slide2
   - Slide8
   - Slide3
   - Slide5
   - Slide4
   - Slide1
+  - ConciseSlide3
   - Slide9
+  - ConciseSlide1
   m_RenderDataMap: {}
   m_Tag: GuiExplanationAtlas
   m_IsVariant: 0
