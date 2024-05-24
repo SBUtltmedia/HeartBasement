@@ -29,17 +29,21 @@ public class RoomMenu : RoomScript<RoomMenu>
 		{
 			Globals.testflag = true;
 		}
+		if (Globals.urlQuery.Contains("concise"))
+		{
+			Globals.conciseflag = true;
+		}
 		} catch (Exception e) {}
-
-
+		
+		
 		Audio.PlayMusic("Menu2", 1);
 		//G.Inventory.Hide();
 		G.MenuButton.Hide();
 		G.TitleMenu.Show();
-
-
-
-
+		
+		
+		
+		
 	}
 
 	IEnumerator OnExitRoom(IRoom oldRoom, IRoom newRoom)

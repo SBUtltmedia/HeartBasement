@@ -13,6 +13,13 @@ public class GuiExplanation : GuiScript<GuiExplanation>
 		G.Inventory.Hide();
 		
 		string image = "Slide" + ((int) Globals.gameStage+1) ;
+		
+		
+		if (Gobals.conciseflag){
+			image = Concise + image;
+		}
+		
+		
 		Image("SlideImage").Anim = image;
 		Debug.Log(image);
 		

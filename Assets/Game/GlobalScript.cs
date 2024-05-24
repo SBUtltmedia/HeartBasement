@@ -50,6 +50,8 @@ public partial class GlobalScript : GlobalScriptBase<GlobalScript>
 	
 	public bool testflag = false;
 	
+	public bool conciseflag = false;
+	
 	public string urlQuery = "";
 	
 	/// Just an example of using a global variable that can be accessed in any room with `Globals.m_spokeToBarney`.
