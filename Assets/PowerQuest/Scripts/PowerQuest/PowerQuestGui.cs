@@ -28,14 +28,10 @@ public partial class PowerQuest
 	public void LockFocusedControl() { m_focusedControlLock = m_focusedControl; }
 	public void UnlockFocusedControl() {m_focusedControlLock=null;}
 	
-	public bool NavigateGui(eGuiNav input = eGuiNav.Ok)
-	{
-		if ( GetBlocked() == false && m_focusedGui != null )
-		{
-			return m_focusedGui.Navigate(input);
-		}
-		return false;
-	}
+	// Called when gui input is pressed- pass it through to gui system and record presses for queries.
+	public bool NavigateGui(eGuiNav input = eGuiNav.Ok) { return QuestMenuManager.Get.NavigateGui(input); }
+	// Return whether key was pressed this frame (or repeated) and marks the input as having been "used" so other thigns won't use it
+	public bool ConsumeGuiKey(eGuiNav input = eGuiNav.Ok) { return QuestMenuManager.Get.ConsumeGuiKey(input); }
 
 	// Called from PowerQuest update
 	void UpdateGuiFocus()

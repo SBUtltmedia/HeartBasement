@@ -295,9 +295,10 @@ public partial class Slider : GuiControl, ISlider
 			m_questText = GetComponentInChildren<QuestText>();
 	}
 
-
-	void Start()
-	{		
+	
+	protected override void Start()
+	{
+		base.Start();
 		InitComponentReferences();
 			
 		// Set state if clickable/not clickable			

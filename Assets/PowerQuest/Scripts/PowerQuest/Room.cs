@@ -139,6 +139,9 @@ public partial class Room : IQuestScriptable, IRoom, IQuestSaveCachable
 	#endregion
 	#region Funcs: Public
 
+	// Todo: manually save room data?
+	public void Save(Dictionary<string, object> data){}
+
 	public GameObject GetPrefab() { return m_prefab; }
 	public string GetScriptName(){ return m_shortName; }
 	public string GetScriptClassName(){ return m_scriptClass; }
@@ -184,25 +187,23 @@ public partial class Room : IQuestScriptable, IRoom, IQuestSaveCachable
 	}
 	public Room Data { get {return this; } }
 	public Hotspot GetHotspot(string name) 
-	{ 
-		
-		Hotspot result = QuestUtils.FindScriptable(m_hotspots, name);
+	{
+		Hotspot result = PowerQuest.GetSavable(QuestUtils.FindScriptable(m_hotspots, name));
 		if ( result == null )
 			Debug.LogError("Hotspot '"+name+"' doesn't exist in " +ScriptName);
 		return result;
 	} 
 
 	public Prop GetProp(string name) 
-	{ 
-		Prop result = QuestUtils.FindScriptable(m_props, name);
+	{
+		Prop result = PowerQuest.GetSavable(QuestUtils.FindScriptable(m_props, name));
 		if ( result == null )
 			Debug.LogError("Prop '"+name+"' doesn't exist in " +ScriptName);
 		return result;
 	} 
 	public Region GetRegion(string name) 
-	{ 
-
-		Region result = QuestUtils.FindScriptable(m_regions, name);
+	{
+		Region result = PowerQuest.GetSavable(QuestUtils.FindScriptable(m_regions, name));
 		if ( result == null )
 			Debug.LogError("Region '"+name+"' doesn't exist in " +ScriptName);
 		return result;
@@ -229,14 +230,18 @@ public partial class Room : IQuestScriptable, IRoom, IQuestSaveCachable
 
 	public string GetSceneName() { return m_sceneName; }
 
-	public List<Hotspot> GetHotspots() { return m_hotspots; }
-	public List<Prop> GetProps() { return m_props; }
+	// Warning: Any items modified in the returned list MUST have Dirty property set, or save games will break!
+	public List<Hotspot> GetHotspots_SaveFlagNotDirtied() { return m_hotspots; }
+	// Warning: Any items modified in the returned list MUST have Dirty property set, or save games will break!
+	public List<Prop> GetProps_SaveFlagNotDirtied() { return m_props; }
+	// Warning: Any items modified in the returned list MUST have Dirty property set, or save games will break!
+	public List<Region> GetRegions_SaveFlagNotDirtied() { return m_regions; }
 	public List<RoomPoint> GetPoints() 
 	{ 
 		if ( m_points == null ) m_points = new List<RoomPoint>();
 			return m_points; 
 	}
-	public List<Region> GetRegions() { return m_regions; }
+	
 
 	public static implicit operator string(Room room) { return room.m_shortName; }
 
@@ -291,10 +296,10 @@ public partial class Room : IQuestScriptable, IRoom, IQuestSaveCachable
 		PropComponent[] propPrefabs = prefab.GetComponentsInChildren<PropComponent>(true);
 		foreach ( PropComponent prefabComponent in propPrefabs )
 		{
-			
-			Prop restoredData = loadedProps.Find(item=>item.ScriptName == prefabComponent.GetData().ScriptName);
-			Prop data = new Prop();
+			Prop restoredData = loadedProps.Find(item=>item != null && item.ScriptName == prefabComponent.GetData().ScriptName);
+			Prop data = new Prop();			
 			QuestUtils.CopyFields(data, restoredData != null ? restoredData : prefabComponent.GetData() );
+			data.Position = restoredData != null ? restoredData.Position : (Vector2)prefabComponent.transform.position; // have to do this specificall (not too sure why though)
 			m_props.Add(data);	
 		}
 
@@ -314,6 +319,9 @@ public partial class Room : IQuestScriptable, IRoom, IQuestSaveCachable
 		// Mark as dirty if room is active, otherwise as clean
 		SaveDirty = Active;
 	}
+
+	// Called when initialising data classes- copy default data from the prefab into permanent data thats kept between scenes
+	partial void ExInitialise( GameObject prefab );
 
 	//
 	// Initialise Data classes ( rooms, characters, etc.
@@ -369,7 +377,11 @@ public partial class Room : IQuestScriptable, IRoom, IQuestSaveCachable
 		// Copy data from points
 		//
 		m_points = QuestUtils.CopyListFields(m_points); // the points will have been shallow copied already, but we want a deep copy.
+
+		ExInitialise(prefab);
 	}
+
+	
 
 	#endregion
 	#region Funcs: Internal
@@ -396,7 +408,14 @@ public partial class Room : IQuestScriptable, IRoom, IQuestSaveCachable
 	// Implementing IQuestSaveCachable
 	//	
 	bool m_saveDirty = true;
-	public bool SaveDirty { get=>m_saveDirty; set{m_saveDirty=value;} }
+	bool m_saveDirtyEver = false;
+	public bool SaveDirty { get=>m_saveDirty; set { m_saveDirty=value; 
+		if (value) 
+		{
+			//if ( m_saveDirtyEver == false ) Debug.Log($"Room {ScriptName} set dirty");
+			m_saveDirtyEver=true; 
+		} } }
+	public bool SaveDirtyEver => m_saveDirtyEver;
 
 	#endregion
 

@@ -1,30 +1,39 @@
 //#define LOG_TIME
-
 //#define LOG_DATA
+//#define LOG_CACHE_DATA
 #if LOG_DATA 
 	//#define LOG_DATA_SERIALIZEABLE // More verbose, shows all serializables, not just custom classes
-	#define LOG_DATA_SURROGATE
+	//#define LOG_DATA_SURROGATE
 #endif
 
-// Cache data speeds up consecutive saves, at cost of restore being slower, and save file being bigger
+// Serialize data to memstream before its saved to disk. Necessary for console ports (added in v5)
+#define ENABLE_MEMSTREAM
+// Compress data instead of encrypting (added in v5)
+#define ENABLE_COMPRESSION
+// Cache data speeds up consecutive saves, at cost of restore being slower, and save file being bigger (added in v3)
 #define CACHE_SAVE_DATA 
-//#define LOG_CACHE_DATA
-
-// Checking the QuestDontSave attribute potentially makes save/load slower. Though testing with/without this  and logging time, it didn't seem dramatically differnt
-//#define ENABLE_DONTSAVE_ATTRIB
+// Check if saved objects are IQuestCachable and EverDirty before saving. Applies to props, hotspots, regions, so have to be more careful about marking them as dirty. (added in v5)
+#define IGNORE_NONDIRTY_CACHABLES
+// Checking for [DontSave] makes saving potentially slightly slower, but its useful so decided its worth it
+#define ENABLE_DONTSAVE_ATTRIB
 
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 // for saving
+
 using System.IO;
+using System.Threading.Tasks;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System;
 using System.Text;
 using System.Reflection;
 using System.Security.Cryptography;
+#if ENABLE_COMPRESSION
+using Compression = System.IO.Compression;
+#endif
 using PowerTools;
 
 namespace PowerTools.Quest
@@ -37,7 +46,7 @@ public class QuestSaveAttribute : System.Attribute
 	public QuestSaveAttribute(){}
 }
 
-/// NB: This attribute is disabled for now
+// Attribute used to specifically disable saving variables
 [AttributeUsage(AttributeTargets.All)]
 public class QuestDontSaveAttribute : System.Attribute
 {
@@ -49,6 +58,17 @@ public class QuestDontSaveAttribute : System.Attribute
 [System.Serializable]
 public class QuestSaveSlotData
 {
+	public QuestSaveSlotData(){}
+	public QuestSaveSlotData(int slotId) { m_slotId = slotId; }
+	public QuestSaveSlotData(int slotId, int version, int timestamp, string description, Texture2D image)
+	{
+		m_slotId = slotId;
+		m_version = version;
+		m_timestamp = timestamp;
+		m_description = description;
+		m_image = image;
+	}
+	
 	// The header of each 
 	public int m_slotId = -1;
 	public int m_version = -1;
@@ -63,6 +83,25 @@ public class QuestSaveSlotData
 public interface IQuestSaveCachable
 {
 	bool SaveDirty {get;set;}
+	bool SaveDirtyEver {get;}
+}
+
+// Save file strategy interface- gives layer of indirection to file io so can swap it out on different platforms (switch/ps/xbox,etc)
+public interface ISaveIoStrategy 
+{
+	// Retreive a log, in case of error that needs to be reported
+	string Log { get; }
+	// Retreive status of the save file system. Mainly useful for async saving
+	QuestSaveManager.eStatus Status{ get; }	
+	string GetSaveDirectory();
+	// Fill an array with the save file names from the SaveDirectory
+	string[] ReadFileNames();
+	// Write bytes to a file. Return success
+	bool WriteToFile(string fileName, byte[] bytes);
+	// Read  bytes from a file. Return success
+	byte[] ReadFromFile(string fileName);
+	// Delete a file
+	bool DeleteFile(string fileName);
 }
 
 public class QuestSaveManager
@@ -70,6 +109,19 @@ public class QuestSaveManager
 
 	#endregion
 	#region Definitions
+
+	public enum eStatus
+	{ 
+		Saving,
+		Loading,
+		None,
+		Complete,
+		Error
+	}
+
+	// Version and version requirement for the save manager. There's a seperate one used for the "game"	
+	static readonly int VERSION_CURRENT = 5;	
+	static readonly int VERSION_REQUIRED = 5;
 
 	// Used so can easily add data to save system
 	class CustomSaveData
@@ -95,23 +147,16 @@ public class QuestSaveManager
 	static readonly byte[] NOTHING_TO_SEE_HERE = {0xdd, 0x2a, 0xdc, 0x58, 0xa6, 0xc4, 0xca, 0x10};
 	static readonly byte[] JUST_A_REGULAR_VARIABLE = {0x47, 0xa1, 0x6d, 0xc1, 0xc6, 0x67, 0xd9, 0xed};
 
-	static readonly string FILE_NAME_START = "Save";
-	static readonly string FILE_NAME_EXTENTION = ".sav";
-	static readonly string FILE_NAME_WILDCARD = FILE_NAME_START+"*"+FILE_NAME_EXTENTION;
+	public static readonly string FILE_NAME_START = "Save";
+	public static readonly string FILE_NAME_EXTENTION = ".sav";
+	public static readonly string FILE_NAME_WILDCARD = FILE_NAME_START+"*"+FILE_NAME_EXTENTION;
 
-	// Version and version requirement for the save manager. There's a seperate one used for the "game"
-	#if CACHE_SAVE_DATA
-		static readonly int VERSION_CURRENT = 4;
-	#else 
-		static readonly int VERSION_CURRENT = 4;
-	#endif
-	static readonly int VERSION_REQUIRED = 4;
 	
 	#endregion
 	#region Variables
-
+		
 	List<QuestSaveSlotData> m_saveSlots = new List<QuestSaveSlotData>();
-	string m_log = string.Empty;	// Debug text log thing, might remove if it's not going to be useful for getting load error messages to display to user
+	string m_log = string.Empty;	// Debug text log, can query error messages
 	bool m_loadedSaveSlots = false; // Flag set true when save slots have been loaded
 
 	List< CustomSaveData > m_customSaveData = new List< CustomSaveData >();
@@ -119,9 +164,19 @@ public class QuestSaveManager
 	
 	// Serialized bytes, cached so they don't have to be serialized again (since that's so slow)
 	Dictionary<string, byte[]> m_cachedSaveData = new Dictionary<string, byte[]>();
+	
+	ISaveIoStrategy m_ioStrategy = new SaveIoStrategyPC(); // default to PC.
+	
 
 	#endregion
 	#region Public Functions
+
+	// Future proofing for console ports really, Ps4 at least needs file io to be async...
+	public bool Ready => (m_ioStrategy.Status != eStatus.Saving && m_ioStrategy.Status != eStatus.Loading);
+	public bool Busy => Ready == false;
+	public eStatus Status => m_ioStrategy.Status;
+	public string Log => m_log;
+
 	/*
 	public void AddSaveDataAttribute(string name, object owner, System.Action OnPostRestore = null )
 	{
@@ -188,31 +243,28 @@ public class QuestSaveManager
 
 	public bool Save(int slot, string displayName, int version, Dictionary<string, object> data, Texture2D image = null)
 	{
-		bool result = Save(FILE_NAME_START+slot+FILE_NAME_EXTENTION, displayName,version,data,image);
-		ReloadSaveSlotData(slot);
-		return result;
+		return Save(FILE_NAME_START+slot+FILE_NAME_EXTENTION, displayName,version,data,image,slot);
 	}
 
-	public bool Save(string fileName, string displayName, int version, Dictionary<string, object> data, Texture2D image = null)
+	public bool Save(string fileName, string displayName, int version, Dictionary<string, object> data, Texture2D image = null, int slotId = -1)
 	{	
-
-		#if UNITY_SWITCH
-		// TODO: Implement save/load on switch
-		bool isSwitch = true;
-		if ( isSwitch )
-			return false;
-		#endif
-
 		bool success = false;
+		
+		// Load save slots first if never did it
+		if ( m_loadedSaveSlots == false )
+			LoadSaveSlotData();
 
 		// Add the registered data
 		foreach( CustomSaveData customSaveData in m_customSaveData )
 			data.Add(customSaveData.m_name+'%', customSaveData.m_data); // adding '%' to mostly ensure it's unique
 				
-		Stream fStream = null;
-		Stream cryptoStream = null;
+		Stream stream = null;
+		Stream encoderStream = null;
 		
 		QuestSaveSurrogateSelector.StartLogSave();
+
+		// Create slot data- even if not using slots (in that case it's just not added to m_slotData list)
+		QuestSaveSlotData slotData = new QuestSaveSlotData( slotId, version, Utils.GetUnixTimestamp(), displayName, image );
 
 		try
 		{
@@ -220,45 +272,54 @@ public class QuestSaveManager
 			#if LOG_TIME
 				QuestUtils.StopwatchStart();
 			#endif		
-					
-			fStream = File.Open(GetSaveDirectory()+fileName, FileMode.Create);
+			
+			#if ENABLE_MEMSTREAM
+			// Save to memory stream, then disk
+			stream = new MemoryStream(32*1024); // start with 30KB block allocated- gets expanded if save file is larger
+			#else 
+			// Save straight to file 
+			stream = File.Open(GetSaveDirectory()+fileName, FileMode.Create);
+			#endif
 			
 			BinaryFormatter bformatter = new BinaryFormatter();
 			bformatter.Binder = new VersionDeserializationBinder(); 	
 
 			// Serialize 'header' (unencrypted version and slot information)
-			bformatter.Serialize(fStream, VERSION_CURRENT); // QuestSaveManager version
-			bformatter.Serialize(fStream, version);			// Game Version
-			bformatter.Serialize(fStream, displayName);
-			bformatter.Serialize(fStream, Utils.GetUnixTimestamp());			
+			bformatter.Serialize(stream, VERSION_CURRENT);      // QuestSaveManager version
+			bformatter.Serialize(stream, slotData.m_version);   // Game Version
+			bformatter.Serialize(stream, slotData.m_description);
+			bformatter.Serialize(stream, slotData.m_timestamp);			
 			{
 				// Save image				
-				if ( image == null )
+				if ( slotData.m_image == null )
 				{
-					bformatter.Serialize(fStream, false);	// no image
+					bformatter.Serialize(stream, false);	// no image
 				}
 				else 
 				{
-					bformatter.Serialize(fStream, true);	// Set flag to show there's an image
+					bformatter.Serialize(stream, true);	// Set flag to show there's an image
 
 					// from https://docs.unity3d.com/ScriptReference/ImageConversion.EncodeToPNG.html
 					{
-						byte[] bytes = image.EncodeToPNG();
-						//bformatter.Serialize(stream,bytes.Length);
-						bformatter.Serialize(fStream,bytes);
+						byte[] bytes = slotData.m_image.EncodeToPNG();
+						bformatter.Serialize(stream,bytes);
 					}
 				}
 			}
-
+			
 			// Construct SurrogateSelectors object to serialize unity structs
 			
 			DESCryptoServiceProvider des = new DESCryptoServiceProvider();
 			des.Key = NOTHING_TO_SEE_HERE;
 			des.IV = JUST_A_REGULAR_VARIABLE;
 			
-			cryptoStream = new CryptoStream(fStream, des.CreateEncryptor(), CryptoStreamMode.Write);
+			#if ENABLE_COMPRESSION
+			encoderStream = new Compression.GZipStream(stream, Compression.CompressionLevel.Fastest,false);
+			#else
+			encoderStream = new CryptoStream(stream, des.CreateEncryptor(), CryptoStreamMode.Write);			
+			#endif
 
-			SurrogateSelector surrogateSelector = new SurrogateSelector();					
+			SurrogateSelector surrogateSelector = new SurrogateSelector();
 			surrogateSelector.ChainSelector( new QuestSaveSurrogateSelector() );
 			bformatter.SurrogateSelector = surrogateSelector;
 			
@@ -273,7 +334,7 @@ public class QuestSaveManager
 				using ( MemoryStream mStream = new MemoryStream(128) )
 				{
 					// Serialise the number of items in the list
-					bformatter.Serialize(cryptoStream, data.Count);
+					bformatter.Serialize(encoderStream, data.Count);
 					foreach ( KeyValuePair<string, object> pair in data )	
 					{
 						// For each item, serialise the key, and the object.
@@ -281,7 +342,7 @@ public class QuestSaveManager
 						// This gets save time from 0.7 to 0.2 sec in debug
 
 						// Serialise the key
-						bformatter.Serialize(cryptoStream, pair.Key as string);
+						bformatter.Serialize(encoderStream, pair.Key as string);
 						byte[] bytes = null;
 						if ( pair.Value is IQuestSaveCachable )
 						{
@@ -316,7 +377,7 @@ public class QuestSaveManager
 							mStream.SetLength(0); // reset stream
 						}						
 
-						bformatter.Serialize(cryptoStream, bytes);
+						bformatter.Serialize(encoderStream, bytes);
 
 					}
 
@@ -328,14 +389,10 @@ public class QuestSaveManager
 			#else
 				
 				// The old way to save was just to save the whole dictionary as one thing
-				bformatter.Serialize(cryptoStream, data);
+				bformatter.Serialize(encoderStream, data);
 
 			#endif
-			
-			#if LOG_TIME
-				QuestUtils.StopwatchStop("Save: ");
-			#endif
-			cryptoStream.Close();
+
 			success = true;	
 		}
 		catch( Exception e )
@@ -345,11 +402,33 @@ public class QuestSaveManager
 		}
 		finally
 		{
-			if ( cryptoStream != null )
-				cryptoStream.Close();
-			if ( fStream != null )
-				fStream.Close();		
+			if ( encoderStream != null )
+				encoderStream.Close();
+			if ( stream != null )
+				stream.Close();
 		}
+		
+		#if ENABLE_MEMSTREAM		
+		/* Save to memory stream, then disk */
+		if ( success )
+		{
+			byte[] buffer = (stream as MemoryStream).ToArray();
+			success = m_ioStrategy.WriteToFile(fileName, buffer);
+		}
+		#endif
+		/**/
+		
+		#if LOG_TIME
+			QuestUtils.StopwatchStop("Save: ");
+		#endif
+
+		if ( success && slotId >= 0 )
+		{
+			// Remove old data and add new
+			RemoveSlotData(slotId);
+			m_saveSlots.Add(slotData);
+		}
+
 		TempPrintLog();
 
 		return success;
@@ -365,26 +444,22 @@ public class QuestSaveManager
 	{
 		return RestoreSave(FILE_NAME_START+slot+FILE_NAME_EXTENTION, versionRequired, out version, out data, slot);
 	}
-	// Restore save from a file name
-	public bool RestoreSave(string fileName, int versionRequired, out int version, out Dictionary<string, object> data )
-	{
-		return RestoreSave(fileName, versionRequired,out version, out data, -1);
-	}
 
-	bool RestoreSave(string fileName, int versionRequired, out int version, out Dictionary<string, object> data, int slot )
-	{
+	// Restore save from a file name
+	public bool RestoreSave(string fileName, int versionRequired, out int version, out Dictionary<string, object> data, int slot = -1 )
+	{	
+
 		bool success = false;
 		data = null;
 		version = -1;
 		int saveVersion = -1;
-
-		#if UNITY_SWITCH 
-		// TODO: Implement save/load on switch
-		bool isSwitch = true;
-		if ( isSwitch )
-			return false;
-		#endif
 			
+		if ( Ready == false )
+		{ 
+			Debug.LogError("Attempted to restore while saving. Check Save manager's Check Save Manager's 'Ready' property before attempting a restore");			
+			return success;
+		}
+					
 		QuestSaveSurrogateSelector.StartLogLoad();
 		
 		// Get the save slot. If it doesn't exist, try to load anyway (for settings)
@@ -393,20 +468,23 @@ public class QuestSaveManager
 		{
 			slotData = GetSaveSlot(slot);
 			if ( slotData == null )
-				slotData = new QuestSaveSlotData() { m_slotId = slot };			
+				slotData = new QuestSaveSlotData(slot);			
 		}
 
 		Stream stream = null;
-		Stream cryptoStream = null;
+		Stream encoderStream = null;
 		try
-		{
-			stream = File.Open(GetSaveDirectory()+fileName, FileMode.Open);		    
-			
-			DESCryptoServiceProvider des = new DESCryptoServiceProvider();
-			des.Key = NOTHING_TO_SEE_HERE;
-			des.IV = JUST_A_REGULAR_VARIABLE;
+		{	
+			#if ENABLE_MEMSTREAM				
+				byte[] buffer = m_ioStrategy.ReadFromFile(fileName);
+				if ( buffer == null )
+					throw new Exception("File not found: " + fileName);
+				
+				stream = new MemoryStream(buffer,0,buffer.Length);
+			#else
+				stream = File.Open(GetSaveDirectory()+fileName, FileMode.Open);		    
+			#endif
 
-			cryptoStream = new CryptoStream(stream, des.CreateDecryptor(), CryptoStreamMode.Read);
 			
 			BinaryFormatter bformatter = new BinaryFormatter();
 			bformatter.Binder = new VersionDeserializationBinder(); 
@@ -414,9 +492,8 @@ public class QuestSaveManager
 			// Deserialize unencrtypted version and slot information (not encrypted)
 			saveVersion = (int)bformatter.Deserialize(stream); // QuestSaveManager version
 			if ( saveVersion < VERSION_REQUIRED )
-			{
 				throw new Exception("Incompatible save version. Required: " + VERSION_REQUIRED + ", Found: " + saveVersion);
-			}
+			
 
 			DeserializeSlotData(slotData, bformatter, stream, saveVersion);
 			
@@ -429,21 +506,34 @@ public class QuestSaveManager
 			#if LOG_TIME
 				QuestUtils.StopwatchStart();
 			#endif
+			
 						
 			SurrogateSelector ss = new SurrogateSelector();
 			ss.ChainSelector( new QuestSaveSurrogateSelector() );
 			bformatter.SurrogateSelector = ss;
 			
+			DESCryptoServiceProvider des = new DESCryptoServiceProvider();
+			des.Key = NOTHING_TO_SEE_HERE;
+			des.IV = JUST_A_REGULAR_VARIABLE;
+
+			
+			#if ENABLE_COMPRESSION
+			encoderStream = new Compression.GZipStream(stream, Compression.CompressionMode.Decompress,false);
+			#else
+			encoderStream = new CryptoStream(stream, des.CreateDecryptor(), CryptoStreamMode.Read);
+			#endif
+
 			// deserialize the data
+			#if CACHE_SAVE_DATA
 			if ( saveVersion < 3 )					
 			{
 				// Older version saved all objects in single dictionary. But that meant couldn't cache anything, so consecutive saves were slower.
-				data = bformatter.Deserialize(cryptoStream) as Dictionary<string, object>;
+				data = bformatter.Deserialize(encoderStream) as Dictionary<string, object>;
 			}
 			else 
 			{			
 				// The new way of saving, where we have each object serialised separately			
-				int dictionarySize = (int)bformatter.Deserialize(cryptoStream);
+				int dictionarySize = (int)bformatter.Deserialize(encoderStream);
 				data = new Dictionary<string, object>(dictionarySize);
 				/* #Optimisation test /
 				using ( MemoryStream memStream = new MemoryStream() )
@@ -451,8 +541,8 @@ public class QuestSaveManager
 				{
 					for ( int i = 0; i < dictionarySize; ++i )
 					{
-						string key = bformatter.Deserialize(cryptoStream) as string;
-						byte[] bytes = bformatter.Deserialize(cryptoStream) as byte[];
+						string key = bformatter.Deserialize(encoderStream) as string;
+						byte[] bytes = bformatter.Deserialize(encoderStream) as byte[];
 												
 						/* #Optimisation test: Write bytes to memstream, then reset position (try ing to minimise allocs, but maybe just as good to new memory streams each time...) /
 						memStream.SetLength(0);
@@ -475,6 +565,9 @@ public class QuestSaveManager
 					}
 				}
 			}
+			#else
+			data = bformatter.Deserialize(encoderStream) as Dictionary<string, object>;
+			#endif
 			
 			// Pull out the custom data we want
 			object loadedCustomSaveData;
@@ -512,8 +605,8 @@ public class QuestSaveManager
 		{
 			try 
 			{
-				if ( cryptoStream != null )
-					cryptoStream.Close();
+				if ( encoderStream != null )
+					encoderStream.Close();
 			}
 			catch( Exception e )
 			{
@@ -546,11 +639,14 @@ public class QuestSaveManager
 			if ( bytes != null && bytes.Length > 0 )
 			{
 				if ( slotData.m_image == null )
-					slotData.m_image = new Texture2D(2,2);
+					slotData.m_image = new Texture2D(2,2); // create new one
 				slotData.m_image.LoadImage(bytes,false);
 			}
 		}			
 	}
+	
+	// Allows overriding file io used in save system. For porting to other platforms that can't use regular file io (switch, etc)
+	public void SetSaveIoStrategy(ISaveIoStrategy strategy) { m_ioStrategy = strategy; }
 
 	//  This function must be called after restoring data, from the caller of RestoreSave
 	public void OnPostRestore()
@@ -594,18 +690,11 @@ public class QuestSaveManager
 
 	public bool DeleteSave(int slot)
 	{
-		#if UNITY_SWITCH 
-		// TODO: Implement save/load on switch
-		bool isSwitch = true;
-		if ( isSwitch )
-			return false;
-		#endif
-
 		bool result = true;
 		//
 		try
 		{
-			File.Delete(GetSaveDirectory()+FILE_NAME_START+slot+FILE_NAME_EXTENTION);
+			m_ioStrategy.DeleteFile(FILE_NAME_START+slot+FILE_NAME_EXTENTION);
 		}
 		catch (Exception e)
 		{
@@ -614,7 +703,7 @@ public class QuestSaveManager
 		}
 
 		// Remove the save slot
-		m_saveSlots.RemoveAll(item=>item.m_slotId == slot);
+		RemoveSlotData(slot);
 
 		TempPrintLog();
 		return result;
@@ -623,16 +712,9 @@ public class QuestSaveManager
 
 	#endregion
 	#region Private Functions
-
+	
 	bool LoadHeader(QuestSaveSlotData slotData)
 	{
-	
-		#if UNITY_SWITCH 
-		// TODO: Implement save/load on switch
-		bool isSwitch = true;
-		if ( isSwitch )
-			return;
-		#endif
 
 		bool result = false;
 
@@ -640,11 +722,18 @@ public class QuestSaveManager
 			return false;
 		int slotId = slotData.m_slotId;
 
-		string path = GetSaveDirectory()+FILE_NAME_START+slotId+FILE_NAME_EXTENTION;
+		string path = FILE_NAME_START+slotId+FILE_NAME_EXTENTION;
 		Stream stream = null;
 		try
 		{
-			stream = File.Open(path, FileMode.Open);		    
+		
+			#if ENABLE_MEMSTREAM
+				byte[] buffer = m_ioStrategy.ReadFromFile(path);
+				stream = new MemoryStream(buffer,0,buffer.Length);
+			#else				
+				stream = File.Open(GetSaveDirectory()+path, FileMode.Open);		    
+			#endif
+			
 
 			BinaryFormatter bformatter = new BinaryFormatter();
 			bformatter.Binder = new VersionDeserializationBinder();
@@ -673,7 +762,7 @@ public class QuestSaveManager
 		}
 		return result;
 	}
-
+	
 	void ReloadSaveSlotData(int slotId)
 	{
 		if ( m_loadedSaveSlots == false )
@@ -685,7 +774,7 @@ public class QuestSaveManager
 		QuestSaveSlotData slotData = GetSaveSlot(slotId);
 		bool newSlot = slotData == null;
 		if ( newSlot )
-			slotData = new QuestSaveSlotData(){m_slotId=slotId};
+			slotData = new QuestSaveSlotData(slotId);
 		bool success = LoadHeader(slotData);
 		
 		if ( newSlot && success )
@@ -699,18 +788,11 @@ public class QuestSaveManager
 	// Creates slot, and reads in displayname, timestamp, version information
 	// If zero or greater is passed as specificSlotOnly, only that slot will be loaded
 	void LoadSaveSlotData()
-	{	
-		#if UNITY_SWITCH 
-		// TODO: Implement save/load on switch
-		bool isSwitch = true;
-		if ( isSwitch )
-			return;
-		#endif
-	
+	{		
 		if ( m_loadedSaveSlots )
 			Debug.LogWarning("Save slots should only be loaded once. Use ReloadSaveSlotData()");
-
-		string[] sourceFileNames = Directory.GetFiles(Path.GetFullPath(GetSaveDirectory()),FILE_NAME_WILDCARD);
+					
+		string[] sourceFileNames = m_ioStrategy.ReadFileNames();
 		foreach ( string path in sourceFileNames )
 		{
 			QuestSaveSlotData slotData = new QuestSaveSlotData();
@@ -728,6 +810,14 @@ public class QuestSaveManager
 		}
 
 		m_loadedSaveSlots = true;
+	}
+	
+	void RemoveSlotData(int slotId)
+	{
+		QuestSaveSlotData oldSlot = GetSaveSlot(slotId);
+		if ( oldSlot != null && oldSlot.m_image != null )	
+			Texture2D.Destroy(oldSlot.m_image); // destroy old image to avoid potential mem leak
+		m_saveSlots.RemoveAll(item=>item.m_slotId == slotId);
 	}
 
 	string GetSaveDirectory()
@@ -872,8 +962,17 @@ sealed class QuestSaveSurrogateSelector  : ISerializationSurrogate , ISurrogateS
 			selector = this;
 			return this;
 		}
-		else if (IsKnownType(type))
-		{
+		else if ( IsKnownType(type))
+		{	
+			#if IGNORE_NONDIRTY_CACHABLES
+			if ( !(type == STRING_TYPE) && !type.IsPrimitive && typeof(IQuestSaveCachable).IsAssignableFrom(type) )
+			{
+				// Check for items that need to be marked as "dirty" to save (eg: hotspots,regions,props)
+				//Debug.Log("QuestSaveCachable surrogate for "+type.Name);
+				selector = this;
+				return this;
+			}
+			#endif
 			#if LOG_DATA_SURROGATE
 				s_log.Append("\nKnown: ");				
 				s_log.Append(type.ToString());
@@ -931,7 +1030,16 @@ sealed class QuestSaveSurrogateSelector  : ISerializationSurrogate , ISurrogateS
 					info.AddValue(fi.Name, fi.GetValue(obj));
 				}			
 				return;
+			}	
+				
+			
+			#if IGNORE_NONDIRTY_CACHABLES
+			if ( typeof(IQuestSaveCachable).IsAssignableFrom(type) && (obj as IQuestSaveCachable).SaveDirtyEver == false )
+			{
+				//Debug.Log("Ignored cachable "+type.Name);
+				return;				
 			}
+			#endif
 
 			// If the type has the "QuestSave" attribute, then only serialize fields with it that also have that attribute
 			bool manualType = Attribute.IsDefined(type, TYPE_QUESTSAVE);
@@ -980,7 +1088,7 @@ sealed class QuestSaveSurrogateSelector  : ISerializationSurrogate , ISurrogateS
 				}
 				else if (IsKnownType(fi.FieldType) )
 				{
-					if ( fi.Name.Length > 0 && fi.Name[0] == '$' )
+					if ( fi.Name.Length > 0 && fi.Name[0] == '$' ) // hrm. do we want to return? or just ingore it?!? is wouldn' thtis break any data after this field?
 						return;
 					// Debug.Log("Known: "+fi.Name);
 					#if LOG_DATA					
@@ -1030,6 +1138,7 @@ sealed class QuestSaveSurrogateSelector  : ISerializationSurrogate , ISurrogateS
 		{
 			Type type = obj.GetType();
 
+
 			// Handle Vectors/colors seperately, since we do thousands of them, so doing this whole thing just for those is quite expensive
 			if ( type == typeof(Vector2) || type == typeof(Color) )
 			{
@@ -1066,7 +1175,7 @@ sealed class QuestSaveSurrogateSelector  : ISerializationSurrogate , ISurrogateS
 					 //Debug.Log("Ignored: "+fi.Name);
 				}
 				else if (IsKnownType(fi.FieldType))
-				{
+				{					
 					//var value = info.GetValue(fi.Name, fi.FieldType);
 
 					if (IsNullableType(fi.FieldType))
@@ -1163,6 +1272,173 @@ sealed class QuestSaveSurrogateSelector  : ISerializationSurrogate , ISurrogateS
 	}
 
 }
+
+#if !UNITY_SWITCH
+
+public class SaveIoStrategyPC : ISaveIoStrategy
+{
+	protected string m_log = string.Empty;
+	protected QuestSaveManager.eStatus m_status = QuestSaveManager.eStatus.None;
+	
+	public string Log => m_log;
+	public QuestSaveManager.eStatus Status=>m_status;
+
+	public virtual string GetSaveDirectory()
+	{		
+		// For OSX - point to persistent data path (eg: a place on osx where we can store svae files)
+		#if UNITY_2017_1_OR_NEWER
+		if ( Application.platform == RuntimePlatform.OSXPlayer )
+		#else
+		if ( Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXDashboardPlayer )
+		#endif
+		{		
+			return Application.persistentDataPath+"/";
+		}
+		// For Other platforms, store saves in game directory
+		return "./";
+	}
+
+	public string[] ReadFileNames()
+	{
+		return Directory.GetFiles(Path.GetFullPath(GetSaveDirectory()), QuestSaveManager.FILE_NAME_WILDCARD);
+	}
+
+	public virtual byte[] ReadFromFile(string fileName)
+	{	
+		byte[] bytes = null;
+		Stream fStream = null;
+		try
+		{	
+			fStream = File.Open(GetSaveDirectory()+fileName, FileMode.Open, FileAccess.Read);
+			
+			bytes = new byte[fStream.Length];
+			int numBytesToRead = (int)fStream.Length;
+			int numBytesRead = 0;
+			while ( numBytesToRead > 0 )
+			{
+				int n = fStream.Read(bytes, numBytesRead,numBytesToRead);
+				if ( n==0 )
+					break; // eof
+				
+				numBytesRead += n;
+				numBytesToRead -= n;
+			}
+		}
+		finally
+		{
+			if ( fStream != null )
+				fStream.Close();		
+		}
+		return bytes;
+	}
+	
+	public virtual bool WriteToFile(string fileName, byte[] bytes)
+	{
+		// Now save memstream to disk
+		bool success = false;
+		Stream fStream = null;
+		try
+		{
+			fStream = File.Open(GetSaveDirectory()+fileName, FileMode.Create);
+			fStream.Write(bytes,0, bytes.Length);
+			success = true;
+		}
+		finally
+		{
+			if ( fStream != null )
+				fStream.Close();		
+		}
+		return success;
+	}
+	
+	public bool DeleteFile(string fileName)
+	{
+		File.Delete(GetSaveDirectory()+fileName);
+		return true;
+	}
+}
+
+// Trying async saving... not enough benefit to be worth the extra complexity
+public class SaveIoStrategyPCAsync : SaveIoStrategyPC
+{
+	// files currently being saved
+	static List<string> s_saving = new List<string>();
+
+	public override bool WriteToFile(string fileName, byte[] bytes)
+	{		
+		if ( s_saving.Contains(fileName) )
+		{ 
+			Debug.Log("Already saving");
+			return false;
+		}
+
+		// Now save memstream to disk
+		m_status = QuestSaveManager.eStatus.Saving;
+		Task task = Task.Run(()=>WriteAsyncTask(GetSaveDirectory()+fileName, bytes));
+		if ( task.IsFaulted || task.IsCanceled )
+			return false; // not really reliable since its async		
+		return true;
+	}
+
+
+	async Task WriteAsyncTask(string filePath, byte[] bytes)
+	{ 
+		s_saving.Add(filePath);
+		Task task = WriteAsync(filePath, bytes);		
+		await task;		
+		s_saving.Remove(filePath);
+		if ( task.IsCanceled || task.IsFaulted )
+			m_status = QuestSaveManager.eStatus.Error;
+		else if ( s_saving.Count == 0 )
+			m_status = QuestSaveManager.eStatus.Complete;
+	}
+
+	static async Task WriteAsync(string filePath, byte[] bytes)
+	{	
+		using (FileStream fStream = new FileStream(filePath,
+			FileMode.Create, FileAccess.Write, FileShare.None,
+			bufferSize: 4096, useAsync: true))
+		{
+			await fStream.WriteAsync(bytes, 0, bytes.Length);
+		};
+	}
+}
+
+#else
+
+public class SaveIoStrategyPCAsync : ISaveIoStrategy
+{
+
+	public string Log => null;
+	public QuestSaveManager.eStatus Status=>QuestSaveManager.eStatus.None;
+
+	public virtual string GetSaveDirectory() => "./";
+
+	public string[] ReadFileNames() => new string[]{};
+
+	public virtual byte[] ReadFromFile(string fileName) => null;	
+	public virtual bool WriteToFile(string fileName, byte[] bytes) => false;
+
+	public bool DeleteFile(string fileName) => false;
+}
+
+public class SaveIoStrategyPC : ISaveIoStrategy
+{
+
+	public string Log => null;
+	public QuestSaveManager.eStatus Status=>QuestSaveManager.eStatus.None;
+
+	public virtual string GetSaveDirectory() => "./";
+
+	public string[] ReadFileNames() => new string[]{};
+
+	public virtual byte[] ReadFromFile(string fileName) => null;	
+	public virtual bool WriteToFile(string fileName, byte[] bytes) => false;
+
+	public bool DeleteFile(string fileName) => false;
+}
+#endif
+
 
 }
 

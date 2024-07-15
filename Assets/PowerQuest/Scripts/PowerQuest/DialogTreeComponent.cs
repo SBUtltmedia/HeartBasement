@@ -221,7 +221,11 @@ public partial class DialogTree : IQuestScriptable, IDialogTree, IQuestSaveCacha
 		{ 
 			DialogOption result = m_options.Find(item=>string.Compare( item.Name,name,true)== 0);
 			if ( result == null )
+			{ 
 				Debug.LogError("Failed to find option "+name+" in dialog "+m_scriptName);
+				result = new DialogOption();
+				result.Description = $"Missing option {m_scriptName}";
+			}
 			return result; 
 		}
 	}
@@ -248,8 +252,14 @@ public partial class DialogTree : IQuestScriptable, IDialogTree, IQuestSaveCacha
 	//
 	// Implementing IQuestSaveCachable
 	//	
-	bool m_saveDirty = true;
-	public bool SaveDirty { get=>m_saveDirty; set{m_saveDirty=value;} }
+	bool m_saveDirtyEver = false;
+	public bool SaveDirty { get=>m_saveDirtyEver; set {
+		if (value) 
+		{
+			//if ( m_saveDirtyEver == false ) Debug.Log($"Dialog {ScriptName} set dirty");
+			m_saveDirtyEver=true; 
+		} } }
+	public bool SaveDirtyEver => m_saveDirtyEver;
 
 	//
 	// Internal Functions

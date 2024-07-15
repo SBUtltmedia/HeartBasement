@@ -109,11 +109,19 @@ public partial class Inventory : IQuestClickable, IQuestScriptable, IInventory, 
 	// Implementing IQuestSaveCachable
 	//	
 	bool m_saveDirty = true;
-	public bool SaveDirty { get=>m_saveDirty; set{m_saveDirty=value;} }
+	bool m_saveDirtyEver = false;
+	public bool SaveDirty { get=>m_saveDirty; set { m_saveDirty=value; 
+		if (value) 
+		{
+			//if ( m_saveDirtyEver == false ) Debug.Log($"Inv {ScriptName} set dirty");
+			m_saveDirtyEver=true; 
+		} } }
+	public bool SaveDirtyEver => m_saveDirtyEver;
 
 	//
 	// Implementing IQuestClickable- Mostly n/a
 	//	
+	public IQuestClickable IClickable {get { return this;} }
 	public Vector2 WalkToPoint { get{return Vector2.zero;} set{} }
 	public Vector2 LookAtPoint  { get{return Vector2.zero;} set{} }
 	public float Baseline  { get{ return 0;} set{} }
@@ -190,6 +198,7 @@ public partial class Inventory : IQuestClickable, IQuestScriptable, IInventory, 
 	// Called from player addInventory so items can record when they've been collected
 	public void OnCollected() { m_everCollected = true; }
 
+
 	/// Whether the current player has the item in their inventory
 	public bool Owned 
 	{ 
@@ -197,9 +206,25 @@ public partial class Inventory : IQuestClickable, IQuestScriptable, IInventory, 
 		set
 		{
 			if ( value == true && Owned == false )
+			{ 
 				Add();
+			}
 			else if ( value == false && Owned == true )
-				Remove( Mathf.RoundToInt(PowerQuest.Get.GetPlayer().GetInventoryItemCount()) );
+			{ 
+				Character plr = PowerQuest.Get.GetPlayer();
+				plr.RemoveInventory(this,plr.GetInventoryQuantity(this));				
+			}
+		}
+	}
+	public int QuantityOwned
+	{ 
+		get { return Mathf.RoundToInt(PowerQuest.Get.GetPlayer().GetInventoryQuantity(this)); }
+		set 
+		{
+			if ( QuantityOwned < value )				
+				Add(value-QuantityOwned);
+			else if ( QuantityOwned > value )
+				Remove(QuantityOwned-value);
 		}
 	}
 

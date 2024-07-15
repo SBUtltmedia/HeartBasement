@@ -210,6 +210,8 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 		{
 			clipInfo.defaultVolume = volume;
 			clipInfo.targetVolume = volume;
+			// Set the volume immediately (Added 04/03/2024)- otherwise waits for next game update, which could be too late if changing rooms
+			UpdateActiveAudioClip(clipInfo);
 		}
 	}
 
@@ -293,12 +295,12 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 		for ( int i = 0; i < self.m_activeAudio.Count; ++i )
 		{
 			ClipInfo info = self.m_activeAudio[i];
-			if ( info.handle != null && info.handle.clip == clip
+			if ( info.handle != null && info.handle.clip == clip && (info.cue == null || info.cue == cue) //&& info.handle.isPlaying
 				&& Application.isPlaying
 				&& (withStartDelay <= 0 && fromTime <= 0 && cue.m_loopSection.m_endTime <= 0 && cue.m_startDelay <= 0 )
 				&& ( info.handle.time < ( cue.m_noDuplicateTime >= 0 ? cue.m_noDuplicateTime : self.m_noDuplicateTime) ) )
 			{
-				//Debug.Log("AUD: duplicate"+info.source.name);
+				//Debug.Log("AUD: duplicate"+info.handle.cueName);
 				return new AudioHandle(null);
 			}
 		}
@@ -337,6 +339,18 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 			if ( sourceFilter.enabled )
 			{
 				sourceFilter.reverbPreset = cue.m_reverbPreset;
+				if ( cue.m_reverbLevel > 0 )
+				{
+					//sourceFilter.reverbLevel = Mathf.Lerp(-10000,2000,cue.m_reverbLevel);
+					//sourceFilter.reflectionsLevel = Mathf.Lerp(-10000,1000,cue.m_reverbLevel);
+					sourceFilter.reverbPreset = AudioReverbPreset.User; // have to set to user to be able to tweak settings
+					sourceFilter.room = Mathf.Lerp(-10000,0,Mathf.InverseLerp(-144,0,ToDecibel(cue.m_reverbLevel)));
+					sourceFilter.roomLF = Mathf.Lerp(-10000,0,Mathf.InverseLerp(-144,0,ToDecibel(cue.m_reverbLevel)));
+					sourceFilter.roomHF = Mathf.Lerp(-10000,0,Mathf.InverseLerp(-144,0,ToDecibel(cue.m_reverbLevel)));
+					//sourceFilter.dryLevel= Mathf.Lerp(-10000,0,1.0f-cue.m_reverbLevel);
+				}
+				//if ( cue.m_reverbLevel >= 0 )
+					//sourceFilter.dryLevel = Mathf.Lerp(-10000,2000,cue.m_reverbLevel) 1.0f-cue.m_reverbLevel;
 			}
 
 		}
@@ -491,6 +505,10 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 			emmitter = (emmitter == null ? self.transform : emmitter) }
 			
 			);
+
+		// Fade in the sound if fadeInTime set
+		if ( cue.m_fadeInTime > 0 )
+			handle.FadeIn(cue.m_fadeInTime);
 
 		// NB: Probably should apply "active audio" updates to the clip immediately
 
@@ -784,18 +802,22 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 	{
 		if ( m_instance.m_activeMusic == null )
 			return PlayMusic(cue);
-
-		if ( m_instance.m_restartMusicIfAlreadyPlaying == false && m_instance.GetIsActiveMusic(cue) )
+		/* Doesn't make sense to play music synced if its th same track	*/
+		if ( m_instance.GetIsActiveMusic(cue) )
 		{
 			// If flag set, we don't want to restart music that's already playing, just update it's volume
 			m_instance.UpdateCurrentMusicVolumeFromCue(cue, fadeTime, volumeOverride);
 			return m_instance.m_activeMusic;
 		}
+		
 		const float spinUpTime = 0.25f; // Time buffer to give time to load the new track so they sync up correctly
 		float syncTime = m_instance.m_activeMusic.time+spinUpTime;
+
 		StopMusic(fadeTime*1.5f,spinUpTime);
-		m_instance.m_musicCueName = cue.name;
+		m_instance.m_musicCueName = cue == null ? null : cue.name;
+		m_instance.m_musicVolOverride = 0;
 		m_instance.m_activeMusic = Play(cue,null,1,1,syncTime,spinUpTime);
+
 		// set the volume of the clip
 		if ( volumeOverride > 0.0f )
 		{
@@ -865,28 +887,30 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 	/// <param name="closeVol">The volume when the player is standing CLOSE to the sound (eg. loud). From 0 to 1.</param>
 	/// <param name="farPan">The maximum amount to pan in stereo, when the player is FAR from the sound. From 0 to 1.</param>
 	public static void UpdateCustomFalloff(string cueName, Vector2 soundPos, Vector2 listenerPos, float closeDist, float farDist, float farVol = 0, float closeVol = 1, float farPan = 0.7f )
-	{
-		AudioHandle fireHandle = SystemAudio.GetHandle(cueName);
-		if ( fireHandle == null )
+	{	
+		AudioHandle[] handles = SystemAudio.GetHandles(cueName);
+		if ( handles == null )
 			return;
+		foreach( AudioHandle handle in handles )
+		{
+			// Query the clip info to see if sound is "fading" if it's fading in or out we want to preserve that
+			ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == handle);
+			if ( clipInfo == null || clipInfo.stopAfterFade ) // NB: once stop after fade is called, don't allow volume changes through this function				
+				continue;
 
-		// Query the clip info to see if sound is "fading" if it's fading in or out we want to preserve that
-		ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == fireHandle);
-		if ( clipInfo == null || clipInfo.stopAfterFade ) // NB: once stop after fade is called, don't allow volume changes through this function				
-			return;
+			float diff = soundPos.x - listenerPos.x;
+			float vol = Mathf.Lerp(closeVol,farVol, Utils.EaseCubic(
+				Mathf.InverseLerp(closeDist,farDist,Vector2.Distance(soundPos,listenerPos))));
+			float pan = Mathf.Lerp(0,farPan, Utils.EaseCubic(
+				Mathf.InverseLerp(closeDist,farDist,Mathf.Abs(diff))));
+			pan = pan*Mathf.Sign(diff);
 
-		float diff = soundPos.x - listenerPos.x;
-		float vol = Mathf.Lerp(closeVol,farVol, Utils.EaseCubic(
-			Mathf.InverseLerp(closeDist,farDist,Vector2.Distance(soundPos,listenerPos))));
-		float pan = Mathf.Lerp(0,farPan, Utils.EaseCubic(
-			Mathf.InverseLerp(closeDist,farDist,Mathf.Abs(diff))));
-		pan = pan*Mathf.Sign(diff);
-
-		if ( clipInfo.targetVolume != clipInfo.defaultVolume )
-			clipInfo.targetVolume = vol;
-		else 
-			fireHandle.volume = vol;
-		fireHandle.panStereo = pan;
+			if ( clipInfo.targetVolume != clipInfo.defaultVolume )
+				clipInfo.targetVolume = vol;
+			else 
+				handle.volume = vol;
+			handle.panStereo = pan;
+		}
 	}
 
 	#endregion
@@ -1638,6 +1662,8 @@ public class AudioHandle
 	public float time { get { return m_source == null ? 0 : m_source.time; } set { if ( m_source != null ) m_source.time = Mathf.Min(value, (m_source.clip.length-0.01f)*0.9f); } } // Hack, cause sounds won't play if time gets set too close to end
 	/// Is the audio clip looping 
 	public bool loop { get { return m_source == null ? false : m_source.loop; } }
+	/// Delay before cue is started- must be set immediately after playing (same as `AfterDelay()`)
+	public float startDelay { set { AfterDelay(value); } }
 	/// The audio clip that is playing
 	public AudioClip clip { get { return m_source == null ? null : m_source.clip; } }
 	/// Pauses playing the clip
@@ -1651,6 +1677,20 @@ public class AudioHandle
 			return;		
 		if ( SystemAudio.Get.StopHandleInternal(this, overTime,afterDelay) )
 			m_source = null; // need to clear the source, and don't want to expose it, so doing it here. SystemAudio.Stop calls through to this to make sure its cleared.
+	}
+
+
+	/// Makes the clip start after the passed in time (if called immediately after play)
+	public void AfterDelay(float time)
+	{
+		if ( m_source == null )
+		{
+			Debug.LogWarning("Attempted to set start delay on sound handle that is not playing");
+			return;
+		}
+
+		m_source.Stop();
+		m_source.PlayDelayed(time);
 	}
 
 	/// Fades in the sound from zero, call directly after playing the sound to fade it in. eg `Audio.Play("FireCrackling").FadeIn(1);`
@@ -1672,5 +1712,12 @@ public class AudioHandle
 	string m_cueName = null;
 }
 #endregion
+
+
+// Attribute used to mark string fields that should be added to the text system to support localization. Eg: [QuestLocalize, SerializeField] string m_description;
+public class QuestAudioCueName : PropertyAttribute
+{
+	public QuestAudioCueName(){}
+}
 
 }

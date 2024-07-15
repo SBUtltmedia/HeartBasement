@@ -103,8 +103,8 @@ public class SystemTextEditor : Editor
 		.sceneheader  { font-weight: bold; text-transform:uppercase; }
 		.action { padding-right: 5%; }
 		.character {  margin-left: 40%; text-transform:uppercase;  }
-		.dialogue { margin-left: 25%; min-width: 320px; padding-right: 25%; }
-		.parenthetical { margin-left: 32%; padding-right: 30%; }
+		.dialogue { margin-left: 25%; min-width: 320px; padding-right: 5%; }
+		.parenthetical { margin-left: 32%; padding-right: 10%; }
 		/* special case: dialogue followed by a parenthetical; the extra line needs to be suppressed */
 		.dialogue + .parenthetical { padding-bottom: 0; }
 		.dialogue.recorded { color:#aaa; }
@@ -172,6 +172,8 @@ public class SystemTextEditor : Editor
 	[SerializeField] eCsvEncoding m_csvEncoding = eCsvEncoding.Excel;
 
 	string m_currSourceFile = null;
+
+	string m_sectionsOrder = null;
 
 	public override void OnInspectorGUI()
 	{
@@ -296,6 +298,26 @@ public class SystemTextEditor : Editor
 				new GUIContent("Skip Recorded Sections", "If this is enabled, sections where all the lines have been recorded will be omitted (recorded lines will not have their character names highlighted, if Highlight Character has been enabled), all lines except those that need to be recorded by the VA are greyed out"),
 				m_skipFullyRecordedSections
 			);
+				
+			
+			if ( GUILayout.Button("Get Section Order"))
+			{ 			
+				List<TextData> list = m_component.EditorGetTextDataOrdered();
+				DialogScript dialogScript = GatherDialog(list);				
+				m_sectionsOrder = string.Empty;
+				foreach ( DialogSection section in dialogScript.Sections )
+				{
+					string sectionName = section.Name + ": ";
+					foreach ( DialogSubsection subsection in section.Subsections )
+					{	
+						m_sectionsOrder += sectionName + subsection.Name + '\n';
+					}
+				}
+
+			}
+
+			if ( string.IsNullOrWhiteSpace(m_sectionsOrder) == false  )				
+				m_sectionsOrder = EditorGUILayout.TextArea(m_sectionsOrder);
 		
 			GUILayout.Space(5);
 
@@ -872,7 +894,7 @@ public class SystemTextEditor : Editor
 		}
 	}
 
-	private void GenerateScriptForLanguage(SystemText systemText, string languageCode = null)
+	void GenerateScriptForLanguage(SystemText systemText, string languageCode = null)
 	{
 		// A lang code MUST be always specified or no script will be generated.
 		if (languageCode == null)
@@ -892,55 +914,19 @@ public class SystemTextEditor : Editor
 
 		Dictionary<string, Color> colourCache = new Dictionary<string, Color>();
 
-		System.Text.StringBuilder builder = new System.Text.StringBuilder();
-		List<TextData> list = systemText.EditorGetTextDataOrdered();
+		System.Text.StringBuilder builder = new System.Text.StringBuilder();		
 		builder.Append(SCRIPT_DIALOG_FILE_START);
 		// builder.AppendFormat(SCRIPT_DIALOG_LINE, "fred", "23", "blah di blah di blah blah blah");
 
+		List<TextData> list = systemText.EditorGetTextDataOrdered();
 		DialogScript dialogScript = GatherDialog(list);
 
 		foreach (DialogSection section in dialogScript.Sections)
 		{
-			// If scripts are specified, only export specified scripts
-			if (m_exportScripts != null && m_exportScripts.Length > 0)
-			{
-				bool includeGlobals = System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase("globalscript"));
-				bool includeItems = System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase("items"));
-				bool includeGuis = System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase("guis"));
-				bool includeCharacters = System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase("characters"));
-
-				string scriptName = section.Name;
-				bool found = false;
-				found |= includeGlobals && scriptName.StartsWithIgnoreCase("Global");
-				found |= includeItems && scriptName.StartsWithIgnoreCase("Item");
-				found |= includeGuis && scriptName.StartsWithIgnoreCase("Gui");
-				found |= includeCharacters && scriptName.StartsWithIgnoreCase("Character");
-
-				if (found == false)
-				{
-					// Ignore everything before the space- (eg: "Room- Forest" becomes "Forest");
-					int spaceIndex = scriptName.LastIndexOf(' ');
-					if (spaceIndex >= 0)
-						scriptName = scriptName.Substring(spaceIndex + 1);
-					if (System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase(scriptName)) == false)
-						continue;
-				}
-			}
-
-			if (section.IsEmpty(m_exportCharacters, m_skipFullyRecordedSections))
-			{
-				 continue;
-			}
-
 			builder.AppendFormat(SCRIPT_FILE_LINE, section.Name);
 			
 			foreach (DialogSubsection subsection in section.Subsections)
 			{
-				if (subsection.IsEmpty(m_exportCharacters, m_skipFullyRecordedSections))
-				{
-					continue;
-				}
-
 				builder.AppendFormat(SCRIPT_FUNCTION_LINE, subsection.Name);
 
 				foreach (CharacterBlock block in subsection.CharacterBlocks)
@@ -1042,6 +1028,120 @@ public class SystemTextEditor : Editor
 		{
 			dialog.Sections.Add(section);
 		}
+
+		// Remove sections we don't want to include
+		{
+			List<DialogSection> toRemove = new List<DialogSection>();
+
+			foreach (DialogSection section in dialog.Sections)
+			{
+				// If scripts are specified, only export specified scripts
+				if (m_exportScripts != null && m_exportScripts.Length > 0)
+				{
+					bool includeGlobals = System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase("globalscript"));
+					bool includeItems = System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase("items"));
+					bool includeGuis = System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase("guis"));
+					bool includeCharacters = System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase("characters"));
+
+					string scriptName = section.Name;
+					bool found = false;
+					found |= includeGlobals && scriptName.StartsWithIgnoreCase("Global");
+					found |= includeItems && scriptName.StartsWithIgnoreCase("Item");
+					found |= includeGuis && scriptName.StartsWithIgnoreCase("Gui");
+					found |= includeCharacters && scriptName.StartsWithIgnoreCase("Character");
+
+					if (found == false)
+					{
+						// Ignore everything before the space- (eg: "Room- Forest" becomes "Forest");
+						int spaceIndex = scriptName.LastIndexOf(' ');
+						if (spaceIndex >= 0)
+							scriptName = scriptName.Substring(spaceIndex + 1);
+						if (System.Array.Exists(m_exportScripts, item => item.EqualsIgnoreCase(scriptName)) == false)
+						{ 
+							toRemove.Add(section);
+							continue;
+						}
+					}
+				}
+
+				if (section.IsEmpty(m_exportCharacters, m_skipFullyRecordedSections))
+				{
+					toRemove.Add(section);
+					continue;
+				}
+				
+				for ( int i = section.Subsections.Count-1; i >= 0; --i )
+				{
+					DialogSubsection subsection = section.Subsections[i];
+					if (subsection.IsEmpty(m_exportCharacters, m_skipFullyRecordedSections))
+						section.Subsections.RemoveAt(i);
+				}
+				if ( section.Subsections.Count <= 0 )
+				{ 
+					toRemove.Add(section);
+					continue;
+				}
+			}
+
+			foreach (DialogSection section in toRemove)
+			{ 
+				dialog.Sections.Remove(section);
+			}
+		}
+
+		// Order sections based on names in m_sectionsOrder		
+		string[] sectionNamesOrdered = {string.Empty};
+		if ( m_sectionsOrder != null )
+			sectionNamesOrdered = m_sectionsOrder.Split(new char[]{'\n','\r'});
+		
+		DialogSection currSection = null;
+
+		List<DialogSection> orderedSections = new List<DialogSection>();
+
+		foreach ( string orderName in sectionNamesOrdered )
+		{	
+			int splitId = orderName.IndexOf(':');
+			if ( splitId <= 0)
+				continue;
+			string sectionName = orderName.Substring(0,splitId);
+			string subsectionName = orderName.Substring(splitId+2); // skip colon and space ": "
+
+			if ( currSection == null || sectionName.EqualsIgnoreCase(currSection.Name) == false )
+			{ 
+				// new Section
+				currSection = new DialogSection(sectionName);
+				orderedSections.Add(currSection);
+			}
+
+			// find and add subsection- removing it from old section. If old
+			DialogSection oldSection = dialog.Sections.Find(item=>item.Name.EqualsIgnoreCase(sectionName));
+			if (oldSection != null )
+			{
+				DialogSubsection subsection = oldSection.Subsections.Find(item=>item.Name.EqualsIgnoreCase(subsectionName));
+				if ( subsection != null )
+				{ 
+					oldSection.Subsections.Remove(subsection);
+					currSection.Subsections.Add(subsection);
+					if (oldSection.Subsections.Count <= 0)
+						dialog.Sections.Remove(oldSection);
+				}
+			}
+		}
+		// Add ordered sections at start of dialog sections list
+		dialog.Sections.InsertRange(0,orderedSections);
+		/* // sections only way
+		foreach ( string orderName in sectionNamesOrdered )
+		{	
+
+			DialogSection section = dialog.Sections.Find(item=>item.Name.EqualsIgnoreCase(orderName));
+			if (section != null )
+			{ 
+				dialog.Sections.Remove(section);
+				dialog.Sections.Insert(orderId,section);
+				orderId++;
+			}
+		}
+		*/
 		
 		return dialog;
 	}

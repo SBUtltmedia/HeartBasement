@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using System.Collections;
 using UnityEditor;
+using UnityEditor.EditorTools;
 using System.IO;
 using System.Collections.Generic;
 using PowerScript;
@@ -12,6 +13,7 @@ using PowerTools.Quest;
 using PowerTools;
 using UnityEditorInternal;
 using System.Text.RegularExpressions;
+
 
 using UnityEngine.U2D;
 using UnityEditor.U2D;
@@ -54,7 +56,9 @@ public class QuestEditorUtils
 	static readonly string TEMPLATE_COROUTINE = "\n\tIEnumerator #FUNC#(#PARAM#)\n\t{\n\n\t\tyield return E.Break;\n\t}\n";
 	static readonly string TEMPLATE_NEW_FUNCTION = "\n\tpublic #FUNC#\n\t{\n\t}\n";
 	static readonly string TEMPLATE_NEW_COROUTINE = "\n\tpublic #FUNC#\n\t{\n\n\t\tyield return E.Break;\n\t}\n";
-
+	//! Play From Func Selector
+	static readonly string TEMPLATE_PLAY_FROM_FUNCTION = "\n\t[QuestPlayFromFunction]\n\tvoid #FUNC#()\n\t{\n\t}\n";
+	
 	#endregion
 	#region Gui Layout utils
 	
@@ -62,7 +66,7 @@ public class QuestEditorUtils
 	public static float GameResScale => ((PowerQuestEditor.GetPowerQuest() == null) ? 1 : PowerQuestEditor.GetPowerQuest().VerticalResolution*INV180); 
 
 	public static void LayoutQuestObjectContextMenu( eQuestObjectType questObjectType, ReorderableList list, string scriptName,  GameObject prefab, Rect rect, int index,bool onRightClick, System.Action<GenericMenu,GameObject> addItemsCallback=null )
-	{			
+	{
 		if ( onRightClick== false || (Event.current.isMouse && Event.current.button == 1 && rect.Contains(Event.current.mousePosition) ) )
 		{
 			list.index = index;
@@ -80,19 +84,9 @@ public class QuestEditorUtils
 				ScriptableObject.CreateInstance< RenameQuestObjectWindow >().ShowQuestWindow(
 					prefab, questObjectType, scriptName, PowerQuestEditor.OpenPowerQuestEditor().RenameQuestObject );});		
 			menu.AddItem("Delete",  !Application.isPlaying, ()=>list.onRemoveCallback(list));
-			menu.AddSeparator(string.Empty);			
-			menu.AddItem("Add New "+questObjectType,  !Application.isPlaying, ()=>list.onAddCallback(list)	);
+			menu.AddSeparator(string.Empty);
+			menu.AddItem("Add New "+questObjectType,  !Application.isPlaying, ()=>list.onAddCallback(list) );
 			
-			/*
-			if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) )
-			{
-				menu.AddItem(new GUIContent("On Look"), false, ()=>{
-					QuestScriptEditor.Open( PowerQuestEditor.Get.GetSelectedRoom(), QuestScriptEditor.eType.Hotspot,
-							PowerQuest.SCRIPT_FUNCTION_LOOKAT_HOTSPOT+ scriptName,
-							PowerQuestEditor.SCRIPT_PARAMS_LOOKAT_HOTSPOT);});
-			}	
-			*/
-
 			menu.ShowAsContext();			
 			Event.current.Use();	
 		}
@@ -171,63 +165,6 @@ public class QuestEditorUtils
 		return true;
 	}
 	
-	 
-	static bool s_shownPolygonEditor = false;
-
-	// Set col to null to hide again
-	public static void HidePolygonEditor()
-	{
-		if ( Tools.current == Tool.Custom && s_shownPolygonEditor )
-		{
-			UnityEditorInternal.EditMode.ChangeEditMode(UnityEditorInternal.EditMode.SceneViewEditMode.None, new Bounds(), null);						
-			#if UNITY_2019_3_OR_NEWER
-			UnityEditor.EditorTools.ToolManager.SetActiveTool((UnityEditor.EditorTools.EditorTool)null);		
-			#endif
-		}
-	}
-
-
-	public static void ShowPolygonEditor( Collider2D col )
-	{
-		if ( !col )		
-		{
-			HidePolygonEditor();
-			return;
-		}
-		
-		s_shownPolygonEditor = true;
-
-		System.Type colliderEditorBase = System.Type.GetType("UnityEditor.ColliderEditorBase,UnityEditor.dll");
-		Editor[] colliderEditors = Resources.FindObjectsOfTypeAll(colliderEditorBase) as Editor[];
-
-		if (colliderEditors == null || colliderEditors.Length <= 0)
-			return;
-
-		UnityEditorInternal.EditMode.ChangeEditMode(UnityEditorInternal.EditMode.SceneViewEditMode.Collider, col.bounds, colliderEditors[0]);
-		
-				
-		//Debug.Log("EditMode: " + UnityEditorInternal.EditMode.editMode);
-
-		#if UNITY_2019_3_OR_NEWER
-		// Need to test the rest of this in newer unity before committing to changing it
-		try
-		{
-			Selection.activeGameObject = col.gameObject;
-			var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-			foreach (var assembly in assemblies) 
-			{
-				if (assembly.GetType("UnityEditor.PolygonCollider2DTool") != null) 
-				{
-					// This fails when the selection was changed this frame
-					UnityEditor.EditorTools.ToolManager.SetActiveTool(assembly.GetType("UnityEditor.PolygonCollider2DTool"));
-				}
-			}
-		}
-		catch
-		{}
-		#endif
-	}
-
 
 	#endregion
 	#region Functions: Script File IO
@@ -581,7 +518,162 @@ public class QuestEditorUtils
 		return foundLineNum;
 	}
 
+	//! Play From Func Selector
+	// Creates a [QuestPlayFromFunction] function in a script (if it didn't already exist, and returns the line (or -1 if not created). File will NOT be created
+	public static int CreatePlayFromFunction(string path, string functionName)
+	{
+		int foundLineNum = -1;
 
+		//Debug.Log("Prefab Path: "+path);
+		bool foundFile = false;
+
+		try 
+		{		
+			int lineNum = 0;			
+			foreach ( string line in File.ReadAllLines(path) )
+			{
+				if ( line.Contains(functionName+"(") )
+				{
+					foundLineNum = lineNum+2;
+					break;
+				}
+				lineNum++;
+			}
+			foundFile = true;			
+		} 
+		catch 
+		{ 
+		}
+
+		if ( foundFile && foundLineNum == -1 )
+		{
+			// Create the function in the file
+			try 
+			{
+
+				string allText = File.ReadAllText(path);
+				int index = allText.LastIndexOf( '}' );
+				File.WriteAllText(path, allText.Insert(index, TEMPLATE_PLAY_FROM_FUNCTION.Replace("#FUNC#", functionName)));
+
+				// find line we wrote to
+
+				foundLineNum = 0;
+				for ( int i = 0; i < index; ++i )
+				{
+					if ( allText[i] == '\n' )
+						foundLineNum++;
+				}
+
+			}
+			catch (System.Exception ex)
+			{ 
+				Debug.Log("Failed to add function to script: " + ex.ToString() ); 
+			}
+		}
+		return foundLineNum;
+	}
+	
+	//! Play From Func Selector
+	// Erases a [QuestPlayFromFunction] function from a script if it existed, and returns the line (or -1 if not found).
+	public static int EraseFunction(string path, string functionName)
+	{
+		int foundLineNum = -1;
+
+		try
+		{
+			List<string> allLines = new List<string>(File.ReadAllLines(path));
+			for (int i = 0; i < allLines.Count; i++)
+			{
+				// First quick check that line contains function name, then more expensive regex to confirm
+				if ( allLines[i].Contains(functionName) && Regex.IsMatch(allLines[i], @"^\s*(public\s+)?([\w\d])+\s+"+functionName+@"\(") )
+				{
+					foundLineNum = i;					
+					// Remove the function and along with its body
+					int braceCount = 0;
+					for (int j = i; j < allLines.Count; j++)
+					{
+						braceCount += CountOccurrences(allLines[j], '{') - CountOccurrences(allLines[j], '}');
+						if (j - i >= 2 && braceCount <= 0)
+						{
+							allLines.RemoveRange(i, j - i + 1);
+							break;
+						}
+					}
+					
+					// Remove empty line before
+					if ( i > 1 &&  Regex.IsMatch(allLines[i - 1], @"^\s*$") )
+						allLines.RemoveRange(i - 1, 1);
+
+					File.WriteAllLines(path, allLines.ToArray());
+					break;
+				}
+			}
+		}
+		catch (System.Exception ex)
+		{
+			Debug.Log("Failed to erase function from script: " + ex.ToString());
+			foundLineNum = -1;
+		}
+
+		return foundLineNum;
+	}
+	
+	//! Play From Func Selector
+	// Erases a [QuestPlayFromFunction] function from a script if it existed, and returns the line (or -1 if not found).
+	public static int ErasePlayFromFunction(string path, string functionName)
+	{
+		int foundLineNum = -1;
+
+		try
+		{
+			List<string> allLines = new List<string>(File.ReadAllLines(path));
+			for (int i = 0; i < allLines.Count; i++)
+			{
+				if (allLines[i].Contains("[QuestPlayFromFunction]") && allLines[i + 1].Contains("void " + functionName + "()"))
+				{
+					foundLineNum = i;
+					
+					// Remove the function and the [QuestPlayFromFunction] attribute along with its body
+					int braceCount = 0;
+					for (int j = i; j < allLines.Count; j++)
+					{
+						braceCount += CountOccurrences(allLines[j], '{') - CountOccurrences(allLines[j], '}');
+						if (j - i >= 2 && braceCount <= 0)
+						{
+							allLines.RemoveRange(i, j - i + 1);
+							break;
+						}
+					}
+					
+					// Remove empty line before
+					if (allLines[i - 1] == "")
+						allLines.RemoveRange(i - 1, 1);
+
+					File.WriteAllLines(path, allLines.ToArray());
+					break;
+				}
+			}
+		}
+		catch (System.Exception ex)
+		{
+			Debug.Log("Failed to erase function from script: " + ex.ToString());
+		}
+
+		return foundLineNum;
+	}
+
+	//! Play From Func Selector
+	// Count occurrences of a character in a string (to avoid importing Linq)
+	private static int CountOccurrences(string text, char target)
+	{
+		int count = 0;
+		foreach (char c in text)
+		{
+			if (c == target)
+				count++;
+		}
+		return count;
+	}
 
 	// Creates a function in a script (if it didn't already exist, and returns the line (or -1 if not created). File will NOT be created
 	public static int CreateScriptFunction(string path, string functionName, string parameters="", bool isCoroutine = true )
@@ -713,16 +805,28 @@ public class QuestEditorUtils
 		}
 		return false;
 	}	
-
-	public static GUIStyle GetMiniButtonStyle(int index, int total)
+	
+	public static class EditorStylesBold
 	{
+		public static GUIStyle miniButton = new GUIStyle(EditorStyles.miniButton){fontStyle=FontStyle.Bold}; 
+		public static GUIStyle miniButtonLeft = new GUIStyle(EditorStyles.miniButtonLeft){fontStyle=FontStyle.Bold};
+		public static GUIStyle miniButtonRight = new GUIStyle(EditorStyles.miniButtonRight){fontStyle=FontStyle.Bold};
+		public static GUIStyle miniButtonMid = new GUIStyle(EditorStyles.miniButtonMid){fontStyle=FontStyle.Bold};
+		public static GUIStyle toolbarButton = new GUIStyle(EditorStyles.toolbarButton){fontStyle=FontStyle.Bold};
+		public static GUIStyle button = new GUIStyle(GUI.skin.button){fontStyle=FontStyle.Bold};
+		public static GUIStyle Button(bool bold) { return bold ? button: GUI.skin.button; }
+	}
+	
+	public static GUIStyle GetMiniButtonStyle(int index, int total, bool bold = false)
+	{		
 		if ( total <= 1 )
-			return EditorStyles.miniButton;
+			return bold ? EditorStylesBold.miniButton : EditorStyles.miniButton;
 		if ( index <= 0 )
-			return EditorStyles.miniButtonLeft;
+			return bold ? EditorStylesBold.miniButtonLeft : EditorStyles.miniButtonLeft;
 		if ( index >= total-1 )
-			return EditorStyles.miniButtonRight;
-		return EditorStyles.miniButtonMid;
+			return bold ? EditorStylesBold.miniButtonRight : EditorStyles.miniButtonRight;
+		return bold ? EditorStylesBold.miniButtonMid : EditorStyles.miniButtonMid;
+
 	}
 
 	public static string GetFullPath(GameObject prefabObject, string fileName )
@@ -925,6 +1029,8 @@ public partial class QuestClickableEditorUtils
 		GUIStyle textStyle = new GUIStyle(EditorStyles.boldLabel);
 		
 		float scale = QuestEditorUtils.GameResScale;
+		
+		QuestPolyTool.DrawCollider(component.gameObject);
 		
 		Transform transform = component.transform;
 		if ( OnSceneGUIBaseline(component, clickable, fixedBaseline? Vector3.zero : transform.position) )

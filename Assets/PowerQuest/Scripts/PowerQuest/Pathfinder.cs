@@ -354,11 +354,23 @@ public class Pathfinder
 		AddPathPolyNodes(pathPoly);
 
 		m_pathPolys.Add(pathPoly);
+
+		// Add other paths in the collider as obstacles
+		if ( isMain )
+		{	
+			for ( int i = 1; i < collider.pathCount; ++i )
+			{ 
+				Vector2[] path = collider.GetPath(i);
+				if ( CheckWindingClockwise(path) )
+					AddPolygon(transform,false,path);
+			}
+		}
+
 		return pathPoly;	
 	}
 
 	// Returns true if the polygon is clockwise, otherwise false.
-	bool CheckWindingClockwise(Vector2[] verts) 
+	public static bool CheckWindingClockwise(Vector2[] verts) 
 	{
 		// From https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
 		float signedArea = 0;

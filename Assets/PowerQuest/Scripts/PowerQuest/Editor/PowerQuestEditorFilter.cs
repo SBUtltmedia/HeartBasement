@@ -355,6 +355,8 @@ public partial class PowerQuestEditor
 			Func<List<T>, ReorderableList, bool> onRemoveCallback
 		) where T : MonoBehaviour 
 	{
+
+		
 		filterCtx.SearchString=m_searchString;
 		
 		ApplyFilter(allPrefabs, listPrefabs, filterCtx);
@@ -628,7 +630,7 @@ public partial class PowerQuestEditor
 	/// <param name="onRemoveCallback"><para>The callback to be triggered when we have to clean up a prefab.</para><para>The first input is the complete list of prefabs of that type on the global PowerQuest object that will need to be cleaned up, if it doesn't match the <see cref="ReorderableList.list"/> on the <see cref="ReorderableList"/>s</para></param>
 	/// <typeparam name="T">The type of the PowerQuest Object (<see cref="RoomComponent"/>, <see cref="CharacterComponent"/>, <see cref="InventoryComponent"/>, etc...)</typeparam>
 	/// <returns>The top level <see cref="ReorderableList"/> of groups</returns>
-	private ReorderableList CreateReorderableListWithSubfolderGroups<T>(
+	ReorderableList CreateReorderableListWithSubfolderGroups<T>(
 		bool isFullList,
 		List<T> allPrefabs,
 		List<T> listedPrefabs,
@@ -661,7 +663,7 @@ public partial class PowerQuestEditor
 		);
 		
 		list.onReorderCallback = reorderedList => ReorderCompletePrefabList<T>(allPrefabs, groups);
-		
+				
 		// Go through and build the lists for the sub groups:
 		foreach (PrefabGroupListItem<T> groupData in groups)
 		{
@@ -681,6 +683,10 @@ public partial class PowerQuestEditor
 				onReorderCallback = reorderedList => ReorderCompletePrefabList(allPrefabs, groups)
 			};
 
+			// Set the main  list's callbacks for context menues...
+			//list.onAddCallback = groupList.onAddCallback;
+			//list.onRemoveCallback = groupList.onRemoveCallback;
+
 			if (groupData.Grouped)
 			{
 				groupLists.GroupedCollection.Add(groupData.GroupName, groupList);
@@ -692,6 +698,41 @@ public partial class PowerQuestEditor
 		}
 
 		return list;
+	}
+	
+
+	ReorderableList FindReorderableList(RoomComponent itemComponent)
+	{
+		foreach ( ReorderableList list in m_listRoomGroups.GroupedCollection.Values )
+		{ 
+			if ( list.list.Contains(itemComponent) )
+				return list;
+		}
+		if ( m_listRoomGroups.UngroupedList != null )
+			return m_listRoomGroups.UngroupedList;
+		return m_listRooms;
+	}
+
+	// Finds the reorderable list that a component is in- used for adding/deleting from context menu. This system is sooo spaghetti now eeeep.
+	ReorderableList FindReorderableList<T>(T itemComponent) where T : MonoBehaviour
+	{ 		
+		GroupedPrefabContext groupedPrefabContext; 
+		if ( itemComponent is RoomComponent )
+			groupedPrefabContext = m_listRoomGroups;
+		else if ( itemComponent is CharacterComponent )
+			groupedPrefabContext = m_listCharacterGroups;
+		else if ( itemComponent is InventoryComponent )
+			groupedPrefabContext = m_listInventoryGroups;
+		else if ( itemComponent is DialogTreeComponent )
+			groupedPrefabContext = m_listDialogTreeGroups;
+		else //if ( itemComponent is GuiComponent )
+			groupedPrefabContext = m_listGuiGroups;
+		foreach ( ReorderableList list in groupedPrefabContext.GroupedCollection.Values )
+		{ 
+			if ( list.list.Contains(itemComponent) )
+				return list;
+		}
+		return groupedPrefabContext.UngroupedList;
 	}
 
 	/// <summary>

@@ -97,6 +97,9 @@ public partial class SpriteAnim : SpriteAnimEventHandler
 	#endregion
 	#region Funcs: Public 
 
+	AnimationClip m_preAwakeClip = null;
+	float m_preAwakeSpeed = 1;
+
 	/// Plays the specified clip
 	public void Play( AnimationClip anim, float speed = 1 ) 
 	{
@@ -105,8 +108,11 @@ public partial class SpriteAnim : SpriteAnimEventHandler
 	
 		if ( m_controller == null )
 		{
-			Debug.LogWarning("Attempted to play animation before object was Awake: " + anim.name);
-			Awake();
+			//Debug.LogWarning("Attempted to play animation before object was Awake: " + anim.name);
+			m_preAwakeClip=anim;
+			m_preAwakeSpeed = speed;
+			//Awake();
+			return;
 		}
 
 		ExPlayStart(anim, speed);
@@ -142,6 +148,8 @@ public partial class SpriteAnim : SpriteAnimEventHandler
 	/// Stops the clip by disabling the animator
 	public void Stop()
 	{		
+		m_preAwakeClip = null;
+
 		if ( m_animator != null )
 			m_animator.enabled = false;
 
@@ -276,7 +284,14 @@ public partial class SpriteAnim : SpriteAnimEventHandler
 
 		ExAwake();
 
-		Play(m_defaultAnim);
+		if ( m_preAwakeClip != null )
+		{ 
+			Play(m_preAwakeClip, m_preAwakeSpeed );
+			m_preAwakeClip=null;
+			m_preAwakeSpeed=1;
+		}
+		else
+			Play(m_defaultAnim);
 
 	}
 

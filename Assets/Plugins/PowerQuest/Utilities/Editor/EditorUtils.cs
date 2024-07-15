@@ -774,6 +774,20 @@ public class EditorLayouter
 		m_items.Add(new LayoutItem(){type=eType.Variable,size=ratio});
 		return this;
 	}
+	
+	// Adds an item that stretches to fit a gui label with passed in text (or minWidth, whichever is larger)
+	public EditorLayouter Label(string text, float minWidth = 0) 
+	{	
+		if ( string.IsNullOrEmpty(text) )
+		{ 
+			m_items.Add(new LayoutItem(){type=eType.Fixed,size=2});
+			return this;
+		}
+		float min,max;
+		EditorStyles.label.CalcMinMaxWidth(new GUIContent(text),out min, out max);
+		m_items.Add(new LayoutItem(){type=eType.Fixed,size=Mathf.Max(minWidth, max)});
+		return this;
+	}
 
 
 	Rect NextRect()

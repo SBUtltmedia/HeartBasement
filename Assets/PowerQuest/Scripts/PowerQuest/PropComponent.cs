@@ -14,7 +14,7 @@ namespace PowerTools.Quest
 #region Component
 
 
-public partial class PropComponent : MonoBehaviour 
+public partial class PropComponent : MonoBehaviour
 {
 	#endregion
 	#region Component: Variables
@@ -32,9 +32,7 @@ public partial class PropComponent : MonoBehaviour
 
 	SpriteRenderer m_sprite = null; 
 	SpriteAnim m_spriteAnimator = null;
-	#if ( UNITY_SWITCH == false )
 	VideoPlayer m_video = null;
-	#endif
 
 	bool m_moving = false;
 
@@ -112,9 +110,7 @@ public partial class PropComponent : MonoBehaviour
 			PlayAnimInternal(GetData().Animation, true);	
 	}
 
-	#if ( UNITY_SWITCH == false )
 	public VideoPlayer GetVideoPlayer() { return m_video; }
-	#endif
 
 	public bool Moving => m_moving;
 
@@ -137,14 +133,14 @@ public partial class PropComponent : MonoBehaviour
 		m_renderers = GetComponentsInChildren<Renderer>(true);		
 		m_sprite = GetComponentInChildren<SpriteRenderer>(true);
 		m_particle = GetComponentInChildren<ParticleSystem>();
-		m_hasCollider = GetComponentInChildren<Collider2D>(true) != null;
+		m_hasCollider = GetComponent<Collider2D>() != null;
 
 		if ( m_sprite != null )
 			m_spriteAnimator = m_sprite.GetComponent<SpriteAnim>();
 					
-		#if ( UNITY_SWITCH == false )
+		//#if ( UNITY_SWITCH == false )
 		m_video = GetComponentInChildren<VideoPlayer>(true);
-		#endif
+		//#endif
 	}
 
 	public SpriteRenderer[] Sprites => m_sprites;
@@ -153,11 +149,8 @@ public partial class PropComponent : MonoBehaviour
 
 	void Start()
 	{
-
-		#if ( UNITY_SWITCH == false )
 		if ( m_video )
 			m_video.Prepare();
-		#endif
 
 		OnAnimationChanged();
 		OnSetVisible();
@@ -243,7 +236,7 @@ public partial class PropComponent : MonoBehaviour
 	public void OnLoadComplete()
 	{
 		// Check if it has a collider, and if not, ensure it's non-clickable
-		m_hasCollider = GetComponentInChildren<Collider2D>(true) != null;
+		m_hasCollider = GetComponent<Collider2D>() != null;
 		if ( m_data != null && m_hasCollider == false && m_data.Clickable )
  			m_data.Clickable=false; // Props shouldn't be clickable if have no collider
 
@@ -447,7 +440,7 @@ public partial class PropComponent : MonoBehaviour
 // Prop Data and functions. Persistant between scenes, as opposed to PropComponent which lives on a GameObject in a scene.
 //
 [System.Serializable] 
-public partial class Prop : IQuestClickable, IProp, IQuestScriptable
+public partial class Prop : IQuestClickable, IProp, IQuestScriptable, IQuestSaveCachable
 {
 
 	#endregion
@@ -483,7 +476,7 @@ public partial class Prop : IQuestClickable, IProp, IQuestScriptable
 	PropComponent m_instance = null;
 	int m_useCount = 0;
 	int m_lookCount = 0;
-	
+		
 
 	#endregion
 	#region Prop: Properties
@@ -652,14 +645,13 @@ public partial class Prop : IQuestClickable, IProp, IQuestScriptable
 		return PowerQuest.Get.StartQuestCoroutine(m_instance.CoroutineMoveTo(toPos,speed, curve)); 
 	}
 	public void MoveToBG(Vector2 toPos, float speed, eEaseCurve curve = eEaseCurve.None) { MoveTo(toPos,speed,curve); }
-
-	#if ( UNITY_SWITCH == false )
-
+	
 	/// Starts video playback if the prop has a video component. Returns once the video has completed, or on mouse click if skippableAfterTime is greater than zero
 	/// NB: Video playback position isn't currently saved
 	public Coroutine PlayVideo(float skippableAfterTime = -1)
-	{
+	{	
 		if ( m_instance != null ) return PowerQuest.Get.StartCoroutine(CoroutinePlayVideo(skippableAfterTime)); 
+		
 		return null;
 	}
 
@@ -685,7 +677,7 @@ public partial class Prop : IQuestClickable, IProp, IQuestScriptable
 			return m_instance.GetVideoPlayer();
 		} 
 	}
-	#endif
+	//#endif
 
 	public void EditorInitialise( string name )
 	{
@@ -744,7 +736,6 @@ public partial class Prop : IQuestClickable, IProp, IQuestScriptable
 	}
 
 
-	#if ( UNITY_SWITCH == false )
 	IEnumerator CoroutinePlayVideo(float skippableAfterTime = -1) 
 	{
 		if ( PowerQuest.Get.GetSkippingCutscene() )
@@ -769,7 +760,6 @@ public partial class Prop : IQuestClickable, IProp, IQuestScriptable
 			video.enabled = false;
 		yield break;
 	}
-	#endif
 	
 
 	IEnumerator CoroutineFade(float start, float end, float duration, eEaseCurve curve = eEaseCurve.Smooth )
@@ -818,6 +808,22 @@ public partial class Prop : IQuestClickable, IProp, IQuestScriptable
 	{
 		QuestUtils.InitWithDefaults(this);
 	}
+	
+	#endregion
+	#region Functions: Implementing IQuestSaveCachable
+	
+	//
+	// Implementing IQuestSaveCachable
+	//	
+	bool m_saveDirtyEver = false;
+	public bool SaveDirty { get=>m_saveDirtyEver; set { 
+		if (value) 
+		{
+			//if ( m_saveDirtyEver == false ) Debug.Log($"Prop {ScriptName} set dirty");
+			m_saveDirtyEver=true; 
+		} } }
+	public bool SaveDirtyEver => m_saveDirtyEver;
+	
 }
 
 #endregion

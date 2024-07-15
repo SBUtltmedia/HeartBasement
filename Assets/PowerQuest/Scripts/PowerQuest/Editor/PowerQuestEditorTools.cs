@@ -24,6 +24,7 @@ public partial class PowerQuestEditor
 
 	[SerializeField] bool m_showPowerQuestEdit = false;
 	[SerializeField] bool m_showTextManagerEdit = false;
+	[SerializeField] bool m_showParserEdit = false;
 	[SerializeField] bool m_showSystemAudioEdit = false;
 	[SerializeField] bool m_showQuestCursorEdit = false;
 	[SerializeField] bool m_showQuestCameraEdit = false;
@@ -50,8 +51,8 @@ public partial class PowerQuestEditor
 	#endregion
 	#region GUI Layout: Tools
 
-	[SerializeField]
-	Editor m_textManagerEditor = null;
+	[SerializeField] Editor m_textManagerEditor = null;
+	[SerializeField] Editor m_parserEditor = null;
 
 	void GuiLine( int i_height = 1 )
 	{
@@ -86,6 +87,33 @@ public partial class PowerQuestEditor
 		}
 		GuiLine();
 		GUILayout.Space(5);
+		
+		//
+		// Parser
+		//
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Parser) && m_systemParser != null )
+		{ 
+			GUILayout.BeginHorizontal();
+			m_showParserEdit = EditorGUILayout.Foldout(m_showParserEdit,"Parser", true, m_showParserEdit ? new GUIStyle(EditorStyles.foldout) { fontStyle = FontStyle.Bold } : EditorStyles.foldout );
+			if ( GUILayout.Button( "Select Prefab", EditorStyles.miniButton, GUILayout.MaxWidth(90) ) ) { Selection.activeObject = m_systemParser.gameObject; }
+			GUILayout.EndHorizontal();
+		
+			if ( m_showParserEdit && m_systemText != null ) 
+			{			
+				GUILayout.Space(5);	
+				if ( m_parserEditor == null )
+					m_parserEditor = Editor.CreateEditor(m_systemParser);
+				if ( m_parserEditor != null && m_parserEditor.target != null )
+				{
+					m_parserEditor.OnInspectorGUI();
+					GUILayout.Space(15);
+				}
+
+			}			
+
+			GuiLine();
+			GUILayout.Space(5);		
+		}
 
 		//
 		// Text manager object

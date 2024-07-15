@@ -19,19 +19,41 @@ public partial class PowerQuestEditor
 {
 	#region Variables: Static definitions
 
-	static readonly string[] GAME_TEMPLATE_NAMES = {"Default","9-Verb", "HD"};		
+	enum eGameTemplate {Default, NineVerb, HD, Parser};
+
+	static readonly string[] GAME_TEMPLATE_NAMES = {"Default","9-Verb", "HD", "Text Parser"};
 	static readonly string[] GAME_TEMPLATE_PATHS = 
 	{
 		"Assets/PowerQuest/Templates/DefaultGameTemplate.unitypackage",
 		"Assets/PowerQuest/Templates/9VerbGameTemplate.unitypackage",
 		"Assets/PowerQuest/Templates/HdGameTemplate.unitypackage",
+		"Assets/PowerQuest/Templates/ParserGameTemplate.unitypackage",
 	};
 	static readonly string[] GAME_TEMPLATE_DESCRIPTIONS = 
 	{
 		"The Default Template is a modern 1 or 2 click interface, with drop-down inventory (Similar to most Wadjet Eye games, or Beneath a Steel Sky).",
 		"The 9-Verb interface is the classic Lucasarts style. It's clunky by modern standards, but fun for that retro style. Just be prepared to write lots of responses for interactions! \n\nIt's a bit more complicated than the default, so read \"Assets\\Game\\9-Verb-ReadMe.txt\" to get started.",
-		"A High Def (1080p) version of the default template. Good starting place for non-pixel art games."
+		"A High Def (1080p) version of the default template. Good starting place for non-pixel art games.",
+		"A Text Parser interface similar to early Sierra games. Type commands to perform actions! \n\nYou can optionally also left click to walk, and right click to look-at."
 	};
+	
+	// Function to export the powerQuest package automatically
+	public static void ExportTemplatePackage()
+	{		
+		AssetDatabase.ExportPackage( new string[] {@"Assets\Audio", @"Assets\Fonts", @"Assets\Game"}, @"Assets\PowerQuest\Templates\DefaultGameTemplate.unitypackage", ExportPackageOptions.Recurse);
+	}
+	public static void ExportTemplatePackage9Verb()
+	{		
+		AssetDatabase.ExportPackage( new string[] {@"Assets\Audio", @"Assets\Fonts", @"Assets\Game"}, @"Assets\PowerQuest\Templates\9VerbGameTemplate.unitypackage", ExportPackageOptions.Recurse);
+	}
+	public static void ExportTemplatePackageHD()
+	{		
+		AssetDatabase.ExportPackage( new string[] {@"Assets\Audio", @"Assets\Fonts", @"Assets\Game"}, @"Assets\PowerQuest\Templates\HdGameTemplate.unitypackage", ExportPackageOptions.Recurse);
+	}
+	public static void ExportTemplatePackageParser()
+	{		
+		AssetDatabase.ExportPackage( new string[] {@"Assets\Audio", @"Assets\Fonts", @"Assets\Game"}, @"Assets\PowerQuest\Templates\ParserGameTemplate.unitypackage", ExportPackageOptions.Recurse);
+	}
 
 	#endregion
 	#region Variables: Serialized
@@ -41,7 +63,6 @@ public partial class PowerQuestEditor
 	#endregion
 	#region Gui Layout: Initial Setup Required
 
-	enum eGameTemplate {Default, NineVerb};
 	eGameTemplate m_gameTemplate = eGameTemplate.Default;
 
 	void OnGuiInitialSetup()
@@ -91,9 +112,16 @@ public partial class PowerQuestEditor
 			string systemPath = Path.GetDirectoryName(m_powerQuestPath)+"/SystemText.prefab";
 			GameObject obj = AssetDatabase.LoadAssetAtPath(systemPath, typeof(GameObject)) as GameObject;
 			if ( obj != null )
-			{
 				m_systemText = obj.GetComponent<SystemText>();
-			}
+		}
+		
+		// Find parser in same folder as PowerQuest
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Parser) && m_systemParser == null)
+		{
+			string systemPath = Path.GetDirectoryName(m_powerQuestPath)+"/SystemParser.prefab";
+			GameObject obj = AssetDatabase.LoadAssetAtPath(systemPath, typeof(GameObject)) as GameObject;
+			if ( obj != null )
+				m_systemParser = obj.GetComponent<SystemParser>();
 		}
 
 		// Find systemAudio in same folder as PowerQuest
@@ -102,9 +130,7 @@ public partial class PowerQuestEditor
 			string systemPath = Path.GetDirectoryName(m_systemAudioPath)+"/SystemAudio.prefab";
 			GameObject obj = AssetDatabase.LoadAssetAtPath(systemPath, typeof(GameObject)) as GameObject;
 			if ( obj != null )
-			{
 				m_systemAudio = obj.GetComponent<SystemAudio>();
-			}
 		}
 	}
 
@@ -188,7 +214,7 @@ public partial class PowerQuestEditor
 			// Version 0.4.3 changed what GlobalScript inherits from (slightly)
 			if ( oldVersion < Version(0,4,3) )
 			{
-				// Need to update GlobalScript to inherit from GlobalScript	
+				// Need to update GlobalScript to inherit from GlobalScriptBase
 
 				string globalSource = File.ReadAllText(	PowerQuestEditor.PATH_GLOBAL_SCRIPT );
 				globalSource = Regex.Replace(globalSource, "class GlobalScript.*","class GlobalScript : GlobalScriptBase<GlobalScript>", RegexOptions.Multiline);
@@ -439,6 +465,16 @@ public partial class PowerQuestEditor
 				// Scale vertical resolution to horizontal resolutions supported. (Now regretting setting it as a width instead of aspect dropdown lol)
 				m_powerQuest.EditorSetHorizontalResolution(new MinMaxRange((16f/9f)*m_powerQuest.DefaultVerticalResolution) );
 				EditorUtility.SetDirty(m_powerQuest);
+			}
+
+			
+			if ( oldVersion < Version(0,18,6) )
+			{
+				// Replace GetInventoryItems with _SaveFlagNotDirtied version in GlobalScript
+				string globalSource = File.ReadAllText(	PowerQuestEditor.PATH_GLOBAL_SCRIPT );
+				globalSource = Regex.Replace(globalSource, @"GetInventoryItems\(","GetInventoryItems_SaveFlagNotDirtied(", RegexOptions.Multiline);
+				File.WriteAllText( PowerQuestEditor.PATH_GLOBAL_SCRIPT, globalSource );
+				AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
 			}
 
 			// Remove PowerQuestObsolete after upgrading for all future versions

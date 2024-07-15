@@ -11,7 +11,7 @@ public class QuestEditorSettings : ScriptableObject
 {
 	public const string SETTINGS_PATH = "Assets/Game/PowerQuestEditorSettings.asset";
 
-	[SerializeField] internal bool m_smartCompile = true;
+	[SerializeField] internal bool m_smartCompile = true;	
 	
 	#if UNITY_EDITOR_WIN
 	[SerializeField] internal string m_scriptEditorFont = "Consolas";
@@ -28,7 +28,7 @@ public class QuestEditorSettings : ScriptableObject
 
 	[Tooltip(@"Regex for functions that should have 'yield return' hidden in script editor. Eg: 'E\.MyBlockingFunc\(', or 'C\.\w+\.MyBlockingFunc\('")]
 	public string[] m_yieldRegexes = new string[]{};
-	[NonReorderable]
+	[NonReorderable] // if reorderable can't fold  out internals :/
 	public QuestScriptEditor.FindReplaceRegexData[] m_scriptReplaceRegexes = new QuestScriptEditor.FindReplaceRegexData[]{};
 	[Tooltip(@"Regex for words that should auto-complete, and be colored in editor. Eg: `MyCoolFunction`")]
 	public string[] m_autoCompleteRegexes = new string[]{};
@@ -40,9 +40,10 @@ public class QuestEditorSettings : ScriptableObject
 
 	public bool m_regexFoldOut = false;
 	public string m_regexError = null;
-
-
-
+		
+	public Color m_scriptBtnUsedCol = Color.white;
+	public Color m_scriptBtnUnusedCol = new Color(0.8f, 0.8f, 0.8f);
+	
 	///////////////////////////////////////////////////////////////
 	// Setup and access functions
 
@@ -86,7 +87,16 @@ public class QuestEditorSettingsEditor : Editor
 		SerializedObject serializedObj = new SerializedObject(editorSettings);
 
 		GUILayout.Space(5);
-
+		
+		EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.LabelField("Script Button Color Used/Unused");
+		EditorGUILayout.PropertyField(serializedObj.FindProperty("m_scriptBtnUsedCol"),new GUIContent(""));
+		EditorGUILayout.PropertyField(serializedObj.FindProperty("m_scriptBtnUnusedCol"),new GUIContent(""));
+		EditorGUILayout.EndHorizontal();
+		if ( serializedObj.ApplyModifiedProperties() )
+				PowerQuestEditor.OnUpdateScriptColors?.Invoke();
+		
+		GUILayout.Space(5);
 		GUILayout.Label("Script Editor Style", EditorStyles.boldLabel);
 
 		QuestScriptEditor.Colors.eTheme oldTheme = editorSettings.m_scriptEditorTheme;			

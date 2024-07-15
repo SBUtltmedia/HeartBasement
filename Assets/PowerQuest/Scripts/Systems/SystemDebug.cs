@@ -38,10 +38,29 @@ public class SystemDebug : SingletonAuto<SystemDebug>
 	}
 	class DebugText: DebugElement
 	{
+		public Vector2 m_pos = Vector2.zero;	
 		public string text = string.Empty;
 
 		public override void Draw()
 		{	
+			/*
+			#if UNITY_EDITOR
+			UnityEditor.Handles.BeginGUI();
+			Color oldCol = GUI.color;
+			GUI.color = m_color;
+			var view = UnityEditor.SceneView.currentDrawingSceneView;
+			Vector3 screenPos = view.camera.WorldToScreenPoint(m_pos);
+			GUIStyle style = new GUIStyle(GUI.skin.label);
+			style.fontStyle = FontStyle.Bold;
+			Vector2 size = GUI.skin.label.CalcSize(new GUIContent(text));
+			GUI.Label(new Rect(screenPos.x, view.position.height-screenPos.y - size.y-8, size.x*2, size.y), text,style);
+			UnityEditor.Handles.EndGUI();
+			GUI.color = oldCol;
+			#endif
+			*/
+			//Gizmos.color=m_color;
+			//GizmosEx.DrawText(text, m_pos);
+
 		}
 	}
 
@@ -80,7 +99,11 @@ public class SystemDebug : SingletonAuto<SystemDebug>
 			}
 		}		
 	}
-
+	
+	public void DrawText(Vector2 pos, string text, Color color, float time = 0 ) 
+	{
+		m_elements.Add(new DebugText(){m_color=color, m_time=time, m_pos=pos} );	
+	}
 	public void DrawLine(Vector2 start, Vector2 end, Color color, float time = 0 ) 
 	{
 		m_elements.Add(new DebugLine(){m_color=color, m_time=time, m_start=start,m_end=end} );	

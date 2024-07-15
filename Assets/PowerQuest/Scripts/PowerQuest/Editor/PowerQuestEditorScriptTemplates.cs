@@ -8,7 +8,24 @@ public partial class PowerQuestEditor
 {
 
 	#region Variables: Static definitions
+	
+	public static readonly string TEMPLATE_GLOBAL_FILE = 	
+@"using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using PowerScript;
+using PowerTools.Quest;
 
+///	Global Script: The home for your game specific logic
+/**		
+ * - The functions in this script are used in every room in your game.
+ * - Add your own variables and functions in here and you can access them with `Globals.` (eg: `Globals.m_myCoolInteger`)
+ * - If you've used Adventure Game Studio, this is equivalent to the Global Script in that
+*/
+public partial class GlobalScript : GlobalScriptBase<GlobalScript>
+{
+
+}";
 
 	public static readonly string TEMPLATE_ROOM_FILE = 	
 @"using UnityEngine;

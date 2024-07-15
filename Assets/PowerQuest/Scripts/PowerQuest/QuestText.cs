@@ -332,11 +332,13 @@ public class QuestText : MonoBehaviour
 
 						if ( m_attachWorldPos != Vector2.zero && PowerQuest.Exists)
 						{
+							/* Disabled: This was stopping text from scrolling correctly when camera pans to talking character / 
 							#if FONT_SNAPPING
 							m_attachOffset = Utils.SnapRound(offset, PowerQuest.Get.SnapAmount);
 							#else
 							m_attachOffset = offset;
 							#endif
+							/**/
 							LateUpdate();
 						}
 						else 
@@ -384,8 +386,8 @@ public class QuestText : MonoBehaviour
 					{
 						GameObject obj = new GameObject(((TextOutline.eDirection)(1<<i)).ToString(), m_mesh.GetType() ) as GameObject;
 						obj.hideFlags = HideFlags.HideAndDontSave;
-						obj.transform.parent = transform;
-						obj.transform.localScale = Vector3.one;
+						obj.transform.SetParent(transform,false);
+						
 						obj.transform.localPosition = SHADOW_OFFSETS[i] * m_outline.m_width;
 						obj.layer = gameObject.layer;
 
@@ -762,14 +764,16 @@ public class QuestText : MonoBehaviour
 			return result;
 
 		string tag = match.Groups[1].Value;
-		// TODO: Append platform tag
+		TextSpriteData data = null;
+		/*  Append platform tag - Now done in PowerQuest /
 		tag += "PS";
 		TextSpriteData data = FindByTag(PowerQuest.Get.m_textSprites, tag);
 		// if not found with platform tag, try without
 		if ( data == null )
+		/**/
 		{
 			tag = match.Groups[1].Value;
-			data = FindByTag(PowerQuest.Get.m_textSprites, tag);
+			data = FindByTag(PowerQuest.Get.TextSprites, tag);
 		}
 
 		if ( data == null || data.m_sprite == null )
@@ -798,7 +802,7 @@ public class QuestText : MonoBehaviour
 			matIndex = renderer.materials.Length;
 			Material[] materials = new Material[matIndex+1];
 			System.Array.Copy(renderer.materials, materials, matIndex);
-			material = Instantiate(PowerQuest.Get.m_textSpriteMaterial);
+			material = Instantiate(PowerQuest.Get.TextSpriteMaterial);
 			material.mainTexture = sprite.texture;
 			materials[matIndex] = material;
 			renderer.materials = materials;

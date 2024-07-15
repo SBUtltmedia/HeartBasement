@@ -398,13 +398,14 @@ public partial class CharacterComponent : MonoBehaviour
 				}
 			}
 
-			if ( m_autoHotspotCollider == null )
+			if ( m_autoHotspotCollider == null && m_sprite != null && m_sprite.sprite != null )
 			{
 				// Add automatic collider
 				m_autoHotspotCollider = gameObject.AddComponent<PolygonCollider2D>();
 				m_autoHotspotCollider.isTrigger = true;
 			}
-			m_autoHotspotCollider.enabled = true;
+			if ( m_autoHotspotCollider != null )
+				m_autoHotspotCollider.enabled = true;
 			
 
 			// disable clickable colliders
@@ -769,7 +770,7 @@ public partial class CharacterComponent : MonoBehaviour
 			if ( m_data.AdjustSpeedWithScaling )
 				speed *= transform.localScale.y; // scale by speed
 			
-			if ( dist > 0 )
+			if ( dist > 0 && m_playWalkAnim )
 				m_data.FaceDirection( direction, true );
 
 			if ( dist == 0 || dist < speed * remainingDeltaTime )
@@ -840,7 +841,7 @@ public partial class CharacterComponent : MonoBehaviour
 
 		if ( m_data != null && (m_flippedLastUpdate != Flipped() || m_lastSprite != m_sprite.sprite) )
 		{
-			transform.position = m_data.Position;
+			transform.position = Utils.SnapRound(m_data.Position,PowerQuest.Get.SnapAmount);
 			m_lastSprite = m_sprite.sprite;
 		}
 		
@@ -1175,7 +1176,7 @@ public partial class CharacterComponent : MonoBehaviour
 		if ( anywhere == false && pathfinder.GetValid() )
 		{
 			// Update which characters collision should be enabled in this pathfinder
-			foreach ( Character character in PowerQuest.Get.GetCharacters() )
+			foreach ( Character character in PowerQuest.Get.GetCharacters_SaveFlagNotDirtied() )
 			{		
 				if ( character.Instance != null )
 				{
@@ -1473,7 +1474,7 @@ public partial class CharacterComponent : MonoBehaviour
 		if ( string.IsNullOrEmpty(GetData().AnimPrefix) == false )
 			animName = GetData().AnimPrefix + animName;
 
-		if ( IsString.Set(m_transitionAnim) && m_transitionAnim.StartsWithIgnoreCase(animName) )
+		if ( IsString.Set(m_transitionAnim) && (m_transitionAnim.StartsWithIgnoreCase(animName)||m_transitionAnim.StartsWithIgnoreCase(animNameNoPrefix)) )
 			return true; // Already playing this transition so don't try and play it again
 
 		if ( m_currTurnAnim != null && animName != m_currTurnAnim && animNameNoPrefix != m_currTurnAnim )
@@ -1576,7 +1577,7 @@ public partial class CharacterComponent : MonoBehaviour
 				else // if ( m_animChangeTime > 0 ) // checking animChangeTime so we don't play "out" transitions for anims we never actually played (for when changing between multiple anims in same frame)
 				{
 					// Transition out from looping anim
-					if (ignoreTransitionLoopTime == false && m_data.LoopEndTime > m_data.LoopStartTime)
+					if (ignoreTransitionLoopTime == false && m_spriteAnimator.NormalizedTime < m_data.LoopEndTime )//&& m_data.LoopEndTime > m_data.LoopStartTime) // Removed to skip to LoopEndTime even if not reached loop tag yet
 						m_spriteAnimator.NormalizedTime = m_data.LoopEndTime;
 
 					m_transitioningFromAnim = currClipName;
@@ -1627,7 +1628,7 @@ public partial class CharacterComponent : MonoBehaviour
 			transform.localScale = new Vector3(-transform.localScale.x,transform.localScale.y,transform.localScale.z);
 
 		if ( clip == null && PowerQuest.Get.IsDebugBuild && animName != "Idle" && animName != "Talk"  && animName != "Walk" && string.IsNullOrEmpty(animName) == false )
-			Debug.Log("Failed to find animation: "+animName, gameObject);
+			Debug.Log($"Failed to find animation: '{animName}' in {gameObject.name}");
 		
 		return clip != null;
 	}
@@ -1926,6 +1927,18 @@ public partial class CharacterComponent : MonoBehaviour
 			return;
 		SystemAudio.Play(sound, transform);	    
 	}
+	
+	void AnimSoundStop(Object obj)
+	{
+		if ( obj == null || (obj as GameObject) == null )
+			return;
+		SystemAudio.Stop((obj as GameObject).name,0.1f);
+	}
+
+	void AnimSoundStop(string sound)
+	{
+		SystemAudio.Stop(sound,0.1f);	
+	}
 
 	void AnimFootstep()
 	{
@@ -2022,22 +2035,7 @@ public partial class CharacterComponent : MonoBehaviour
 	{
 		if ( m_spriteAnimator.ClipName == m_transitionAnim ) // || m_skipTransitionNextFrame ) // maybe want this? would need to test though
 			return; // don't loop when transitioning
-		// Loop start now found when anim is played
-		/*
-		m_data.LoopStartTime = m_spriteAnimator.NormalizedTime+0.001f;
-		m_data.LoopEndTime = m_spriteAnimator.NormalizedTime+0.001f;		
-		foreach( AnimationEvent ev in m_spriteAnimator.Clip.events )
-		{
-			if ( ev.functionName.Contains("Loop") || ev.stringParameter.Contains("Loop") )
-			{
-				float time = (ev.time / m_spriteAnimator.Clip.length)+0.001f;
-				if ( time >= m_data.LoopStartTime )
-				{
-					m_data.LoopEndTime = time;
-					break;
-				}
-			}
-		}*/
+
 		m_spriteAnimator.NormalizedTime=m_data.LoopEndTime;
 		
 		// Pause here

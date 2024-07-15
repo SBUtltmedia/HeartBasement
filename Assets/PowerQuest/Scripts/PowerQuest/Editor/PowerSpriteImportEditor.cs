@@ -294,7 +294,7 @@ public class PowerSpriteImportEditor : Editor
 			return;
 
 		GUILayout.Space(10);
-
+					
 		//
 		// PSD/Asprites source file
 		//
@@ -351,8 +351,20 @@ public class PowerSpriteImportEditor : Editor
 		}
 		EditorGUILayout.EndHorizontal();
 
-
 		EditorGUILayout.Space();
+		
+		// Notes- shown up top if they exist
+		if ( string.IsNullOrEmpty(m_component.m_notes)==false )
+		{ 
+			EditorGUILayout.HelpBox(m_component.m_notes, MessageType.Warning);
+			EditorGUILayout.Space();
+		}
+		else if (m_showSpriteImporterSettings)
+		{
+			// show dummy object so don't lose focus on text box
+			EditorGUILayout.HelpBox("",MessageType.None);
+			EditorGUILayout.Space(0);
+		}
 
 		//
 		// Source Directory/Import
@@ -407,6 +419,10 @@ public class PowerSpriteImportEditor : Editor
 		m_showSpriteImporterSettings = EditorGUILayout.Foldout(m_showSpriteImporterSettings, "Advanced Settings",true);
 		if ( m_showSpriteImporterSettings )
 		{
+			EditorGUILayout.LabelField("Notes:");
+			m_component.m_notes= EditorGUILayout.TextArea(m_component.m_notes);			
+			//EditorGUILayout.Space();
+
 			importTags |= GUILayout.Button( "Import Aseprite Tags" );
 			m_component.m_spriteDirectory = EditorGUILayout.TextField("Sprite Folder", m_component.m_spriteDirectory );
 			m_component.m_createSingleSpriteAnims = EditorGUILayout.Toggle("Create single sprite animations", m_component.m_createSingleSpriteAnims);
@@ -426,9 +442,6 @@ public class PowerSpriteImportEditor : Editor
 
 		GUILayout.Space(20);
 		
-		EditorGUILayout.LabelField("Notes:");
-		m_component.m_notes= EditorGUILayout.TextArea(m_component.m_notes);
-		GUILayout.Space(20);
 
 		if ( string.IsNullOrEmpty( m_console) == false )
 		{					
@@ -555,7 +568,7 @@ public class PowerSpriteImportEditor : Editor
 				createProp = createProp && importerPath == Path.GetDirectoryName(Quest.QuestEditorUtils.GetPrefabPath(Quest.PowerQuestEditor.Get.GetSelectedRoom().gameObject));
 			}
 			// Check prop doesn't already exist
-			createProp &= Quest.PowerQuestEditor.Get.GetSelectedRoom().GetData().GetProps().Exists(prop=>string.Equals(prop.ScriptName, data.m_name, System.StringComparison.OrdinalIgnoreCase) ) == false;
+			createProp &= Quest.PowerQuestEditor.Get.GetSelectedRoom().GetData().GetProps_SaveFlagNotDirtied().Exists(prop=>string.Equals(prop.ScriptName, data.m_name, System.StringComparison.OrdinalIgnoreCase) ) == false;
 
 			if ( createProp )
 			{					

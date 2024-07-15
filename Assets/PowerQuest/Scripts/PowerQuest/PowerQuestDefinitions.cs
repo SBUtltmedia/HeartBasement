@@ -56,7 +56,8 @@ public enum eQuestVerb
 	Walk,
 	Use,
 	Look,
-	Inventory
+	Inventory,
+	Parser
 }
 
 [QuestAutoCompletable]
@@ -149,13 +150,15 @@ public class QuestAction
 	public eQuestVerb m_verb = eQuestVerb.None;
 }
 
+// NB: you can add to these by adding a line liek this at the top of your singleton system 
+//  namespace PowerTools.Quest { public static partial class Systems {	public static SystemMyStuff MyStuff { get{return SystemMyStuff.Get; } } } }
 public static partial class Systems
 {
 	public static PowerQuest Quest { get{return PowerQuest.Get; } }
 	public static SystemAudio Audio { get{return SystemAudio.Get; } }
 	public static SystemTime Time { get{return SystemTime.Get; } }
 	public static SystemDebug Debug { get{return SystemDebug.Get; } }
-	public static SystemText Text { get { return SystemText.Get; } }
+	public static SystemText Text { get { return SystemText.Get; } }	
 
 	/// Returns true when systems have been initialised
 	public static bool Valid { get { return PowerQuest.GetValid() && SystemAudio.GetValid() && SystemTime.GetValid(); } }
@@ -206,6 +209,7 @@ public partial class PowerQuest
 	public static readonly string SCRIPT_FUNCTION_ONKBDEFOCUS = "OnKeyboardDefocus";
 	public static readonly string SCRIPT_FUNCTION_ONTEXTEDIT = "OnTextEdit";
 	public static readonly string SCRIPT_FUNCTION_ONTEXTCONFIRM = "OnTextConfirm";
+	public static readonly string SCRIPT_FUNCTION_ONPARSER = "OnParser";
 
 	static readonly YieldInstruction EMPTY_YIELD_INSTRUCTION = new YieldInstruction(); // Used to prevent having to wait a frame in UpdateBlocking which happens when a routine returns yield break
 	static readonly YieldInstruction CONSUME_YIELD_INSTRUCTION = new YieldInstruction(); // Used to prevent falling through to default interaction in an empty function

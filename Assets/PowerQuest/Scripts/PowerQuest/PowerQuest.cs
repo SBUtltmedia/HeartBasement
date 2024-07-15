@@ -1,11 +1,9 @@
-using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.EventSystems;
 using System.Reflection;
-using PowerTools;
-using PowerTools.QuestGui;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.U2D;
 
 namespace PowerTools.Quest
@@ -107,6 +105,8 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	[SerializeField] eInventoryClickStyle m_inventoryClickStyle = eInventoryClickStyle.OnMouseClick;		
 	[Tooltip("When true, no editor keyboard shortcuts will be used")]
 	[SerializeField] bool m_customKbShortcuts = false;
+	[Tooltip("Enable when using the parser. When enabled, also add SystemParser to the list of Systems")]
+	[SerializeField] bool m_enableParser = false;
 
 	[Header("Screen-Fade Setup")]
 	[SerializeField] float m_transitionFadeTime = 0.3f;
@@ -131,9 +131,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 	[Header("Text Sprite Setup")]
 
-	public Material m_textSpriteMaterial = null;
+	[SerializeField]  Material m_textSpriteMaterial = null;
 	[ReorderableArray,NonReorderable]
-	public QuestText.TextSpriteData[] m_textSprites = null;
+	[SerializeField] QuestText.TextSpriteData[] m_textSprites = null;
 
 	[Header("Other Systems To Create")]
 	[SerializeField] List<Component> m_systems = null;
@@ -261,6 +261,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	string m_autoLoadFunction = string.Empty;
 	IQuestScriptable m_autoLoadUnhandledScriptable = null;
 	string m_autoLoadUnhandledFunction = string.Empty;
+	
+	bool m_ignoreAutoLoadFunc = false;
+	string m_ignoreAutoLoadFuncName = string.Empty;
 
 	Coroutine m_consumedInteraction = null;
 
@@ -363,7 +366,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	}
 	public Coroutine WaitWhile( System.Func<bool> condition, bool skippable = false ) { return StartQuestCoroutine(CoroutineWaitWhile(condition, skippable)); }
 	public Coroutine WaitUntil( System.Func<bool> condition, bool skippable = false ) { return StartQuestCoroutine(CoroutineWaitUntil(condition, skippable)); }
-	public Coroutine WaitForDialog() {	return StartQuestCoroutine(CoroutineWaitForDialog()); }
+	public Coroutine WaitForDialog() {	return StartQuestCoroutine(CoroutineWaitForDialog()); }	
+	public Coroutine WaitForDialogSkip() { return StartQuestCoroutine(CoroutineWaitForDialogSkip()); }
+	
 	
 	//
 	// Narrator 
@@ -569,7 +574,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	{
 		//if ( GetRestoringGame() )
 		//	return GetSavable( m_player.Room as Room ); // While restoring a game, the m_currentRoom hasn't been set yet, so set the room the players actually in.  But actually no. doesn't work.
-		 return  GetSavable(m_currentRoom); 
+		 return GetSavable(m_currentRoom); 
 	}
 	
 	/// Debugging function that overrides the value of `R.Previous`. Useful for testing, paricularly in 'Play from` functions- (when using the [QuestPlayFromFunction] attribute)
@@ -599,14 +604,24 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	public Character GetCharacter(string scriptName) { Systems.Text.LastPlayerName=SystemText.ePlayerName.Character; return GetSavable(QuestUtils.FindScriptable(m_characters, scriptName)); }
 	/// Shortcut to the current player's active inventory  
 	public IInventory ActiveInventory { get { return GetSavable(m_player.ActiveInventory as Inventory); } set { m_player.ActiveInventory = value; } }
-	// NB: Potential pitfall, if modify items from this list, they aren't marked as dirty for save system.
-	public List<Inventory> GetInventoryItems() { return m_inventoryItems; }
+	
+	// NB: Potential pitfall, if modify items from this list, they aren't marked as dirty for save system. To flag dirty, use PowerQuest.GetSavable(item);
+	public List<Inventory> GetInventoryItems_SaveFlagNotDirtied() { return m_inventoryItems; }
 	public Inventory GetInventory(string scriptName) { return GetSavable(QuestUtils.FindScriptable(m_inventoryItems, scriptName));	}
 		
 	public static T GetSavable<T>(T savable) where T: IQuestSaveCachable 
 	{ 
-		if ( savable != null )	
+		if ( savable != null )
+		{ 
+			/* // Debugging /
+			if ( savable.SaveDirtyEver == false )
+			{ 
+				if ( savable is Prop )
+					Debug.Log( $"Marked {(savable as Prop).ScriptName} dirty" );
+			}
+			/**/
 			savable.SaveDirty = true; 
+		}
 		return savable; 
 	}
 	public DialogTree GetCurrentDialog() { return GetSavable(m_currentDialog); }	
@@ -636,6 +651,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			return m_mouseOverDescriptionOverride;		
 		return (m_mouseOverClickable != null) ? m_mouseOverClickable.Description : string.Empty; 
 	}
+
+	// Exposed to allow overriding for WalkToClicked/FaceClicked for the parser
+	public void SetLastClickable(IQuestClickable clickable) { m_lastClickable = clickable; }
 	public Vector2 GetLastLookAt() { return (m_lastClickable == null || m_lastClickable.Instance == null) ? Vector2.zero : (m_lastClickable.LookAtPoint + (Vector2)m_lastClickable.Instance.transform.position); }
 	public Vector2 GetLastWalkTo() { return (m_lastClickable == null || m_lastClickable.Instance == null) ? Vector2.zero : (m_lastClickable.WalkToPoint + (Vector2)m_lastClickable.Instance.transform.position); }
 
@@ -773,6 +791,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 		if (  Input.GetMouseButton(1) == false && control != null ) // Note: we're checking that it's NOT the right mousebutton... dumb. But easier than passing down whether the LeftMouseButton was *lifted* from the button... ugh.
 		{
+			PowerQuest.Get.UnlockFocusedControl(); // do this here so can use Gui.Navigate functions in the OnClick
 			if ( StartScriptInteraction( gui.GetScriptable(), SCRIPT_FUNCTION_CLICKGUI+control.ScriptName, new object[] {control}, false, true ) )
 			{		
 				m_queuedScriptInteractions.Add(m_currentSequence);
@@ -866,6 +885,28 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 		if ( clickHandled == false && verb == eQuestVerb.None )
 		{
 			clickHandled = true;
+		}
+		
+		if ( clickHandled == false && verb == eQuestVerb.Parser )
+		{
+			// Cancel any current interaction.
+			OnInteraction(null, eQuestVerb.Parser);
+			
+			// Handle parser
+			{
+				// Check for "OnWalkTo" interrupts
+				if ( clickHandled == false )
+					clickHandled = StartScriptInteraction(m_currentRoom, SCRIPT_FUNCTION_ONPARSER );
+				if ( clickHandled == false )
+					clickHandled = StartScriptInteraction( this, SCRIPT_FUNCTION_ONPARSER );
+
+				if ( clickHandled )
+					m_queuedScriptInteractions.Add(m_currentSequence); 
+				
+				//CancelCurrentInteraction();
+				clickHandled = true;
+				interactionFound = true;
+			}
 		}
 
 		if ( clickHandled == false && verb == eQuestVerb.Walk )
@@ -1083,70 +1124,96 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 		return interactionFound;
 	}
 
-
 	//
 	// Functions that let scripts call other scripts interaction functions
 	//
 	public Coroutine HandleInteract( IHotspot target )
-	{			
-		OnHandleInteraction(target.IClickable, eQuestVerb.Use);
-		return StartScriptInteractionCoroutine( target.IClickable.GetScript(), SCRIPT_FUNCTION_INTERACT_HOTSPOT + target.ScriptName, new object[] {target}, true );
+	{		
+		return Handle(target.IClickable, eQuestVerb.Use, SCRIPT_FUNCTION_INTERACT_HOTSPOT, new object[] {target}, "UnhandledInteract",new object[]{ target.IClickable });
 	}
 	public Coroutine HandleLookAt( IHotspot target )
 	{
-		OnHandleInteraction(target.IClickable, eQuestVerb.Look);
-		return StartScriptInteractionCoroutine( target.IClickable.GetScript(), SCRIPT_FUNCTION_LOOKAT_HOTSPOT + target.ScriptName, new object[] {target}, true );		
+		return Handle(target.IClickable, eQuestVerb.Look, SCRIPT_FUNCTION_LOOKAT_HOTSPOT, new object[] {target}, "UnhandledLookAt",new object[]{ target.IClickable });
 	}
 	public Coroutine HandleInventory( IHotspot target, IInventory item )
 	{
-		OnHandleInteraction(target.IClickable, eQuestVerb.Inventory);
-		return StartScriptInteractionCoroutine( target.IClickable.GetScript(), PowerQuest.SCRIPT_FUNCTION_USEINV_HOTSPOT + target.ScriptName, new object[] {target, item}, true );
+		return Handle(target.IClickable, eQuestVerb.Inventory, SCRIPT_FUNCTION_USEINV_HOTSPOT, new object[] {target, item},"UnhandledUseInv",new object[]{ target.IClickable, item });
 	}
 	public Coroutine HandleInteract( IProp target )
 	{
-		OnHandleInteraction(target.IClickable, eQuestVerb.Use);
-		return StartScriptInteractionCoroutine( target.IClickable.GetScript(), SCRIPT_FUNCTION_INTERACT_PROP + target.ScriptName, new object[] {target}, true );
+		return Handle(target.IClickable, eQuestVerb.Use, SCRIPT_FUNCTION_INTERACT_PROP, new object[] {target},"UnhandledUse",new object[]{ target.IClickable });
 	}
 	public Coroutine HandleLookAt( IProp target )
 	{
-		OnHandleInteraction(target.IClickable, eQuestVerb.Look);
-		return StartScriptInteractionCoroutine( target.IClickable.GetScript(), SCRIPT_FUNCTION_LOOKAT_PROP + target.ScriptName, new object[] {target}, true );
+		return Handle(target.IClickable, eQuestVerb.Look, SCRIPT_FUNCTION_LOOKAT_PROP, new object[] {target},"UnhandledLookAt",new object[]{ target.IClickable });
 	}
 	public Coroutine HandleInventory( IProp target, IInventory item )	
 	{
-		OnHandleInteraction(target.IClickable, eQuestVerb.Inventory);
-		return StartScriptInteractionCoroutine( target.IClickable.GetScript(), PowerQuest.SCRIPT_FUNCTION_USEINV_PROP + target.ScriptName, new object[] {target, item}, true );	
+		return Handle(target.IClickable, eQuestVerb.Inventory, SCRIPT_FUNCTION_USEINV_PROP, new object[] {target, item},"UnhandledUseInv",new object[]{ target.IClickable, item as Inventory });
 	}
 	public Coroutine HandleInteract( ICharacter target )	
-	{ 
+	{ 		
 		OnHandleInteraction(target.IClickable, eQuestVerb.Use);
 		// first try in room script, then fall back to character script
-		Coroutine result = StartScriptInteractionCoroutine( m_currentRoom.GetScriptable().GetScript(), PowerQuest. SCRIPT_FUNCTION_INTERACT_CHARACTER+target.ScriptName, new object[] {target}, true ); 
+		Coroutine result = StartScriptInteractionCoroutine( m_currentRoom.GetScriptable().GetScript(), SCRIPT_FUNCTION_INTERACT_CHARACTER+target.ScriptName, new object[] {target}, true ); 
 		if ( result != null )
+		{
+			SetAutoLoadScript( m_currentRoom.GetScriptable(), SCRIPT_FUNCTION_INTERACT_CHARACTER+target.ScriptName, true, true ); 
 			return result;
-		return StartScriptInteractionCoroutine( target.IClickable.GetScript(), PowerQuest.SCRIPT_FUNCTION_INTERACT, null, true ); 
+		}
+		result = StartScriptInteractionCoroutine( target.IClickable.GetScript(), SCRIPT_FUNCTION_INTERACT, null, true ); 
+		SetAutoLoadScript( target.Data.GetScriptable(), SCRIPT_FUNCTION_INTERACT, result != null, true ); 
+		return result;
 	}
 	public Coroutine HandleLookAt( ICharacter target )	
 	{ 
 		OnHandleInteraction(target.IClickable, eQuestVerb.Look);
 		// first try in room script, then fall back to character script
-		Coroutine result = StartScriptInteractionCoroutine( m_currentRoom.GetScriptable().GetScript(), PowerQuest. SCRIPT_FUNCTION_LOOKAT_CHARACTER+target.ScriptName, new object[] {target}, true ); 
+		Coroutine result = StartScriptInteractionCoroutine( m_currentRoom.GetScriptable().GetScript(), SCRIPT_FUNCTION_LOOKAT_CHARACTER+target.ScriptName, new object[] {target}, true ); 
 		if ( result != null )
+		{
+			SetAutoLoadScript( m_currentRoom.GetScriptable(), SCRIPT_FUNCTION_LOOKAT_CHARACTER+target.ScriptName, true, true ); 
 			return result;
-		return StartScriptInteractionCoroutine( target.IClickable.GetScript(), PowerQuest.SCRIPT_FUNCTION_LOOKAT, null, true ); 
+		}
+		result = StartScriptInteractionCoroutine( target.IClickable.GetScript(), SCRIPT_FUNCTION_LOOKAT, null, true ); 
+		SetAutoLoadScript( target.Data.GetScriptable(), SCRIPT_FUNCTION_LOOKAT, result != null, true );
+		return result;
 	}
 	public Coroutine HandleInventory( ICharacter target, IInventory item ) 
 	{ 
 		OnHandleInteraction(target.IClickable, eQuestVerb.Inventory);
 		// first try in room script, then fall back to character script
-		Coroutine result = StartScriptInteractionCoroutine( m_currentRoom.GetScriptable().GetScript(), PowerQuest. SCRIPT_FUNCTION_USEINV_CHARACTER+target.ScriptName, new object[] {target,item}, true ); 
+		Coroutine result = StartScriptInteractionCoroutine( m_currentRoom.GetScriptable().GetScript(), SCRIPT_FUNCTION_USEINV_CHARACTER+target.ScriptName, new object[] {target,item as Inventory}, true ); 
 		if ( result != null )
+		{
+			SetAutoLoadScript( m_currentRoom.GetScriptable(), SCRIPT_FUNCTION_USEINV_CHARACTER+target.ScriptName, true, true ); 
 			return result;
-		return StartScriptInteractionCoroutine( target.IClickable.GetScript(), PowerQuest.SCRIPT_FUNCTION_USEINV, new object[] {item}, true ); 
+		}
+		result = StartScriptInteractionCoroutine( target.IClickable.GetScript(), SCRIPT_FUNCTION_USEINV, new object[] {item}, true ); 
+		SetAutoLoadScript( target.Data.GetScriptable(), SCRIPT_FUNCTION_USEINV, result != null, true );
+		return result;
 	}
-	public Coroutine HandleInteract( IInventory target )	{ return StartScriptInteractionCoroutine( target.Data.GetScript(), PowerQuest.SCRIPT_FUNCTION_INTERACT_INVENTORY, new object[] {target}, true ); }
-	public Coroutine HandleLookAt( IInventory target ) 		{ return StartScriptInteractionCoroutine( target.Data.GetScript(), PowerQuest.SCRIPT_FUNCTION_LOOKAT_INVENTORY, new object[] {target}, true ); }
-	public Coroutine HandleInventory( IInventory target, IInventory item ) { return StartScriptInteractionCoroutine( target.Data.GetScript(), PowerQuest.SCRIPT_FUNCTION_USEINV_INVENTORY, new object[] {target, item}, true ); }
+	public Coroutine HandleInteract( IInventory target )	
+	{ 
+		return Handle(target.IClickable, eQuestVerb.Use, SCRIPT_FUNCTION_INTERACT_INVENTORY, new object[] {target},"UnhandledUse",new object[]{ target.IClickable });
+		//Coroutine result = StartScriptInteractionCoroutine( target.Data.GetScript(), SCRIPT_FUNCTION_INTERACT_INVENTORY, new object[] {target}, true ); 
+		//SetAutoLoadScript( target.Data.GetScriptable(), SCRIPT_FUNCTION_INTERACT_INVENTORY, result != null, true ); // set skipCallingFunction so it loads after its called function.
+		//return result;
+	}
+	public Coroutine HandleLookAt( IInventory target ) 
+	{ 
+		return Handle(target.IClickable, eQuestVerb.Look, SCRIPT_FUNCTION_LOOKAT_INVENTORY, new object[] {target},"UnhandledLookAt",new object[]{ target.IClickable });
+		//Coroutine result = StartScriptInteractionCoroutine( target.Data.GetScript(), PowerQuest.SCRIPT_FUNCTION_LOOKAT_INVENTORY, new object[] {target}, true ); 
+		//SetAutoLoadScript( target.Data.GetScriptable(), SCRIPT_FUNCTION_INTERACT_INVENTORY, result != null, true ); // set skipCallingFunction so it loads after its called function.
+		//return result;
+	}
+	public Coroutine HandleInventory( IInventory target, IInventory item ) 
+	{ 		
+		return Handle(target.IClickable, eQuestVerb.Inventory, SCRIPT_FUNCTION_USEINV_INVENTORY, new object[] {target, item},"UnhandledUseInvInv",new object[]{ target as Inventory, item as Inventory });
+		//return StartScriptInteractionCoroutine( target.Data.GetScript(), PowerQuest.SCRIPT_FUNCTION_USEINV_INVENTORY, new object[] {target, item}, true ); 
+	}
+	
+
 	/// Runs a specific dialog option. NB: Does NOT start the dialog tree first
 	public Coroutine HandleOption( IDialogTree dialog, string optionName )
 	{ 
@@ -1160,13 +1227,15 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 		Coroutine coroutine = StartScriptInteractionCoroutine(dialog.Data.GetScript(), SCRIPT_FUNCTION_DIALOG_OPTION + option.Name, new object[]{option}, false );
 		if ( coroutine == null )
-			coroutine = StartScriptInteractionCoroutine(dialog.Data.GetScript(), SCRIPT_FUNCTION_DIALOG_OPTION + option.Name, null, false );
+			coroutine = StartScriptInteractionCoroutine(dialog.Data.GetScript(), SCRIPT_FUNCTION_DIALOG_OPTION + option.Name, null, false );			
+		
+		SetAutoLoadScript( dialog.Data.GetScriptable(), SCRIPT_FUNCTION_DIALOG_OPTION + option.Name, coroutine != null, true ); // set skipCallingFunction so it loads after its called function.
 
 		if ( coroutine != null )
 		{
 			GetGui(DialogTreeGui).Visible = false;
 		}
-		else 
+		else
 		{
 			// Undo Used and TimesUsed- This ensures these properties are consistant no matter where in the script coroutine they're checked.
 			option.Used = wasUsed;
@@ -1175,6 +1244,28 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 		return coroutine;
 	}
 	
+	// Generic "Handle" function for passing events through
+	Coroutine Handle<T>(T clickable, eQuestVerb verb, string function, object[] parameters, string unhandledFunc, object[] unhandledParams) where T: IQuestClickable
+	{ 
+		// when parser's enabled, handle stuff like you're clicking on it
+		if ( m_enableParser )
+			m_lastClickable = clickable;
+
+		OnHandleInteraction(clickable, verb);		
+		if ( clickable.ClickableType != eQuestClickableType.Inventory )
+			function = function + clickable.ScriptName;
+		Coroutine result =  StartScriptInteractionCoroutine( clickable.GetScript(), function, parameters, true );
+		if ( result != null )		
+			SetAutoLoadScript( clickable.GetScriptable(), function, result != null, true ); // set skipCallingFunction so it loads after its called function.
+		if ( m_enableParser )
+		{	// when parser's enabled- 'Handle' functions call through to unhandled events so "look at bklajsdf" will still call UnhandledLook
+			if ( result == null || result == m_consumedInteraction )
+				result = StartScriptInteractionCoroutine( m_currentRoom.GetScript(), unhandledFunc, unhandledParams, true );
+			if ( result == null || result == m_consumedInteraction )
+				result = StartScriptInteractionCoroutine( GetScript(), unhandledFunc, unhandledParams, true );
+		}
+		return result;
+	}
 
 	//
 	// Misc utilities
@@ -1289,21 +1380,23 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	public void DisableAllClickablesExcept()
 	{
 		RestoreAllClickables();
-		foreach( Prop prop in PowerQuest.Get.GetCurrentRoom().GetProps() )		
+		foreach( Prop prop in PowerQuest.Get.GetCurrentRoom().GetProps_SaveFlagNotDirtied() )		
 		{
 			if ( prop.Clickable )
 			{
 				SV.m_tempDisabledProps.Add( prop.ScriptName);
 				prop.Clickable = false;
+				prop.SaveDirty=true;
 			}
 		}
 
-		foreach( Hotspot hotspot in PowerQuest.Get.GetCurrentRoom().GetHotspots() )
+		foreach( Hotspot hotspot in PowerQuest.Get.GetCurrentRoom().GetHotspots_SaveFlagNotDirtied() )
 		{
 			if ( hotspot.Clickable )
 			{
 				SV.m_tempDisabledHotspots.Add(hotspot.ScriptName);
 				hotspot.Clickable = false;
+				hotspot.SaveDirty = true;
 			}
 		}
 		
@@ -1313,21 +1406,24 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	public void DisableAllClickablesExcept(params string[] exceptions)
 	{
 		RestoreAllClickables();
-		foreach( Prop prop in PowerQuest.Get.GetCurrentRoom().GetProps() )		
+		foreach( Prop prop in PowerQuest.Get.GetCurrentRoom().GetProps_SaveFlagNotDirtied() )		
 		{
 			if ( prop.Clickable && System.Array.Exists(exceptions, item=> string.Equals(prop.ScriptName, item, System.StringComparison.OrdinalIgnoreCase)) == false )
 			{
 				SV.m_tempDisabledProps.Add( prop.ScriptName);
 				prop.Clickable = false;
+				prop.SaveDirty=true;
+
 			}
 		}
 
-		foreach( Hotspot hotspot in PowerQuest.Get.GetCurrentRoom().GetHotspots() )
+		foreach( Hotspot hotspot in PowerQuest.Get.GetCurrentRoom().GetHotspots_SaveFlagNotDirtied() )
 		{
 			if ( hotspot.Clickable && System.Array.Exists(exceptions, item => string.Equals(hotspot.ScriptName, item, System.StringComparison.OrdinalIgnoreCase)) == false )
 			{
 				SV.m_tempDisabledHotspots.Add(hotspot.ScriptName);
 				hotspot.Clickable = false;
+				hotspot.SaveDirty = true;
 			}
 		}
 	}
@@ -1335,21 +1431,23 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	public void DisableAllClickablesExcept(params IQuestClickableInterface[] exceptions)
 	{
 		RestoreAllClickables();
-		foreach( Prop prop in PowerQuest.Get.GetCurrentRoom().GetProps() )		
+		foreach( Prop prop in PowerQuest.Get.GetCurrentRoom().GetProps_SaveFlagNotDirtied() )		
 		{
 			if ( prop.Clickable && System.Array.Exists(exceptions, item=> item==prop) == false )
 			{
 				SV.m_tempDisabledProps.Add( prop.ScriptName);
 				prop.Clickable = false;
+				prop.SaveDirty=true;
 			}
 		}
 
-		foreach( Hotspot hotspot in PowerQuest.Get.GetCurrentRoom().GetHotspots() )
+		foreach( Hotspot hotspot in PowerQuest.Get.GetCurrentRoom().GetHotspots_SaveFlagNotDirtied() )
 		{
 			if ( hotspot.Clickable && System.Array.Exists(exceptions, item => item==hotspot) == false )
 			{
 				SV.m_tempDisabledHotspots.Add(hotspot.ScriptName);
 				hotspot.Clickable = false;
+				hotspot.SaveDirty = true;
 			}
 		}
 	}
@@ -1378,23 +1476,25 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	/// Set all clickables to have a specific cursor temporarily, restore using RestoreAllClickableCursors() (will probably move to PowerQuest system)
 	public void SetAllClickableCursors( string cursor, params string[] exceptions)
 	{
-		foreach( Prop prop in PowerQuest.Get.GetCurrentRoom().GetProps() )
+		foreach( Prop prop in PowerQuest.Get.GetCurrentRoom().GetProps_SaveFlagNotDirtied() )
 		{	        
 			if ( prop.Clickable && prop.Cursor != cursor && System.Array.Exists(exceptions, item=> item == prop.ScriptName) == false )
 			{
 				SV.m_tempCursorNoneCursor.Add(prop.Cursor);
 				SV.m_tempCursorNoneProps.Add( prop.ScriptName);
 				prop.Cursor = cursor;
+				prop.SaveDirty=true;
 			}
 		}
 
-		foreach( Hotspot hotspot in PowerQuest.Get.GetCurrentRoom().GetHotspots() )
+		foreach( Hotspot hotspot in PowerQuest.Get.GetCurrentRoom().GetHotspots_SaveFlagNotDirtied() )
 		{
 			if ( hotspot.Clickable && hotspot.Cursor != cursor && System.Array.Exists(exceptions, item=> item == hotspot.ScriptName) == false )
 			{
 				SV.m_tempCursorNoneCursor.Add(hotspot.Cursor);
 				SV.m_tempCursorNoneHotspots.Add(hotspot.ScriptName);
 				hotspot.Cursor = cursor;
+				hotspot.SaveDirty = true;
 			}
 		}
 	}
@@ -1555,7 +1655,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	public void SkipDialog(bool useNoSkipTime = true)
 	{
 		if ( useNoSkipTime == false || (Time.timeSinceLevelLoad-m_timeLastTextShown) > m_textNoSkipTime )
-			m_skipDialog = true;		
+			m_skipDialog = true;	
 	}
 
 	// Returns true if a cutscene was skipped
@@ -1598,7 +1698,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 		if ( CallbackOnDialogSkipped != null )
 			CallbackOnDialogSkipped.Invoke();
 		ExHandleSkipDialogKeyPressed();			
-
+		
 		return result;		
 	}
 
@@ -1608,8 +1708,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 	public Pathfinder Pathfinder { get{  return GetCurrentRoom() != null ? GetCurrentRoom().GetInstance().GetPathfinder() : null; } }
 
-	// NB: Potential pitfall, if modify items from this list, they aren't marked as dirty for save system.
-	public List<Character> GetCharacters() { return m_characters; }
+	// NB: Potential pitfall, if modify items from this list, they aren't marked as dirty for save system. To flag dirty, use PowerQuest.GetSavable(item);
+	public List<Character> GetCharacters_SaveFlagNotDirtied() { return m_characters; }
+
 	public Character GetCharacter(int id) 
 	{ 
 		List<Character> list = m_characters;
@@ -1626,8 +1727,10 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			return GetSavable(list[id]);
 		return null;
 	}
+		
+	// NB: Potential pitfall, modified items in the list aren't marked as dirty, so changes won't be saved automatically. To flag dirty, use item.SaveDirty = true
+	public List<DialogTree> GetDialogTrees_SaveFlagNotDirtied() { return m_dialogTrees; }
 
-	public List<DialogTree> GetDialogTrees() { return m_dialogTrees; }
 	public DialogTree GetDialogTree(int id) 
 	{
 		List<DialogTree> list = m_dialogTrees;
@@ -1986,6 +2089,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			case eQuestVerb.Use: return m_enableUse;
 			case eQuestVerb.Look: return m_enableLook;
 			case eQuestVerb.Inventory: return m_enableInventory;
+			case eQuestVerb.Parser: return m_enableParser;
 		}
 		return true;
 	}
@@ -2013,6 +2117,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	
 	public Sprite GetGuiSprite(string animName) { return FindSpriteInList(m_guiSprites, animName); }
 	
+	public Material TextSpriteMaterial => m_textSpriteMaterial;
+	public QuestText.TextSpriteData[] TextSprites => m_textSprites;
+
 	// Searches a list of sprites for either the animation name, or the animation name with the post-fix _0. So that searching for "Tree" will still find sprite imported as "Tree_0.png"
 	public static Sprite FindSpriteInList(List<Sprite> list, string animName)
 	{
@@ -2024,7 +2131,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 				|| string.Equals(animName_0, item.name, System.StringComparison.OrdinalIgnoreCase)) );  
 	}
 	
-	
+	// NB: Potential pitfall, if modify items from this list, they aren't marked as dirty for save system. To flag dirty, use PowerQuest.GetSavable(item);	
 	public List<IQuestScriptable> GetAllScriptables()
 	{
 		List<IQuestScriptable> scriptables = new List<IQuestScriptable>();
@@ -2096,7 +2203,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	{ 
 		bool result = m_lostFocus && m_hasFocus;
 		if ( result )
-		    m_lostFocus = false;
+			m_lostFocus = false;
 		return result; 
 	}
 	public bool GetLostFocus() { return m_lostFocus; }
@@ -2135,11 +2242,15 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	}
 
 	// Made this static, since even when resstarting PQ, the atlas
-	static Dictionary<string, System.Action<SpriteAtlas>> s_roomAtlasCallbacks = new Dictionary<string, System.Action<SpriteAtlas>>();
+	public static Dictionary<string, System.Action<SpriteAtlas>> s_roomAtlasCallbacks = new Dictionary<string, System.Action<SpriteAtlas>>();
 	
 	void RequestAtlas(string tag, System.Action<SpriteAtlas> callback)
-	{		
-		s_roomAtlasCallbacks.Add(tag,callback);
+	{				
+		if (s_roomAtlasCallbacks.ContainsKey(tag) )
+			s_roomAtlasCallbacks[tag] += callback;
+		else
+			s_roomAtlasCallbacks.Add(tag,callback); 
+		
 		if ( m_currentRoom != null && tag.Equals($"Room{m_currentRoom.ScriptName}Atlas") )
 			LoadAtlas(m_currentRoom.ScriptName);
 	}
@@ -2570,13 +2681,14 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	partial void ExUnblock();	
 	partial void ExProcessClick(eQuestVerb verb, IQuestClickable clickable, Vector2 mousePosition, bool interactionFound);
 	partial void ExOnEndCutscene();
+	partial void ExOnRoomLoad(); // room scene loaded, before first Update and any script functions are called
 
 	partial void ExOnCharacterEnterRegion(Character character, RegionComponent region);
 	partial void ExOnCharacterExitRegion(Character character, RegionComponent region);
 	
 	partial void ExtentionOnGameStart(); // back compatability
 	partial void ExtentionOnMainLoop(); // back compatability
-
+	
 	#endregion
 	#region Functions: Private functions
 
@@ -3002,9 +3114,14 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 		Coroutine result = null;
 		try
 		{
+			m_ignoreAutoLoadFuncName = methodName;
 			result = StartScriptInteractionCoroutine(scriptClass, methodName, parameters, stopPlayerMoving, cancelCurrentInteraction);
 			if ( result != null && result != m_consumedInteraction)
 			{
+				// Mark object as dirty
+				if ( scriptable is IQuestSaveCachable )
+					(scriptable as IQuestSaveCachable).SaveDirty=true;
+
 				if ( m_currentSequence == null )
 				{					
 					// no sequence running, so set this as the current one
@@ -3045,8 +3162,8 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 				if ( stopPlayerMoving )
 					m_player.StopWalking();	
 
-				// Start sequence	
-				m_autoLoadFunc = methodName;
+				// Start sequence
+				//	m_ignoreAutoLoadFuncName = methodName; // moved this to StartScriptInteraction, so handleInteracts still load
 				IEnumerator currentSequenceEnumerator = method.Invoke(scriptClass,parameters) as IEnumerator;					
 				if ( currentSequenceEnumerator != null )
 				{	
@@ -3099,30 +3216,31 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 		return result;
 	}
 
-	bool m_ignoreAutoLoadFunc = false;
-	string m_autoLoadFunc = string.Empty;
-
-	void SetAutoLoadScript( IQuestScriptable questScriptable, string functionName, bool functionBlocked, bool isWaitForFunction )
+	// NB- Since WaitFor and HandleInteract functions may call this BEFORE their calling function, we use skipCallingFunction to ensure these can still be auto-loaded
+	public void SetAutoLoadScript( IQuestScriptable questScriptable, string functionName, bool functionBlocked, bool skipCallingFunction )
 	{
 		if ( Application.isEditor == false )
 			return;
 		
 		// Hacky fix for "WaitFor" functions have their calling functions "auto-load" after them due to order of ops.
 		{
-			if ( isWaitForFunction )
+			if ( skipCallingFunction )
 			{
 				m_ignoreAutoLoadFunc = true; // Set ot ignore the next auto-loaded function (if it's the one called before the "WaitFor" function)
 			}
-			else if ( m_autoLoadFunc == functionName && m_ignoreAutoLoadFunc)
-			{
-				m_autoLoadFunc = string.Empty;
-				m_ignoreAutoLoadFunc = false;
-				return;
-			}
-			else 
-			{
-				m_autoLoadFunc = string.Empty;
-				m_ignoreAutoLoadFunc = false;
+			else if ( m_ignoreAutoLoadFunc )
+			{ 
+				if ( m_ignoreAutoLoadFuncName == functionName) // AutoLoadFunc should be the most recently called function
+				{
+					m_ignoreAutoLoadFuncName = string.Empty;
+					m_ignoreAutoLoadFunc = false;
+					return;
+				}
+				else 
+				{
+					m_ignoreAutoLoadFuncName = string.Empty;
+					m_ignoreAutoLoadFunc = false;
+				}
 			}
 		}
 
@@ -3209,7 +3327,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 	IEnumerator CoroutineDisplayBG(string text, int id = -1)
 	{
-		if ( PowerQuest.Get.GetSkippingCutscene() )
+		if ( GetSkippingCutscene() )
 			yield break;
 		QuestText textComponent;
 		StartDisplay(text,id, out textComponent);
@@ -3312,7 +3430,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			{						
 				if ( audioPlaying )				
 					time = 0; // set time to zero the whole time audio is playing, so we know its at zero when it finishes				
-				else if ( time <= -m_textAutoAdvanceDelay ) // Add extra time to wait after audio clip finishes				
+				else if ( time <= -m_textAutoAdvanceDelay ) // Add extra time to wait after audio clip finishes		
 					return false;				
 			}
 			else if ( audioPlaying == false )
@@ -3425,20 +3543,21 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 				if ( onExit != null )
 					yield return onExit;
 			}
-
+			
 			RestoreAllClickables();
 			RestoreAllClickableCursors();
 
 		}
 				
+
 		if ( instant == false )
 		{
 			// Finish loading scene	
 			while( m_loadingAtlas)
 				yield return null;	
 			operation.allowSceneActivation = true;
-			while( operation.isDone == false )
-				yield return null;	
+			while( operation.isDone == false )			
+				yield return null;					
 		}
 		else 
 		{
@@ -3447,8 +3566,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 				yield return null;
 				
 			if ( wasBlocking == false )
-				Unblock();
-					
+				Unblock();				
 			SceneManager.LoadScene(sceneName);
 		}
 
@@ -3481,6 +3599,17 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			// Check if any players are currently talking
 			return m_displayActive || m_characters.Exists( item => item.Talking );
 	} ); } 
+	
+	IEnumerator CoroutineWaitForDialogSkip()
+	{ 		
+		m_skipDialog = false; // clear this flag when we start waiting here
+		m_waitingForBGDialogSkip = true;
+		yield return WaitWhile(()=> {		
+			// Check if any players are currently talking
+			return m_displayActive || m_characters.Exists( item => item.Talking );
+		} ); 
+		m_waitingForBGDialogSkip = false;
+	}
 
 	IEnumerator CoroutineChangeRoom( IRoom room )
 	{		

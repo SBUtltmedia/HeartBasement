@@ -60,7 +60,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 	static readonly string REGEX_FUNCTION_START = @"\s*\(.+\n*.*\{.*\n\r?";	
 	
 	static readonly string REGEX_CLASS_START = @"public (?:partial )?class \w*.+\n*.*\{.*\n\r?";
-
+	static readonly Regex REGEX_EMPTY_FUNC = new Regex(@"^\s*(End)?\s*$", RegexOptions.Compiled);
 	static readonly string STR_TABS = "\t\t";
 	static readonly string STR_TABS_HEADER = "\t";
 
@@ -78,10 +78,10 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		REGEX_YIELD_CHARACTER+@"Say(?:NoSkip)?\(",
 		REGEX_YIELD_CHARACTER + @"WalkTo\(",
 		REGEX_YIELD_CHARACTER + @"Face\w*?(?<!BG)\(",  // Has zero width  negative lookbehind assertion so it won't include 'BG'			
-		REGEX_YIELD_P_OR_C+@"((PlayAnimation\()|(Wait)|(MoveTo\()|(Fade\())", // Shared prop/character functions, combined to be a bit quicker
+		REGEX_YIELD_P_OR_C+@"((PlayAnimation\()|(Wait)|(MoveTo\()|(Fade\()|(ChangeRoom\())", // Shared prop/character functions, combined to be a bit quicker
 		@"E\.(Wait|Break|ConsumeEvent|Handle)",
 		@"E\.Fade(In|Out)\(",
-		@"E\.ChangeRoom\(",
+		@"E.ChangeRoom\(",
 		@"R\.\w*\.Enter\(",
 	};	
 
@@ -182,7 +182,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 	static readonly Regex[] REGEX_SAVE_MATCH = 
 		{
 			new Regex(@"\s+$", RegexOptions.Compiled), // strip trailing space
-
+			
 			// Strings with braces- these need the $ at the beggining of the string so variables can be included
 			new Regex(@"^(\s*)Section: (.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase),
 			new Regex(@"^(\s*)Display: (.*\{.*)", RegexOptions.Compiled | RegexOptions.IgnoreCase), // $
@@ -439,7 +439,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 
 	enum eTabEvent { None, Tab, Backspace, Delete, Indent, Outdent, Left, Right };
 
-	static readonly string[] FUNCTION_SORT_ORDER = { "OnGameStart","OnEnterRoom", "OnEnterRoomAfterFade", "OnExitRoom", "UpdateBlocking", "Update", "UpdateNoPause","UpdateInput","OnMouseClick","OnAnyClick", "AfterAnyClick", "OnWalkTo", "OnPostRestore" };
+	static readonly string[] FUNCTION_SORT_ORDER = { "OnGameStart","OnEnterRoom", "OnEnterRoomAfterFade", "OnExitRoom", "UpdateBlocking", "Update", "UpdateNoPause","UpdateInput","OnMouseClick","OnParser","OnAnyClick", "AfterAnyClick", "OnWalkTo", "OnPostRestore" };
 
 	#endregion
 	#region Variables: Serialized
@@ -501,6 +501,24 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 	{
 	}
 
+	//! Play From Func Selector
+	public bool IsFunctionLoaded(string path, string function)
+	{
+		return path == m_path && function == m_function;
+	}
+
+	public bool LoadPreviousHistoryEntry()
+	{
+		if ( m_historyIndex+1 < m_history.Count )
+		{
+			m_historyIndex++;
+			Load(m_history[m_historyIndex]);
+			return true;
+		}
+
+		return false;
+	}
+	
 	public static void UpdateAutoComplete(eAutoCompleteContext specificType = eAutoCompleteContext.Ignored)
 	{	
 		if ( EditorWindow.HasOpenInstances<QuestScriptEditor>() )
@@ -537,6 +555,14 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 	}
 
 	// Overrides for easily opening specific QuestObject scripts
+	
+	public static void Open(string functionName = null, string parameters = "", bool isCoroutine = true )
+	{
+		PowerQuest component = PowerQuestEditor.GetPowerQuest();
+		if ( component != null )
+			Open( component.gameObject, component, eType.Global, functionName, parameters, isCoroutine );
+	}
+
 	public static void Open(RoomComponent component, eType type, string functionName = null, string parameters = "", bool isCoroutine = true )
 	{
 		Open( component.GetPrefab(), component.GetData(), type, functionName, parameters, isCoroutine );
@@ -568,6 +594,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		string fileTemplateText = string.Empty;
 		switch (type)
 		{
+		case eType.Global:		fileTemplateText = PowerQuestEditor.TEMPLATE_GLOBAL_FILE; break;
 		case eType.Prop:		fileTemplateText = PowerQuestEditor.TEMPLATE_ROOM_FILE; break;
 		case eType.Hotspot:		fileTemplateText = PowerQuestEditor.TEMPLATE_ROOM_FILE; break;	
 		case eType.Region:		fileTemplateText = PowerQuestEditor.TEMPLATE_ROOM_FILE; break;	
@@ -749,21 +776,11 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 	{
 		if ( Event.current.type == EventType.Layout )
 		{			
-			//s_editors.RemoveAll(item=>item == null);
-			//if ( s_editors.Contains(this) == false )
-			//	s_editors.Add(this);
-
 			
 			if ( string.IsNullOrEmpty(m_fileName) )			
 				titleContent.text = "Quest Script";
 			else 
 				titleContent.text = m_fileName;	
-			/*
-			if ( string.IsNullOrEmpty(m_function) )			
-				titleContent.text = "Quest Script";
-			else 
-				titleContent.text = m_function;	
-			*/
 
 			if ( titleContent.image == null )		
 				titleContent.image = EditorGUIUtility.FindTexture("d_UnityEditor.ConsoleWindow");
@@ -777,8 +794,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 				m_refresh = false;
 			}
 
-		}
-		
+		}		
 
 		if ( m_loaded == false )
 		{
@@ -836,7 +852,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		}
 
 		EditorGUILayout.LabelField( m_fileName, Styles.TOOLBAR_LABEL, GUILayout.MinWidth(1) ); 
-
+				
 		//EditorGUILayout.LabelField( "   Editing: <color=white>" + m_function + "</color> in <color=white>" + fileName+"</color>", new GUIStyle(EditorStyles.boldLabel) { richText = true } );
 		
 		//GUIContent testContent = new GUIContent("View C#", Contents.EYE.image, "View .cs script in IDE");
@@ -1097,6 +1113,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 
 		EditorGUILayout.LabelField( m_fileName, Styles.TOOLBAR_LABEL ); 
 
+
 		// Prev-next function in history control
 		EditorGUI.BeginDisabledGroup( m_historyIndex + 1 >= m_history.Count );
 		string prevFunc = m_history.IsIndexValid(m_historyIndex+1) ? string.Format("{1}\n{0}",m_history[m_historyIndex+1].m_file,m_history[m_historyIndex+1].m_function) : "Previous";
@@ -1127,6 +1144,15 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		{
 			ViewInEditor(m_path, m_function, m_textEditor);	
 		}
+		
+		
+		// Remove Empty Function	
+		bool doRemove = false;	
+		bool empty = m_text != null 
+		             && m_text.Length < 10
+		             && REGEX_EMPTY_FUNC.IsMatch(m_text);
+		if ( empty == false ) GUILayout.Button("", Styles.TOOLBAR_BUTTON, GUILayout.MaxWidth(0)) ; // dummy button so txt doesn't lose focus when it changes
+		doRemove = empty && GUILayout.Button("Remove Empty Script", Styles.TOOLBAR_BUTTON, GUILayout.MaxWidth(140)) ;
 
 		// Revert
 		bool doRevert = GUILayout.Button(m_dirty ? "Revert" : "Reload", EditorStyles.toolbarButton, GUILayout.MaxWidth(60) );
@@ -1465,6 +1491,17 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			Load(m_path, m_editingHeader ? null : m_function, true);
 		if ( doSave )
 			Save();
+		if ( doRemove )
+		{
+			if ( QuestEditorUtils.EraseFunction(m_path, m_function) >= 0 )
+			{ 
+				doPrevScript = true;
+				if ( Application.isPlaying == false )				 
+					PowerQuestEditor.GetPowerQuestEditor().RequestAssetRefresh();
+				//doCompile=true;
+			}
+			
+		}
 		if ( doCompile )
 		{
 			{	// Used to do this defocus on Save, not sure why! But I'll do it on  compile now, in case it was necessary eeep!
@@ -1507,9 +1544,11 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		m_compileErrorExpireTime = System.DateTime.UtcNow.AddSeconds(SAVE_ERROR_TIMEOUT).ToFileTimeUtc();
 	}
 
+
 	// Callback on log message
 	void OnLogMessageReceived(string message, string stackTrace, LogType logType)
 	{
+
 		// todo: call this on compile
 
 		if ( System.DateTime.Compare(System.DateTime.FromFileTimeUtc(m_compileErrorExpireTime),System.DateTime.UtcNow) < 0 )
@@ -1865,6 +1904,9 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		
 	}
 
+	partial void PostprocessOnLoadEx();
+	partial void PostprocessOnSaveEx();
+
 	void Load( ScriptFileData fileData, bool onPlayerRevert = false )
 	{
 		string path = fileData.m_file;
@@ -1986,8 +2028,8 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		{
 			return;
 		}
-		string text = m_text.Substring(startIndex,endIndex-startIndex);			
-
+		string text = m_text.Substring(startIndex,endIndex-startIndex);
+		
 		//
 		// Loop over lines
 		//
@@ -2062,6 +2104,9 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			m_text += line+"\n";
 			line = reader.ReadLine();
 		}
+		
+		//! [Script Postprocess on Load]
+		PostprocessOnLoadEx();
 
 		UpdateSpellCheck();
 		UpdateRichText();
@@ -2078,17 +2123,20 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		// Not sure why this was done on save, but it's now been moved to Compile anyway.
 		//GUI.FocusControl(null);
 		//EditorGUI.FocusTextInControl(string.Empty);
-
+		
 		//
 		// check for matching braces (so don't break things)
 		//
 		int count = 0;
+		bool mismatch = false;
 		for (int i = 0; i< m_text.Length; ++i)
 		{
 			if ( m_text[i] == '{' ) count++;
 			if ( m_text[i] == '}' ) count--;
+			if ( count < 0)
+				mismatch=true;
 		}
-		if ( count != 0 )
+		if ( count != 0 || mismatch )
 		{
 			EditorUtility.DisplayDialog("Mismatched braces!","Mismatched braces!\nThis must be fixed before saving.\n\n(You probably forgot a '{' somewhere)","Oops!");
 			return;
@@ -2100,6 +2148,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		StringReader reader = new StringReader(m_text);
 		string line = reader.ReadLine();
 		string outText = string.Empty;
+		
 		bool isCoroutine = CalcFunctionIsCoroutine();
 		while ( line != null )
 		{				
@@ -2152,6 +2201,32 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			// Next Line
 			outText += line+'\n';
 			line = reader.ReadLine();
+		}
+		
+		//! [Script Postprocess on Save]
+		var oldText = m_text;
+		m_text = outText;
+		PostprocessOnSaveEx();
+		outText = m_text;
+		m_text = oldText;
+
+		{ 
+			// check for matching braces again after search/replace
+			count = 0;
+			mismatch = false;
+			for (int i = 0; i< outText.Length; ++i)
+			{
+				if ( outText[i] == '{' ) count++;
+				if ( outText[i] == '}' ) count--;
+				if ( count < 0)
+					mismatch=true;
+			}
+			if ( count != 0 || mismatch )
+			{
+				m_dirty=true;
+				EditorUtility.DisplayDialog("Mismatched braces!","Mismatched braces!\nThis must be fixed before saving.\n\n(You probably forgot a '}' somewhere)","Oops!");
+				return;
+			}
 		}
 
 		//
@@ -2433,7 +2508,8 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		}
 		catch
 		{
-			Debug.Log("Unable to parse Playmode tint");
+			// This gets spammed for some people... so don't do it
+			// Debug.Log("Unable to parse Playmode tint");
 		}
 	}	
 

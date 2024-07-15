@@ -30,13 +30,12 @@ It makes a good list of the functionality that are easily available when doing y
  * - Triggering "interactions" of other objects
  * - Little helper utilities
  * - Eg.
-
-	        E.FadeOut(1);			
-			E.Wait(3);
-			if ( E.FirstOccurrence("AteBadPie") )
-				E.ChangeRoom(R.Vomitorium);
-			E.Save(1);
-			E.StartCutscene;
+		E.FadeOut(1);			
+		E.Wait(3);
+		if ( E.FirstOccurrence("AteBadPie") )
+			E.ChangeRoom(R.Vomitorium);
+		E.Save(1);
+		E.StartCutscene;
  */
 public partial interface IPowerQuest
 {
@@ -95,6 +94,9 @@ public partial interface IPowerQuest
 
 	/// Waits until the current dialog has finished. Useful for waiting to the end of SayBG commands
 	Coroutine WaitForDialog();
+	
+	/// Waits until the current dialog has finished, allowing it to be skipped. Useful when you start a SayBG, do a bunch of other things, then want to be able to skip the rest of the SayBG()
+	Coroutine WaitForDialogSkip();
 
 	/// Shows gui and waits for it to disappear. Useful for prompts.
 	Coroutine WaitForGui(IGui gui);
@@ -130,11 +132,15 @@ public partial interface IPowerQuest
         if ( Input.GetKey(KeyCode.Right) || MyControllerSytem.LeftJoystick.x > 0.5f )
 			E.NavigateGui(eGuiNav.Right);
 		~~~
-
+		
 		This calls through to the Focused Gui's Navigate function, so alternatively you could call this yourself. Eg. `E.MyGui.Navigate(eGuiNav.Right)`
 		
+		Returns true if handled by a gui.
 	*/
 	bool NavigateGui(eGuiNav input = eGuiNav.Ok);
+
+	/// Returns true if the specfied NavigateGui input was pressed or repeated (when held down after timer). Also 'consumes' the press event so other guis won't recieve it. \sa NavigateGui
+	bool ConsumeGuiKey(eGuiNav input);
 
 	//
 	// Narrator 
@@ -412,7 +418,7 @@ public partial interface IPowerQuest
 	/// Runs a "Use Hotspot" sequence
 	Coroutine HandleInteract( IHotspot target );
 	/// Runs a "Look at Hotspot" sequence
-	Coroutine HandleLookAt( IHotspot target );
+	Coroutine HandleLookAt( IHotspot target);
 	/// Runs a "Use inventory on hostpot" sequence
 	Coroutine HandleInventory( IHotspot target, IInventory item );
 	/// Runs a "Use Prop" sequence
@@ -1213,7 +1219,7 @@ public partial interface ICharacter : IQuestClickableInterface
 
 /** Room: Contains functions and data for manipluating Rooms - Eg.
 
-	        if ( R.Current.FirstTimeVisited )
+			if ( R.Current.FirstTimeVisited )
 				R.Kitchen.ActiveWalkableArea = 2;
 */
 public partial interface IRoom
@@ -1268,10 +1274,10 @@ public partial interface IRoom
 	/// Moves a named room position to the location of another named position
 	void SetPoint(string name, string fromPosition);
 
-	/// Get the room's hotspot
-	List<Hotspot> GetHotspots();
-	/// Get the room's prop
-	List<Prop> GetProps();
+	/// Get the room's hotspot. Warning: Any items modified in the returned list MUST have Dirty property set, or save games will break!
+	List<Hotspot> GetHotspots_SaveFlagNotDirtied();
+	/// Get the room's prop. Warning: Any items modified in the returned list MUST have Dirty property set, or save games will break!
+	List<Prop> GetProps_SaveFlagNotDirtied();
 
 	/// PowerQuest internal function: Access to the specific quest script for the room. Use the specific room script as the templated parameter so you can access specific members of the script. Eg: GetScript<RoomKitchen>().m_tapOn = true;
 	T GetScript<T>() where T : RoomScript<T>;
@@ -1360,9 +1366,7 @@ public partial interface IProp : IQuestClickableInterface
 	void PauseAnimation();
 	/// Resumes the currently paused animation
 	void ResumeAnimation();
-
-
-	#if ( UNITY_SWITCH == false )
+	
 	/// Starts video playback if the prop has a video component. Returns once the video has completed, or on mouse click if skippableAfterTime is greater than zero
 	/** NB: Video playback position isn't currently saved */
 	Coroutine PlayVideo(float skippableAfterTime = -1);
@@ -1370,7 +1374,6 @@ public partial interface IProp : IQuestClickableInterface
 	void PlayVideoBG();
 	/// Gets the prop's VideoPlayer component (if it has one). This can be used to pause/resume/stop video playback
 	UnityEngine.Video.VideoPlayer VideoPlayer { get; }
-	#endif
 
 	/// Adds a function to be called on an animation event here. Eg: to play a sound or effect on an animation tag. 
 	/** Usage:
@@ -1511,7 +1514,7 @@ public partial interface IRegion
 			if ( I.HeavyRock.EverCollected )
 				Dave: I'm not lugging any more of those around			
 */
-public partial interface IInventory
+public partial interface IInventory : IQuestClickableInterface
 {
 	/// Gets/Sets the name shown to players
 	string Description { get; set; }
@@ -1538,6 +1541,8 @@ public partial interface IInventory
 	void SetActive();
 	/// Whether the current player has the item in their inventory
 	bool Owned { get; set; } 
+	/// How many of the item the current player has in their inventory (For stackable items)
+	int QuantityOwned { get; set; } 
 	/// Whether the item  has ever been collected
 	bool EverCollected { get; } 
 	
@@ -1874,6 +1879,8 @@ public partial interface IGui
 	float Baseline { get;set; }
 	/// Sets a cursor to show when hovering over the gui's hotspot (or anywhere if its a modal gui). Can be overriden by specific controls
 	string Cursor { get;set;}
+	/// Returns true if gui navigation key is pressed which hasn't been consumed by a control (consumes this keypress)
+	bool GetKeyPressed( eGuiNav key );
 	/// Tells the gui to handle a keyboard or controller input. eg. Left/Right/Up/Down inputs will navigate between controls, or slide sliders, and 'Ok' will press buttons.	
 	/// Call this from your gui script or global script if the gui is focused. Returns true if button did something
 	bool Navigate( eGuiNav button );
@@ -1976,7 +1983,9 @@ public partial interface IButton : IGuiControl
 	void AddAnimationTrigger(string triggerName, bool removeAfterTriggering, System.Action action);
 	void RemoveAnimationTrigger(string triggerName);
 	Coroutine WaitForAnimTrigger(string triggerName);
-		
+			
+	/// Gets/Sets the transparency of the sprite
+	float Alpha {get;set;}
 	/// Fade the sprite's alpha
 	Coroutine Fade(float start, float end, float duration, eEaseCurve curve = eEaseCurve.Smooth );
 	/// Fade the sprite's alpha (non-blocking)
@@ -1995,9 +2004,11 @@ public partial interface ILabel : IGuiControl
 	Color Color {get;set;}
 	QuestText TextComponent {get;}
 	
-	/// Fade the sprite's alpha
+	/// Gets/Sets the transparency of the text
+	float Alpha {get;set;}
+	/// Fade the sprite's text
 	Coroutine Fade(float start, float end, float duration, eEaseCurve curve = eEaseCurve.Smooth );
-	/// Fade the sprite's alpha (non-blocking)
+	/// Fade the sprite's text (non-blocking)
 	void FadeBG(float start, float end, float duration, eEaseCurve curve = eEaseCurve.InOutSmooth );
 }
 
@@ -2021,6 +2032,8 @@ public partial interface IImage : IGuiControl
 	void RemoveAnimationTrigger(string triggerName);
 	Coroutine WaitForAnimTrigger(string triggerName);
 	
+	/// Gets/Sets the transparency of the sprite
+	float Alpha {get;set;}
 	/// Fade the sprite's alpha
 	Coroutine Fade(float start, float end, float duration, eEaseCurve curve = eEaseCurve.Smooth );
 	/// Fade the sprite's alpha (non-blocking)
@@ -2105,38 +2118,8 @@ public partial interface ITextField : IGuiControl
 	string Text				{get;set;}
 
 	void FocusKeyboard();
-	/*
-	string Anim	           {get;set;}
-	string AnimHover	   {get;set;}
-	string AnimClick	   {get;set;}
-	//string ColorFocus      {get;set;}
-	string AnimOff         {get;set;}
-	
-	Color Color	        {get;set;}
-	Color ColorHover    {get;set;}
-	Color ColorClick    {get;set;}
-	//Color ColorFocus    {get;set;}
-	Color ColorOff		{get;set;}
-	*/
 
 	bool Clickable {get;set;}
-	/*
-	bool Animating {get;}
-	void PauseAnimation();
-	void ResumeAnimation();
-	void StopAnimation();
-	
-	Coroutine PlayAnimation(string animName);
-	void PlayAnimationBG(string animName) ;
-	void AddAnimationTrigger(string triggerName, bool removeAfterTriggering, System.Action action);
-	void RemoveAnimationTrigger(string triggerName);
-	Coroutine WaitForAnimTrigger(string triggerName);
-		
-	/// Fade the sprite's alpha
-	Coroutine Fade(float start, float end, float duration, eEaseCurve curve = eEaseCurve.Smooth );
-	/// Fade the sprite's alpha (non-blocking)
-	void FadeBG(float start, float end, float duration, eEaseCurve curve = eEaseCurve.InOutSmooth );
-	*/
 }
 
 /// 

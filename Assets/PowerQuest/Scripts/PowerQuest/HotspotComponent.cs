@@ -10,7 +10,7 @@ namespace PowerTools.Quest
 // Hotspot Data and functions. Persistant between scenes, as opposed to HotspotComponent which lives on a GameObject in a scene.
 //
 [System.Serializable] 
-public partial class Hotspot : IQuestClickable, IHotspot, IQuestScriptable
+public partial class Hotspot : IQuestClickable, IHotspot, IQuestScriptable, IQuestSaveCachable
 {
 
 	#region Hotspot: Editor data
@@ -125,7 +125,20 @@ public partial class Hotspot : IQuestClickable, IHotspot, IQuestScriptable
 	public string GetScriptName() { return m_scriptName; }
 	public string GetScriptClassName() { return PowerQuest.STR_HOTSPOT+m_scriptName; }
 	public void HotLoadScript(System.Reflection.Assembly assembly) { /*No-op*/ }
-
+	
+	#endregion
+	#region Hotspot Functions: Implementing IQuestSaveCachable
+	//
+	// Implementing IQuestSaveCachable
+	//	
+	bool m_saveDirtyEver = false;
+	public bool SaveDirty { get=>m_saveDirtyEver; set {
+		if (value) 
+		{
+			//if ( m_saveDirtyEver == false )	Debug.Log($"Hotspot {ScriptName} set dirty");
+			m_saveDirtyEver=true; 
+		} } }
+	public bool SaveDirtyEver => m_saveDirtyEver;
 
 	#endregion
 	#region Hotspot: Functions: Private 

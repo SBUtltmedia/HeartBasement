@@ -22,5 +22,4 @@ public class WalkableComponent : MonoBehaviour
 	}
 
 	public Vector2[] Points { get { return PolygonCollider.points; } }
-
 }

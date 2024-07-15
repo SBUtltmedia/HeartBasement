@@ -26,7 +26,7 @@ public class QuestMenuManager
 	// Definitions
 
 	static readonly float KB_REPEAT_TIME_FIRST = 0.4f; // how long before holding kb navigation before it'll repeat
-	static readonly float KB_REPEAT_TIME_REPEAT = 0.1f; // how fast held kb navigation repeats
+	static readonly float KB_REPEAT_TIME_REPEAT = 0.12f; // how fast held kb navigation repeats
 
 	public static readonly string DEFAULT_FADE_SOURCE = "";
 
@@ -62,6 +62,7 @@ public class QuestMenuManager
 	bool m_kbFocus = false; // True when keyboard has taken focus on a gui
 	BitMask m_kbPrevState = new BitMask(); // Mask of current gui keyboard inputs
 	BitMask m_kbState = new BitMask(); // Mask of current gui keyboard inputs
+	BitMask m_kbStateDown = new BitMask(); // Mask of current gui keyboard inputs
 	float m_kbRepeatTimer = KB_REPEAT_TIME_FIRST; // Timer used for repeating gui keyboard L/R/U/D events
 	bool m_kbWaitForRelease = false; // Whether to wait for next input before processing next input (used when )
 	Vector2 m_cachedMousePos = Vector2.zero;
@@ -204,18 +205,57 @@ public class QuestMenuManager
 
 	public bool KeyboardInputValid => m_kbWaitForRelease = false;
 	
-
-	// Called when a gui handles a keyboard input, allows for 'repeat keys' to be managed in one place
-	public bool ProcessKeyboardInput( eGuiNav key )
+	// Called when gui input is pressed- pass it through to gui system and record presses for queries.
+	public bool NavigateGui(eGuiNav input = eGuiNav.Ok)
 	{
+		if ( PowerQuest.Get.GetBlocked())
+			return false;
+		
+		// update keyboard input
+		if ( OnKeyboardInput(input) )
+		{ 
+			bool handled = false;
+			if ( PowerQuest.Get.GetFocusedGui() != null )
+				handled = PowerQuest.Get.GetFocusedGui().Navigate(input);
+			
+			// if gui didn't consume, cache input for others
+			if ( handled == false )
+				m_kbStateDown.SetAt(input);
+
+			return true;
+		}
+		
+		return false;
+	}
+
+	// Handles keyboard input and returns true if input was "pressed" (or repeated with timer)
+	bool OnKeyboardInput( eGuiNav key )
+	{ 
 		m_kbActive = true;
 		m_kbState.SetAt(key);
 		if ( m_kbWaitForRelease )
 			return false;
 
-		// Return true if pressed this frame
-		if ( m_kbPrevState.IsSet(key) == false )  // If pressed
+		/*
+		// Return true if pressed this frame		
+		if ( key <= eGuiNav.Down )
+		{ 
+			// handle up/down/left/right together. Stops "rolling" analog stick counting as lots of presses which feels bad when pushing diagonally- you get it jumping over 2 at once...
+			// But if one direction isn't "handled" and other is, this feels bad not too :/
+			int num = 0;
+			for ( eGuiNav butt = eGuiNav.Left; butt <= eGuiNav.Down; butt++ )
+				if ( m_kbPrevState.IsSet(butt) )
+					num++;
+			if ( num > 0 && m_kbPrevState.IsSet(key) == false ) // lower repeat time when rolling
+				m_kbRepeatTimer = KB_REPEAT_TIME_REPEAT;
+
+			if ( num == 0 )
+				return true;
+		}
+		else */
+		if ( m_kbPrevState.IsSet(key) == false )  // Return true if pressed this frame	
 			return true;
+
 
 		// Return true if held until repeat timer is zero
 		if ( m_kbRepeatTimer <= 0 )
@@ -229,12 +269,22 @@ public class QuestMenuManager
 
 	// gui keyboard input stuff	
 
+	// Return whether key was pressed this frame (or repeated) and marks the input as having been "used" so other thigns won't use it
+	public bool ConsumeGuiKey( eGuiNav key )
+	{ 		
+		if ( GetGuiKeyPress(key) )
+		{ 
+			m_kbStateDown.UnsetAt(key);
+			return true;
+		}
+		return false;
+	}
 	// Returns wheter the key is currently held down. Only valid between this component update and When gui.HandleKeyboardInput functions are called. Not a real input system.
-	public bool GetGuiKey(eGuiNav button) { return m_kbState.IsSet(button); }
+	public bool GetGuiKey(eGuiNav button) { return m_kbWaitForRelease ? false : m_kbState.IsSet(button); }
 	// Return whether key was pressed this frame
-	public bool GetGuiKeyPress(eGuiNav button) { return m_kbState.IsSet(button) && m_kbPrevState.IsSet(button) == false; }
+	public bool GetGuiKeyPress(eGuiNav button) { return m_kbWaitForRelease ? false : m_kbStateDown.IsSet(button); } // (m_kbState.IsSet(button) && m_kbPrevState.IsSet(button) == false); }
 	// Returns whether key was released this frame
-	public bool GetGuiKeyRelease(eGuiNav button) { return m_kbState.IsSet(button) == false && m_kbPrevState.IsSet(button); }
+	public bool GetGuiKeyRelease(eGuiNav button) { return m_kbWaitForRelease ? false : (m_kbState.IsSet(button) == false && m_kbPrevState.IsSet(button)); }
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Private functions
@@ -286,6 +336,7 @@ public class QuestMenuManager
 		// Update last state
 		m_kbPrevState.Value = m_kbState.Value;
 		m_kbState.Value = 0;
+		m_kbStateDown.Value = 0;
 
 		// Reset 'wait for release' flag
 		if ( m_kbWaitForRelease && m_kbPrevState.Value == 0 )

@@ -35,7 +35,6 @@ public class DialogTreeComponentEditor : Editor
 		DialogTreeComponent component = (DialogTreeComponent)target;
 		if ( component == null ) return;
 		
-
 		GUILayout.Label( "Script Functions", EditorStyles.boldLabel);
 
 		if ( GUILayout.Button("Edit Script") )

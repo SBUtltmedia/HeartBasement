@@ -68,10 +68,14 @@ public partial class PowerQuest
 
 	public bool Save(int slot, string description, Texture2D imageOverride = null)
 	{
-		// Check we're not currently saving a game. This could happen if "Save" is called in OnEnter (since that'll be called again when you restore)
+		// Check we're not currently loading a game. This could happen if "Save" is called in OnEnter (since that'll be called again when you restore)
 		if ( m_restoring )
 			return false;
 
+		// Check not currently already loading/saving files (would only be problem for async save really)
+		if ( m_saveManager.Busy )
+			return false;
+			
 		// Save settings when regular game is saved whynot
 		SaveSettings();
 
@@ -79,11 +83,13 @@ public partial class PowerQuest
 		
 		foreach( Character value in m_characters )
 		{
-			data.Add( "Char"+value.ScriptName, value );
+			if ( value.SaveDirtyEver )
+				data.Add( "Char"+value.ScriptName, value );
 		}
 		foreach( Room value in m_rooms )
 		{
-			data.Add( "Room"+value.GetScriptName(), value );
+			if ( value.SaveDirtyEver )
+				data.Add( "Room"+value.GetScriptName(), value );
 		}
 		foreach( Gui value in m_guis )
 		{
@@ -91,18 +97,20 @@ public partial class PowerQuest
 		}
 		foreach( Inventory value in m_inventoryItems )
 		{
-			data.Add( "Inv"+value.GetScriptName(), value );
-		}
+			if ( value.SaveDirtyEver )
+				data.Add( "Inv"+value.GetScriptName(), value );
+		}	
 		foreach( DialogTree value in m_dialogTrees )
 		{
-			data.Add( "Dlg"+value.GetScriptName(), value );
+			if ( value.SaveDirtyEver )
+				data.Add( "Dlg"+value.GetScriptName(), value );
 		}
-
+		
 		data.Add("Global",m_globalScript );
 		data.Add("Camera", m_cameraData );
 		data.Add("Cursor", m_cursor );
 		data.Add("Audio", SystemAudio.Get.GetSaveData());
-		//data.Add("Settings",m_settings );
+		//data.Add("Settings",m_settings ); // Settings moved to own save
 		data.Add("SV", m_savedVars);
 		data.Add("Extra", 
 			new ExtraSaveData() 
@@ -119,34 +127,41 @@ public partial class PowerQuest
 			});
 
 		Texture2D image = imageOverride;
-		Camera cam = m_cameraData?.Camera;		
-		if ( image == null && cam != null && m_saveScreenshotHeight > 0 )
-		{
-			int imageHeight = m_saveScreenshotHeight;			
-			int imageWidth = Mathf.CeilToInt(imageHeight * cam.aspect);
-
-			// Take screenshot for image
-			RenderTexture currentRT = RenderTexture.active;				
-			RenderTexture.active = new RenderTexture(imageWidth,imageHeight,16, RenderTextureFormat.ARGB32,0);
-			
-			RenderTexture currCamTex = cam.targetTexture;
-			cam.targetTexture = RenderTexture.active;
-
-			Texture2D tex = new Texture2D(imageWidth, imageHeight, TextureFormat.ARGB32, false);
-			cam.Render(); 
-			image = new Texture2D(cam.targetTexture.width, cam.targetTexture.height);
-			image.ReadPixels(new Rect(0, 0, cam.targetTexture.width, cam.targetTexture.height), 0, 0);
-			image.Apply();
-			RenderTexture.active = currentRT;
-			cam.targetTexture = currCamTex;
-			
-			/*	Test code to preview screenshot as file /
-			var Bytes = image.EncodeToPNG(); 
-			System.IO.File.WriteAllBytes(Application.dataPath + "test.png", Bytes);
-			/**/
-		}
-
+		if ( image == null  )
+			image = TakeSaveScreenshot();
+		
 		return m_saveManager.Save(slot, description, m_saveVersion, data, image);
+	}
+
+	public Texture2D TakeSaveScreenshot()
+	{ 
+		Camera cam = m_cameraData?.Camera;	
+		if ( cam == null || m_saveScreenshotHeight <= 0 )
+			return null;
+		Texture2D image = null;
+		int imageHeight = m_saveScreenshotHeight;			
+		int imageWidth = Mathf.CeilToInt(imageHeight * cam.aspect);
+
+		// Take screenshot for image
+		RenderTexture currentRT = RenderTexture.active;				
+		RenderTexture.active = new RenderTexture(imageWidth,imageHeight,16, RenderTextureFormat.ARGB32,0);
+			
+		RenderTexture currCamTex = cam.targetTexture;
+		cam.targetTexture = RenderTexture.active;
+
+		Texture2D tex = new Texture2D(imageWidth, imageHeight, TextureFormat.ARGB32, false);
+		cam.Render(); 
+		image = new Texture2D(cam.targetTexture.width, cam.targetTexture.height);
+		image.ReadPixels(new Rect(0, 0, cam.targetTexture.width, cam.targetTexture.height), 0, 0);
+		image.Apply();
+		RenderTexture.active = currentRT;
+		cam.targetTexture = currCamTex;
+		
+		/*	Test code to preview screenshot as file /
+		var Bytes = image.EncodeToPNG(); 
+		System.IO.File.WriteAllBytes(Application.dataPath + "test.png", Bytes);
+		/**/
+		return image;
 	}
 
 	public bool RestoreLastSave()
@@ -356,6 +371,9 @@ public partial class PowerQuest
 	{
 		return m_saveManager.DeleteSave(slot);
 	}
+		
+	// Allows overriding file io used in save system. For porting to other platforms that can't use regular file io (switch, etc). Implement the interface and pass here on startup
+	public void SetSaveIoStrategy(ISaveIoStrategy strategy) { m_saveManager.SetSaveIoStrategy(strategy); }
 
 	/// Advanced save/restore function: For saving data not in a QuestScript...
 	/**
@@ -367,9 +385,9 @@ public partial class PowerQuest
 	- The object to be saved must be a class containing the data to be saved (can't just pass in a value type like an int, float or Vector2).
 	- By default all data in a class is saved, except for:
 		- GameObjects, and MonoBehaviours
-		- Variables with the [QuestDontSave] attribute (NOTE: THIS IS NOT YET IMPLEMENTED, BUG DAVE IF NEEDED!)
+		- Variables with the [QuestDontSave] attribute
 		- If you store references to other things that shouldnt be saved in your scripts, that may cause problems. Best thing is to dave know, he can add a feature tohelp with that
-	-  you can add the [QuestSave] attribute to the class
+	-  You can add the [QuestSave] attribute to the class
 		- When you do that, ONLY the variables that also have the [QuestSave] attribute are saved.
 		- You can put this tag on a Monobehaviour class, when you just want to save a few of its variables without having to put them in their own seperate class		
 

@@ -249,9 +249,10 @@ public partial class TextField : GuiControl, ITextField
 
 		m_textEditor.text = m_questText.text;
 	}
-
-	void Start()
-	{		
+	
+	protected override void Start()
+	{
+		base.Start();   
 		InitComponentReferences();
 
 		StartStateAnimation();

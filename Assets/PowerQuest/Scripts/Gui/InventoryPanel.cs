@@ -131,6 +131,12 @@ public partial class InventoryPanel : GuiControl, IInventoryPanel
 			m_buttonScrollForward.OnClick += OnForwardButton;
 	}
 
+	// Start is called before the first frame update
+	protected override void Start()
+	{
+		base.Start();
+	}
+
 	void OnDestroy()
 	{
 		if ( m_buttonScrollBack != null )	

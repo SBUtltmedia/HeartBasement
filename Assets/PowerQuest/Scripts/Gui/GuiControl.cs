@@ -38,6 +38,7 @@ public partial class GuiControl : MonoBehaviour, IQuestClickable, IQuestScriptab
 	
 	protected Gui m_gui = null;
 	protected GuiComponent m_guiComponent = null;
+	protected GuiNavigation m_navComponent = null;
 
 	#endregion
 	#region Funcs: For inheritors to implement
@@ -112,14 +113,14 @@ public partial class GuiControl : MonoBehaviour, IQuestClickable, IQuestScriptab
 	#endregion
 	#region Funcs: Public
 
-	void Start()
-	{
+	protected virtual void Start()
+	{	
 		GuiComponent.EditorUpdateChildComponents(); // TEMP HACK- Should just check its in there itself
 		GuiComponent.RegisterControl(this);
 		Visible = m_visible;
 		// update sort order
 		UpdateBaseline();
-
+		m_navComponent = GetComponent<PowerTools.Quest.GuiNavigation>();
 		ExStart();
 	}
 
@@ -158,8 +159,8 @@ public partial class GuiControl : MonoBehaviour, IQuestClickable, IQuestScriptab
 				m_guiComponent = GetComponentInParent<GuiComponent>();	
 			return m_guiComponent;
 		}
-	}
-	
+	}	
+	public GuiNavigation NavigationComponent => m_navComponent;	
 	public AnimationClip GetAnimation(string animName) { return GuiComponent.GetAnimation(animName); }
 	public List<AnimationClip> GetAnimations() { return GuiComponent.GetAnimations(); }
 	public Sprite GetSprite(string name) { return GuiComponent.GetSprite(name); }
@@ -173,6 +174,7 @@ public partial class GuiControl : MonoBehaviour, IQuestClickable, IQuestScriptab
 		}	
 	}
 
+	// Check for keyboard focus. Eg: Text Input controls that  capture kb. (different to navigation focus)
 	public bool HasKeyboardFocus
 	{
 		// Simply sets state in PowerQuest, which will call back to the control with OnKbFocus or OnKbDefocus
@@ -264,12 +266,10 @@ public partial class GuiControl : MonoBehaviour, IQuestClickable, IQuestScriptab
 			
 			SpriteRenderer[] sprites = Instance.GetComponentsInChildren<SpriteRenderer>(true);
 			QuestText[] texts = Instance.GetComponentsInChildren<QuestText>(true);
-
-			System.Action FadeSetAlpha = ()=>
-			{		
-				System.Array.ForEach( sprites, sprite => { if ( sprite != null ) sprite.color = sprite.color.WithAlpha( m_alpha ); });
-				System.Array.ForEach( texts, text => { if ( text != null ) text.color = text.color.WithAlpha( m_alpha ); });
-			};
+	
+			System.Array.ForEach( sprites, sprite => { if ( sprite != null ) sprite.color = sprite.color.WithAlpha( m_alpha ); });
+			System.Array.ForEach( texts, text => { if ( text != null ) text.color = text.color.WithAlpha( m_alpha ); });
+			
 		}
 	}
 

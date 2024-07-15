@@ -102,7 +102,7 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 
 	[Header("Audio")]
 	[Tooltip("Add Footstep event to animation to trigger the footstep sound")]
-	[SerializeField] string m_footstepSound = string.Empty;
+	[SerializeField,QuestAudioCueName] string m_footstepSound = string.Empty;
 
 	[Header("Other Settings")]
 	[Tooltip("Whether clickable collider shape is taken from the sprite")]
@@ -231,23 +231,22 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 			// Add/remove instance of character if it's the current room that effected. 
 			if ( currRoom == oldRoom )
 			{
-
 				// Handle the player changing rooms (should trigger scene change)
 				if ( IsPlayer )
 				{		
+					StopFacingCharacter(); // Stop facing character (it's easy to forget to reset this, causes wierd bugs)
 					PowerQuest.Get.StartRoomTransition(value.Data);
 				}
-				// Player has left the current room, remove them from the scene
+				// Character has left the current room, remove them from the scene
 				else if ( Instance != null )
 				{
 					Instance.gameObject.name = "deleted"; // so it doesn't turn up in searches in same frame
 					GameObject.Destroy(Instance.gameObject);
-					
 				}
 			}	
 			else if ( currRoom == m_room )
 			{
-				// Player has entered the current room, add them to the scene
+				// Character has entered the current room, add them to the scene
 				SpawnInstance();
 			}	
 			else if ( currRoom != m_room && IsPlayer && PowerQuest.Get.GetRestoringGame() == false )
@@ -278,6 +277,7 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 	// Debugging function to set the last room, useful in PlayFrom functions in particular
 	public void DebugSetLastRoom(IRoom room)
 	{
+		(room as Room).DebugSetVisited(1);
 		if ( room == null ) 
 			m_lastRoom = null; 
 		else 
@@ -293,7 +293,10 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 	public List<Vector2> Waypoints { get { return m_waypoints; } }
 
 	public float Baseline { get{return m_baseline;} set{m_baseline = value;} }	
-	public void SetBaselineInFrontOf(IQuestClickableInterface clickable) { Baseline = (clickable.IClickable.Baseline-1) - Position.y; }
+	public void SetBaselineInFrontOf(IQuestClickableInterface clickable) 
+	{ 		
+		Baseline = (clickable.IClickable.Baseline+clickable.IClickable.Position.y-1) - Position.y;
+	}
 
 	public Vector2 WalkSpeed 
 	{
@@ -352,8 +355,9 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 		get	{ return m_clickable && Enabled; } 
 		set
 		{		
-			if ( value && m_enabled == false )
-				Debug.LogWarning("Character Clickable set when Character is not Enabled. Did you mean to call Show() or Enable() first?");
+			// Disabled this warning, which was really only for when upgrading old PQ from ages ago
+			//if ( value && m_enabled == false )
+			//	Debug.LogWarning("Character Clickable set when Character is not Enabled. Did you mean to call Show() or Enable() first?");
 			//m_clickableWhenEnabled = value; 
 			m_clickable = value;
 		} 
@@ -364,8 +368,8 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 		get	{ return m_visible && Enabled; } 
 		set
 		{
-			if ( value && m_enabled == false )
-				Debug.LogWarning("Character Visible set when Character is not Enabled. Did you mean to call Show() or Enable() first?");
+			//if ( value && m_enabled == false )
+			//	Debug.LogWarning("Character Visible set when Character is not Enabled. Did you mean to call Show() or Enable() first?");
 			bool changed = value != m_visible;
 			//m_visibleWhenEnabled = value;
 			m_visible = value;
@@ -883,8 +887,10 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 		m_prefab = prefab;
 		if ( m_script == null ) // script could be null if it didn't exist in old save game, but does now.
 			m_script = QuestUtils.ConstructByName<QuestScript>(m_scriptClass);
-			
+
+		m_nonSavedData.m_roomCached = null;	// Cached room will poitn to wrong place after restoring, so null it
 		SaveDirty=false;
+
 
 		/*	NB: The below doesn't work because instance won't have loaded yet.
 		
@@ -923,7 +929,14 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 	// Implementing IQuestSaveCachable
 	//	
 	bool m_saveDirty = true;
-	public bool SaveDirty { get=>m_saveDirty; set{m_saveDirty=value;} }
+	bool m_saveDirtyEver = false;
+	public bool SaveDirty { get=>m_saveDirty; set { m_saveDirty=value; 
+		if (value) 
+		{
+			//if ( m_saveDirtyEver == false ) Debug.Log($"Char {ScriptName} set dirty");
+			m_saveDirtyEver=true; 
+		} } }
+	public bool SaveDirtyEver => m_saveDirtyEver;
 
 	#endregion
 	#region Funcs: Public
@@ -1418,9 +1431,13 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 	{
 		if ( m_faceChar == null || PowerQuest.Get.GetCharacter(m_faceChar.m_character) == null )
 			return;
-		if ( Walking == false && m_targetFaceDirection == m_faceDirection && Utils.GetTimeIncrementPassed(m_faceChar.m_minTime, m_faceChar.m_maxTime, ref m_faceChar.m_timer) )
+		if ( Walking == false && m_targetFaceDirection == m_faceDirection
+			&& Utils.GetTimeIncrementPassed(m_faceChar.m_minTime, m_faceChar.m_maxTime, ref m_faceChar.m_timer)
+			)
 		{
-			FaceBG(PowerQuest.Get.GetCharacter(m_faceChar.m_character) as IQuestClickable);
+			Character charctr = PowerQuest.Get.GetCharacter(m_faceChar.m_character);
+			if ( charctr != null && charctr.VisibleInRoom )
+				FaceBG(charctr as IQuestClickable);
 		}
 	}
 
@@ -1678,7 +1695,7 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 				{
 					GameObject go = GameObject.Instantiate(powerQuest.GetDialogTextPrefab().gameObject) as GameObject;
 					m_dialogText = go.GetComponent<QuestText>();
-					go.GetComponent<TextMesh>().color = m_textColour;
+					m_dialogText.color = m_textColour;
 				}
 				else
 				{

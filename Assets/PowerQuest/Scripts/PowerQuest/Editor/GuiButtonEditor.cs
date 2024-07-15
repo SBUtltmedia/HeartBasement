@@ -162,17 +162,19 @@ public class ControlEditorBase : Editor
 		AnimationClip clip = gui.GetAnimation(anim);
 		if ( clip == null )
 			clip = PowerQuestEditor.GetPowerQuest().GetGuiAnimation(anim);		
+		Sprite sprite = null;
 		if ( clip != null )
 		{
-			// Get first sprite in animation
-			PowerQuestEditor.UpdateDefaultSprite(button,anim,clip);
-			return true;
+			// Get first sprite in animation			
+			sprite = PowerQuestEditor.GetFirstSpriteInAnim(clip);
 		}
 		
 		// Try setting sprite
-		Sprite sprite = gui.GetSprite(anim);
 		if ( sprite == null )
-			sprite = PowerQuestEditor.GetPowerQuest().GetGuiSprite(anim);	
+			sprite = gui.GetSprite(anim);
+		if ( sprite == null )
+			sprite = PowerQuestEditor.GetPowerQuest().GetGuiSprite(anim);
+
 		if ( sprite != null )
 		{
 			spriteComponent.sprite = sprite;
@@ -518,13 +520,21 @@ public class ButtonEditor : ControlEditorBase
 			UpdateCollider();
 			EditorUtility.SetDirty(target);
 		}
+		/* NB: Can't rename while prefab staged, it's a nightmare to figure out, so giving up for now
 		if ( GUILayout.Button("Rename") )
 		{			
+			// Need to use gui
 			ScriptableObject.CreateInstance< RenameQuestObjectWindow >().ShowQuestWindow(
-				component.gameObject, eQuestObjectType.Gui, component.ScriptName, PowerQuestEditor.OpenPowerQuestEditor().RenameQuestObject );
+				component.gameObject, eQuestObjectType.GuiControl, component.ScriptName, RenameGuiControl );
 		}
+		
+		void RenameGuiControl( GameObject prefab, eQuestObjectType questType, string newName )
+		{
+			PowerQuestEditor.OpenPowerQuestEditor().RenameQuestObject(prefab,questType,newName);
+		}*/
 	}
 	
+
 	
 
 	public override void OnSceneGUI()

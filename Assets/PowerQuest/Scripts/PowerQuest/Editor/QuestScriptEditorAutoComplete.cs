@@ -23,7 +23,7 @@ public partial class QuestScriptEditor
 		{ 
 			"E", "R", "C", "I", "D", "G", "Plr",
 			"P","H",/*"Hotspots", "Props",*/ "Regions", "Points","Buttons","Labels","Images","Sliders","TextFields","Controls",
-			"Globals","Audio","Camera","Settings","Cursor",
+			"Globals","Audio","Camera","Settings","Cursor","Parser",
 			"FaceClicked","WalkToClicked", "End", "Return", "Consume",
 			"Display: ", "DisplayBG: ","Section: ",
 			"bool","int","float","string","Vector2","enum","true","false","if","else","while","for","switch","case","default","break","continue","new","public",
@@ -73,12 +73,14 @@ public partial class QuestScriptEditor
 		Audio,		  // Audio System
 		ICamera,	  // QuestCamera
 		ICursor,      // ICursor
-		Settings,	  // Settings
+		IParser,      // Parser
+		Settings,	  // Settings			
 		EnumItem,	  // e???. -> enum contents eg eStateWindow.Open
 		ObjectScript, // C.Dave.Script. or R.Kitchen.Script. or I.Bucket.Script or D.Chat.Script.
 
 		// These contexts include a space or open bracket
 		AnimChar,	// C.Dave.AnimIdle = " or C.Dave.PlayAnimation(
+		AnimChar2, // :: or Dave::
 		AnimProp,	// P.Door.Animation = " or P.Door.PlayAnimation(
 		Sound,      // Audio.Play(
 		Count,
@@ -90,7 +92,7 @@ public partial class QuestScriptEditor
 	static readonly Regex[] AC_CONTEXT_REGEX = 
 	{
 		new Regex( @"^\w+:", RegexOptions.Compiled | RegexOptions.IgnoreCase ), // don't check
-		new Regex( @"^(\w+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ),  // start of a word
+		new Regex( @"^:?(\w+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ),  // start of a word. Optional ':' here as shortcut to match character names
 		new Regex( @"^C\.(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), 		// eg: C.??
 		new Regex( @"^R\.(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), 		// eg: R.??
 		new Regex( @"^I\.(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), 		// eg: I.??
@@ -127,11 +129,13 @@ public partial class QuestScriptEditor
 		new Regex( @"^Audio\.(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), 		// eg: Audio.??
 		new Regex( @"^Camera\.(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), 		// eg: Camera.??
 		new Regex( @"^Cursor\.(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), 		// eg: Cursor.??
+		new Regex( @"^Parser\.(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), 		// eg: Parser.??
 		new Regex( @"^Settings\.(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), 	// eg: Settings.??
 		new Regex( @"^e[A-Z]\w*\.(\w*)$", RegexOptions.Compiled ), 	// eg: eStateWindow.??
 		new Regex( @"^[CRIG]\.\w+\.Script\.(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), 		// eg: C.Fred.Script. // eg: R.Kitchen.Script. // eg: I.Bucket.Script. // eg: G.Prompt.Script.
 
 		new Regex( @"^\s*(?:C\.\w+|Plr)\.(?:(?:AnimIdle|AnimTalk|AnimWalk|Pose|NextPose|Animation)\s*=\s*|PlayAnimation(?:BG)?\(\s*)(""?\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), // eg: C.Fred.AnimIdle = " // eg: C.Fred.PlayAnimation("
+		new Regex( @"^\s*:\w*:\s*(\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), // eg: :Dave: or ::
 		new Regex( @"^\s*P\.\w+\.(?:Animation\s*=\s*|PlayAnimation(?:BG)?\(\s*)(""?\w*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), // eg: P.Door.Animation = " // eg: P.Door.PlayAnimation("
 		new Regex( @"^\s*Audio\.(?:Play|Stop|IsPlaying)\w*\(\s*(""?.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase ), // eg: Audio.Play("
 	};
@@ -177,10 +181,12 @@ public partial class QuestScriptEditor
 		true,	// Audio,		
 		true,	// ICamera,	
 		true,   // ICursor
+		true,   // IParser
 		true,	// Settings,	
 		false,	// eStateBlah.
 		true,	// ObjectScript		
 		false,  // AnimChar,
+		false,  // AnimChar for poses,
 		false,  // AnimProp,
 		false,  // Sound,   
 	};
@@ -531,6 +537,8 @@ public partial class QuestScriptEditor
 				{					
 					System.Array.ForEach(typeof(SystemAudio).GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static),
 						item => {if (item.IsSpecialName == false && item.Name[0] !='<') contextList.Add(item.Name + "(" + (item.GetParameters().Length > 0 ? string.Empty : ")"));} );
+					System.Array.ForEach(typeof(SystemAudio).GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static),
+						item => contextList.Add(item.Name) );
 				} break;
 			case eAutoCompleteContext.ICamera:
 				{					
@@ -546,12 +554,20 @@ public partial class QuestScriptEditor
 					System.Array.ForEach(typeof(ICursor).GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance),
 						item => contextList.Add(item.Name) );
 				} break;
+			case eAutoCompleteContext.IParser:
+				{					
+					System.Array.ForEach(typeof(IParser).GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance ),
+						item => {if (item.IsSpecialName == false && item.Name[0] !='<') contextList.Add(item.Name + "(" + (item.GetParameters().Length > 0 ? string.Empty : ")"));} );
+					System.Array.ForEach(typeof(IParser).GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance),
+						item => contextList.Add(item.Name) );
+				} break;
 			case eAutoCompleteContext.Settings:
 				{
 					System.Array.ForEach(typeof(QuestSettings).GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance),
 						item => contextList.Add(item.Name) );
 				} break;
 			case eAutoCompleteContext.AnimChar:
+			case eAutoCompleteContext.AnimChar2:
 				{					
 					// This needs to happen per character, so it's done during autocomplete
 				} break;
@@ -627,7 +643,7 @@ public partial class QuestScriptEditor
 		// Find the context, first for longer expressions containing spaces and open brackets.
 		if ( foundContext == false )
 		{
-			// Find start of current expression- TODO Cleanup: extract this into function, it's done 3 times.
+			// Find start of current expression
 			if ( FindExpressionStart(index,true, out expressionStart, out expression) == false )
 			{
 				ClearAutoComplete();
@@ -714,24 +730,34 @@ public partial class QuestScriptEditor
 					}
 				}
 			}
-			else if ( m_acContext != oldContext && m_acContext == eAutoCompleteContext.AnimChar )
+			else if ( m_acContext != oldContext && (m_acContext == eAutoCompleteContext.AnimChar || m_acContext == eAutoCompleteContext.AnimChar2) )
 			{
 				// Add animation names dynamically
 				string input = m_text.Substring(expressionStart, ((index-expressionStart)-m_acRemaining.Length));
 
 				Match match = Regex.Match(input, @"^\s*(?:C\.)?(\w+)\.");
-				//if ( match.Success == false )
-				//	match = Regex.Match(input, @"^\s*(\w*)::"); // Trying to match 'Dave::' but wasn't working
+				bool noquote = false;
+				if ( match.Success == false )
+				{ 
+					match = Regex.Match(input, @"^\s*:(\w*):\s*"); // Trying to match ':Dave:'
+					noquote = match.Success;
+				}
+				CharacterComponent charPrefab= null;
+
+				List<string> contextList = m_acLists[(int)m_acContext]; 
+				contextList.Clear();
+
 				if ( match.Success )
 				{
-					List<string> contextList = m_acLists[(int)m_acContext];
-					contextList.Clear();
+					string charName = match.Groups[1].Value;					
+					charPrefab = PowerQuestEditor.GetPowerQuest().GetCharacterPrefabs().Find(character=> character != null && character.GetData() != null && character.GetData().ScriptName == charName);
+				}
 
-					string charName = match.Groups[1].Value;
-					CharacterComponent charPrefab= PowerQuestEditor.GetPowerQuest().GetCharacterPrefabs().Find(character=> character != null && character.GetData() != null && character.GetData().ScriptName == charName);
-					if ( charPrefab == null ) // if didn't find prefab, assume it's Plr or C.Player or something
-						charPrefab = PowerQuestEditor.GetPowerQuest().GetCharacterPrefabs()[0]; // Also assuming player is first in list still
-					charPrefab?.GetAnimations()?.ForEach( item=>  
+				if ( charPrefab == null ) // if didn't find prefab, assume it's Plr or C.Player or something
+					charPrefab = PowerQuestEditor.GetPowerQuest().GetCharacterPrefabs()[0]; // Also assuming player is first in list still
+				if ( charPrefab != null )
+				{ 
+					charPrefab.GetAnimations()?.ForEach( item=>  
 					{ 
 						if ( item != null )
 						{						
@@ -750,17 +776,18 @@ public partial class QuestScriptEditor
 								anim = anim.Substring(0,sublen+1);
 								if ( contextList.Contains(anim) == false )
 								{
-									contextList.Add($"\"{anim}\""); 
-									foundNonDirectional = true;
+									contextList.Add( noquote ? anim :  $"\"{anim}\""); 
 								}
+									foundNonDirectional = true;
 							}
 							// Add the directional name if no non-directional found
 							if ( foundNonDirectional == false )
-								contextList.Add($"\"{item.name}\""); 
+								contextList.Add(noquote ? item.name :$"\"{item.name}\""); 
 						}
 					} );
-					
 				}
+					
+				
 			}
 
 			// Add items that match remaining expression to the list
@@ -918,6 +945,7 @@ public partial class QuestScriptEditor
 			case eAutoCompleteContext.Audio: type = typeof(SystemAudio); break;	
 			case eAutoCompleteContext.ICamera: type = typeof(ICamera); break;	
 			case eAutoCompleteContext.ICursor: type = typeof(ICursor); break;	
+			case eAutoCompleteContext.IParser: type = typeof(IParser); break;	
 			case eAutoCompleteContext.Settings: type = typeof(QuestSettings); break;	
 			case eAutoCompleteContext.ObjectScript: type = m_lastObjectScriptType;  break;
 		}

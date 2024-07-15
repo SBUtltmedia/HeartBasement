@@ -6,7 +6,9 @@ using UnityEditorInternal;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using PowerTools.Quest;
 using PowerTools;
 
@@ -21,8 +23,6 @@ public partial class PowerQuestEditor
 	#endregion
 	#region Variables: Serialized
 
-	[SerializeField]  Editor m_walkableAreaEditor = null;
-	[SerializeField]  int m_walkableAreaEditingId = -1;
 	[SerializeField] int m_selectedRoomPoint = -1;
 	[SerializeField] bool m_showRoomCharacters = false;
 
@@ -37,9 +37,13 @@ public partial class PowerQuestEditor
 	ReorderableList m_listPoints = null;
 	ReorderableList m_listWalkableAreas = null; 
 	ReorderableList m_listRoomCharacters = null; 
+	ReorderableList m_listRoomCharactersUsed = null; 
+
+
 
 	// list of functions you can start he game with
 	List<string> m_playFromFuncs = new List<string>();
+	List<string> m_playFromFuncsNicified = new List<string>();
 	
 	bool m_editingPointMouseDown = false;
 
@@ -299,7 +303,7 @@ public partial class PowerQuestEditor
 		gameObject.GetComponent<SpriteRenderer>().sortingOrder = powerQuestEditor.m_selectedRoom.GetPropComponents().Count;
 
 		// Set sprite if one exists already
-		UpdateDefaultSprite( propComponent, propComponent.GetData().Animation, powerQuestEditor.m_selectedRoom.GetAnimations(), null, powerQuestEditor.m_selectedRoom.GetSprites() );
+		UpdateDefaultSprite( propComponent, propComponent.GetData().Animation, powerQuestEditor.m_selectedRoom.GetAnimations(), powerQuestEditor.m_selectedRoom.GetSprites() );
 
 		Selection.activeObject = gameObject;
 
@@ -452,7 +456,6 @@ public partial class PowerQuestEditor
 		if ( powerQuestEditor == null || powerQuestEditor.m_selectedRoom == null)
 			return;
 
-
 		GameObject walkableAreaObj = new GameObject("WalkableArea",typeof(WalkableComponent)) as GameObject;
 		walkableAreaObj.transform.parent = powerQuestEditor.m_selectedRoom.transform;
 		walkableAreaObj.name = "WalkableArea";
@@ -504,10 +507,6 @@ public partial class PowerQuestEditor
 			}
 		}
 
-		if ( m_walkableAreaEditor != null ) 
-			Editor.DestroyImmediate(m_walkableAreaEditor);
-		m_walkableAreaEditingId = -1;
-
 		m_selectedRoom.EditorUpdateChildComponents();
 		#if !UNITY_2018_3_OR_NEWER
 			PrefabUtility.ReplacePrefab( m_selectedRoom.gameObject, PrefabUtility.GetPrefabParent(m_selectedRoom.gameObject), ReplacePrefabOptions.ConnectToPrefab );
@@ -540,22 +539,15 @@ public partial class PowerQuestEditor
 			m_listPoints = null;
 			m_listWalkableAreas = null;
 			m_listRoomCharacters = null;
+			m_listRoomCharactersUsed = null;
 			m_selectedRoomPoint = -1;
 
 			if ( m_selectedRoom != null )
 			{
 				m_selectedRoom.EditorUpdateChildComponents();
 
-				if ( m_walkableAreaEditor != null ) 
-					Editor.DestroyImmediate(m_walkableAreaEditor);
-				m_walkableAreaEditingId = -1;
-
 				// The selected room will be an instance unless the game is running
-				#if UNITY_2018_3_OR_NEWER	
 				bool isInstance = PrefabUtility.GetPrefabInstanceStatus(m_selectedRoom.gameObject) == PrefabInstanceStatus.Connected;
-				#else 
-				bool isInstance = PrefabUtility.GetPrefabType(m_selectedRoom.gameObject) == PrefabType.PrefabInstance;
-				#endif
 
 				if ( isInstance )
 				{
@@ -670,11 +662,18 @@ public partial class PowerQuestEditor
 					};
 				}
 			}
-
-
-			m_listRoomCharacters = new ReorderableList( m_powerQuest.GetCharacterPrefabs(), typeof(CharacterComponent),false,true,false,false) 
+			
+			m_listRoomCharacters =     new ReorderableList( m_powerQuest.GetCharacterPrefabs(), typeof(CharacterComponent),false,true,false,false) 
 			{ 			
-				drawHeaderCallback = 	(Rect rect) => {  m_showRoomCharacters = EditorGUI.Foldout(rect, m_showRoomCharacters,"Characters (Room Specific Interactions)", true); },
+				drawHeaderCallback = 	(Rect rect) => FoldoutRoomCharacters(rect),
+				drawElementCallback = 	LayoutRoomCharacterGUI,
+				onSelectCallback = 		SelectGameObjectFromList,
+			};
+			
+			RefreshCharactersWithFunctionsList(newRoom);
+			m_listRoomCharactersUsed = new ReorderableList( m_charactersWithFunctions, typeof(CharacterComponent),false,true,false,false) 
+			{ 			
+				drawHeaderCallback = 	(Rect rect) => FoldoutRoomCharacters(rect),
 				drawElementCallback = 	LayoutRoomCharacterGUI,
 				onSelectCallback = 		SelectGameObjectFromList,
 			};
@@ -684,6 +683,48 @@ public partial class PowerQuestEditor
 			if ( repaint ) 
 				Repaint();
 		}
+	}
+
+	//! List of only characters with functions...
+	List<CharacterComponent> m_charactersWithFunctions = new List<CharacterComponent>();
+
+	void FoldoutRoomCharacters(Rect rect)
+	{
+		m_showRoomCharacters = EditorGUI.Foldout(rect, m_showRoomCharacters,"Characters (Room Specific Interactions)", true);
+		if ( m_showRoomCharacters == false )
+			RefreshCharactersWithFunctionsList();
+	}
+
+	void RefreshCharactersWithFunctionsList(RoomComponent room = null)
+	{
+		if ( room == null )
+			room = m_selectedRoom;
+		if ( room == null )
+			return;
+		BeginHighlightingMethodButtons(room.GetData());
+
+		// If false, only show characters with functions... so we need to create this list
+		m_charactersWithFunctions.Clear();
+		foreach (CharacterComponent charComp in m_powerQuest.GetCharacterPrefabs() )
+		{
+			string name = charComp.GetData().ScriptName;
+			if (    HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_LOOKAT_CHARACTER+ name)
+			     || HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_INTERACT_CHARACTER+ name)
+			     || HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_USEINV_CHARACTER+ name) )
+			{
+				m_charactersWithFunctions.Add(charComp);
+			}		
+		}	  
+		EndHighlightingMethodButtons();
+	}
+
+	
+
+	// Character on room panel
+	bool ShouldShowRoomCharacter(Character character)
+	{
+		bool result = false;
+		return result;
 	}
 
 	void UpdateRoomObjectOrder(bool applyPrefab = true)
@@ -729,8 +770,31 @@ public partial class PowerQuestEditor
 		#else 
 		bool isPrefab =  PrefabUtility.GetPrefabType(m_selectedRoom.gameObject) == PrefabType.Prefab;
 		#endif
-		GUILayout.Label( m_selectedRoom.GetData().ScriptName + ( isPrefab ? " (Prefab)" : "" ), new GUIStyle(EditorStyles.largeLabel){alignment=TextAnchor.MiddleCenter});
-		//GUILayout.Space(2);
+		
+		//! Play From Func Selector
+		var headerStyle = new GUIStyle(EditorStyles.largeLabel) { alignment = TextAnchor.MiddleCenter };
+		var roomHeader = m_selectedRoom.GetData().ScriptName + (isPrefab ? " (Prefab)" : "");
+		var isPlayFromSetAndHidden = 
+			m_selectedRoom != null && 
+			!string.IsNullOrEmpty(m_selectedRoom.m_debugStartFunction) &&
+			m_scrollPosition.y > 23;
+		if (isPlayFromSetAndHidden)
+		{
+			var selectedFuncIndex = m_playFromFuncs.IndexOf(m_selectedRoom.m_debugStartFunction);
+			if (selectedFuncIndex >= 0)
+			{
+				headerStyle.richText = true;
+				roomHeader += $" from <color=orange>{m_playFromFuncsNicified[selectedFuncIndex]}</color>";
+			}
+		}
+		if (GUILayout.Button(roomHeader, headerStyle) && isPlayFromSetAndHidden)
+		{
+			m_scrollPosition.y = 0;
+			m_showPlayFromFunctions = true;
+		}
+		//GUILayout.Label(roomHeader, headerStyle);
+		//GUILayout.Label( m_selectedRoom.GetData().ScriptName + ( isPrefab ? " (Prefab)" : "" ), new GUIStyle(EditorStyles.largeLabel){alignment=TextAnchor.MiddleCenter});
+		
 				
 		GUILayout.BeginHorizontal();
 
@@ -747,29 +811,23 @@ public partial class PowerQuestEditor
 		}
 
 
-		if ( GUILayout.Button( "Script", EditorStyles.miniButtonRight ) )
+		if ( GUILayout.Button( "Script", EditorStyles.miniButtonMid ) )
 		{ 
 			// Open the script
 			QuestScriptEditor.Open( m_selectedRoom );	
 		}
+		else if ( GUILayout.Button("...", new GUIStyle(EditorStyles.miniButtonRight){fixedWidth=30} ) )
+		{ 		
+			GenericMenu menu = new GenericMenu();
+			LayoutRoomScriptsContextMenu(menu,m_selectedRoom);
+			menu.ShowAsContext();
+		}
 		GUILayout.EndHorizontal();
-		GUILayout.Space(8);
 		
 		m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
 		
-		if ( m_playFromFuncs.Count > 1 )
-		{
-			int debugFuncId = m_playFromFuncs.FindIndex(item=>string.Compare(item,m_selectedRoom.m_debugStartFunction,true) == 0);
-			if ( debugFuncId <= 0) debugFuncId = 0;		
-			debugFuncId = EditorGUILayout.Popup("Play-from function: ", debugFuncId, m_playFromFuncs.ToArray(), new GUIStyle(EditorStyles.toolbarPopup) );
-			if ( debugFuncId <= 0)
-				m_selectedRoom.m_debugStartFunction = null;
-			else
-				m_selectedRoom.m_debugStartFunction = m_playFromFuncs[debugFuncId];
-				
-			GUILayout.Space(8);
-		}
-
+		//! Play From Func Selector
+		LayoutPlayFromGUI();
 
 		if ( m_listHotspots != null ) m_listHotspots.DoLayoutList();
 
@@ -789,20 +847,15 @@ public partial class PowerQuestEditor
 
 		if ( m_listWalkableAreas != null ) m_listWalkableAreas.DoLayoutList();
 
-		/* Now toggling in  place. But need to test in 2019.3+
-		if ( m_walkableAreaEditor != null && m_walkableAreaEditor.target != null )
-		{			
-			GUILayout.Label("Editing Walkable Area "+m_walkableAreaEditingId.ToString()+":");
-			m_walkableAreaEditor.OnInspectorGUI();
-		} */
-
 		GUILayout.Space(5);
 
 		// Layout characters
 		if ( m_showRoomCharacters && m_listRoomCharacters != null) 
 			m_listRoomCharacters.DoLayoutList();
-		else  
-			m_showRoomCharacters = EditorGUILayout.Foldout(m_showRoomCharacters,"Characters (Room Specific Interactions)", true); 
+		else if ( m_showRoomCharacters == false && m_listRoomCharactersUsed != null )
+			m_listRoomCharactersUsed.DoLayoutList();
+		//else  
+		//	m_showRoomCharacters = EditorGUILayout.Foldout(m_showRoomCharacters,"Characters (Room Specific Interactions)", true); 
 
 		EditorGUILayout.EndScrollView();
 
@@ -810,6 +863,224 @@ public partial class PowerQuestEditor
 		GUILayout.Space(3);
 	}
 
+	//! Play From Func Selector
+	private bool m_showPlayFromFunctions = false;
+	private string m_newPlayFromName = "";
+	private void LayoutPlayFromGUI()
+	{
+		// if ( m_playFromFuncs.Count > 1 )
+		// {
+		// 	debugFuncId = m_playFromFuncs.FindIndex(item => string.Compare(item, m_selectedRoom.m_debugStartFunction, true) == 0);
+		// 	debugFuncId = EditorGUILayout.Popup("Play-from function: ", debugFuncId, m_playFromFuncs.ToArray(), new GUIStyle(EditorStyles.toolbarPopup));
+		// 	if (debugFuncId <= 0)
+		// 		m_selectedRoom.m_debugStartFunction = null;
+		// 	else
+		// 		m_selectedRoom.m_debugStartFunction = m_playFromFuncs[debugFuncId];
+		//
+		// 	GUILayout.Space(8);
+		// }
+		
+		var gridStyle = new GUIStyle("ObjectField")
+		{
+			margin = new RectOffset(4, 4, 5, 5),
+			padding = new RectOffset(3, 3, 3, 3),
+			stretchHeight = false
+		};
+		var oldEnabled = GUI.enabled;
+		GUI.enabled = false;
+		GUILayout.BeginVertical(gridStyle);
+		GUI.enabled = oldEnabled;
+		
+		var headerStyle = new GUIStyle("DropDown") {
+			margin = new RectOffset(0, 0, 0, 0),
+			padding = new RectOffset(8, 0, 0, 0),
+			alignment = TextAnchor.MiddleLeft,
+			fixedHeight = 25,
+			richText = true
+		};
+
+		var selectedFuncIndex = m_playFromFuncs.IndexOf(m_selectedRoom.m_debugStartFunction);
+		var dropdownLabel = selectedFuncIndex >= 0
+			? $"Play from <color=orange><b>{m_playFromFuncsNicified[selectedFuncIndex]}</b></color>"
+			: "Play from...";
+		if (GUILayout.Button(dropdownLabel, headerStyle))
+		{
+			m_showPlayFromFunctions = !m_showPlayFromFunctions;
+		}
+		
+		if (m_showPlayFromFunctions)
+		{
+			var playFromFuncStyle = new GUIStyle("TE toolbarbutton") {
+				margin = new RectOffset(15, 0, 0, 0),
+				padding = new RectOffset(10, 0, 0, 0),
+				alignment = TextAnchor.MiddleLeft,
+				fontSize = 12,
+				fixedHeight = 22,
+				stretchWidth = true,
+				normal = { textColor = Color.white },
+				hover = { textColor = Color.white }
+			};
+			var btnStyle = new GUIStyle(playFromFuncStyle) {
+				margin = new RectOffset(-1, -2, 0, 0),
+				padding = new RectOffset(0,0,0,0),
+				alignment = TextAnchor.MiddleCenter
+			};
+
+			// Function buttons
+			var oldContentColor = GUI.contentColor;
+			var funcToDeleteIndex = -1;
+			for (int i = 0; i < m_playFromFuncs.Count; i++)
+			{
+				if (i == 0 && string.IsNullOrEmpty(m_selectedRoom.m_debugStartFunction)) continue;
+				
+				var funcName = m_playFromFuncs[i];
+				var funcTitle = m_playFromFuncsNicified[i];
+				
+				GUILayout.BeginHorizontal();
+				
+				// Select
+				if (m_selectedRoom.m_debugStartFunction.Equals(funcName)) GUI.contentColor = new Color(1f, 0.67f, 0.19f);
+				if (i == 0)
+				{
+					GUI.contentColor = new Color(1f, 1f, 1f, 0.65f);
+				}
+				if (GUILayout.Button(funcTitle, playFromFuncStyle))
+				{
+					m_selectedRoom.m_debugStartFunction = i == 0  
+						? ""
+						: funcName;
+					m_showPlayFromFunctions = false;
+				}
+				GUI.contentColor = oldContentColor;
+				
+				if (i > 0)
+				{
+					// Edit
+					if (GUILayout.Button(
+						    new GUIContent(EditorGUIUtility.IconContent("align_horizontally_left_active").image), 
+						    btnStyle, 
+						    GUILayout.Width(25)))
+					{
+						QuestScriptEditor.Open( m_selectedRoom, QuestScriptEditor.eType.Other,
+							funcName, isCoroutine: false);
+					}
+
+					// Delete
+					if (GUILayout.Button(
+						    new GUIContent(EditorGUIUtility.IconContent("d_winbtn_win_close").image), 
+						    btnStyle, 
+						    GUILayout.Width(25)))
+					{
+						string fileName = m_selectedRoom.GetData().GetScriptClassName() +".cs";
+						string path = QuestEditorUtils.GetScriptPath(m_selectedRoom.GetPrefab(), fileName);
+						var erased = QuestEditorUtils.ErasePlayFromFunction(
+							path,
+							funcName
+						);
+						if (erased >= 0)
+						{
+							if (m_selectedRoom.m_debugStartFunction == funcName)
+							{
+								m_selectedRoom.m_debugStartFunction = string.Empty;
+							}
+
+							QuestScriptEditor editor = EditorWindow.GetWindow<QuestScriptEditor>();
+							if (editor != null)
+							{
+								if (editor.IsFunctionLoaded(path, funcName))
+								{
+									editor.LoadPreviousHistoryEntry();
+								}
+							}
+							
+							funcToDeleteIndex = i;
+						}
+					}
+				}
+
+				GUILayout.EndHorizontal();
+
+				if (i == 0)
+				{
+					GUILayout.Space(1);
+				}
+			}
+			
+			// Deleting cached elements for function erased with ×
+			if (funcToDeleteIndex > 0)
+			{
+				m_playFromFuncs.RemoveAt(funcToDeleteIndex);
+				m_playFromFuncsNicified.RemoveAt(funcToDeleteIndex);
+			}
+			
+			GUILayout.Space(3);
+			
+			// Add new function
+			GUILayout.BeginHorizontal();
+			GUILayout.Space(10);
+			m_newPlayFromName = GUILayout.TextField(m_newPlayFromName, GUILayout.ExpandWidth(true), GUILayout.Height(22));
+			if (GUILayout.Button("Add", GUILayout.Width(47), GUILayout.Height(22)))
+			{
+				string validationPattern = @"^[a-zA-Z][a-zA-Z0-9_ ]*$";
+				if (Regex.IsMatch(m_newPlayFromName, validationPattern))
+				{
+					var finalFunctionName = "";
+					
+					finalFunctionName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(m_newPlayFromName);
+					finalFunctionName = "PlayFrom" + finalFunctionName.Replace(" ", "");
+					
+					string fileName = m_selectedRoom.GetData().GetScriptClassName() +".cs";
+					string path = QuestEditorUtils.GetScriptPath(m_selectedRoom.GetPrefab(), fileName);
+					var created = QuestEditorUtils.CreatePlayFromFunction(
+						path,
+						finalFunctionName
+						);
+					
+					if (created >= 0)
+					{
+						m_playFromFuncs.Add(finalFunctionName);
+						m_playFromFuncsNicified.Add(
+							ObjectNames.NicifyVariableName(finalFunctionName
+								.Replace("PlayFrom", "")));
+
+						m_selectedRoom.m_debugStartFunction = finalFunctionName;
+						
+						QuestScriptEditor.Open(m_selectedRoom, QuestScriptEditor.eType.Other,
+							finalFunctionName, isCoroutine: false);
+
+						m_newPlayFromName = "";
+						GUI.FocusControl(null);
+					}
+				}
+			}
+			GUILayout.Space(3);
+			GUILayout.EndHorizontal();
+			GUILayout.Space(3);
+		}
+		
+		GUILayout.EndVertical();
+	}
+
+	void LayoutRoomScriptsContextMenu(GenericMenu menu, RoomComponent component, string path = "" )
+	{ 				
+		menu.AddItem(
+			"Header", true,()=> QuestScriptEditor.Open( m_selectedRoom ));
+
+		menu.AddSeparator("");
+		menu.AddItem(path+"On Enter Room (BG)",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnEnterRoom","", false) );
+		menu.AddItem(path+"On Enter Room After Fade",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnEnterRoomAfterFade") );
+		menu.AddItem(path+"On Exit Room",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnExitRoom", " IRoom oldRoom, IRoom newRoom ") );
+		menu.AddItem(path+"Update Blocking",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "UpdateBlocking") );
+		menu.AddItem(path+"Update (BG)",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "Update","", false) );
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Parser) )
+			menu.AddItem(path+"On Parser",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnParser") );
+		menu.AddItem(path+"On Any Click",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnAnyClick") );
+		menu.AddItem(path+"After Any Click",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "AfterAnyClick") );
+		menu.AddItem(path+"On Walk To",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnWalkTo") );
+		menu.AddItem(path+"Post-Restore Game (BG)",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnPostRestore", " int version ", false) );
+		menu.AddItem(path+"Unhandled Interact",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "UnhandledInteract", " IQuestClickable mouseOver ", true) );
+		menu.AddItem(path+"Unhandled Use Inv",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "UnhandledUseInv", " IQuestClickable mouseOver, IInventory item ", true) );
+	}
 
 	void LayoutHotspotGUI(Rect rect, int index, bool isActive, bool isFocused)
 	{
@@ -828,15 +1099,20 @@ public partial class PowerQuestEditor
 				EditorLayouter layout = new EditorLayouter(new Rect(rect){y= rect.y+2,height=EditorGUIUtility.singleLineHeight});
 				layout.Variable(1);
 				for (int i = 0; i< actionCount; ++i)
-					layout.Fixed(34);
+					layout.Fixed(36);
 				// layout.Fixed(22); // for '...'
 
 				EditorGUI.LabelField(layout, itemComponent.GetData().ScriptName );
+				
+				//!
+				BeginHighlightingMethodButtons(m_selectedRoom.GetData());
 
 				int actionNum = 0;
 				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) )
 				{
-					if ( GUI.Button(layout, "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+					//!
+					bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_LOOKAT_HOTSPOT+ itemComponent.GetData().ScriptName);
+					if ( GUI.Button(layout, "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 					{
 						// Lookat
 						QuestScriptEditor.Open( m_selectedRoom, QuestScriptEditor.eType.Hotspot,
@@ -846,7 +1122,9 @@ public partial class PowerQuestEditor
 				}
 				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Use) )
 				{
-					if ( GUI.Button(layout, "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+					//!
+					bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_INTERACT_HOTSPOT+ itemComponent.GetData().ScriptName);
+					if ( GUI.Button(layout, "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 					{
 						// Interact
 						QuestScriptEditor.Open( m_selectedRoom, QuestScriptEditor.eType.Hotspot,
@@ -857,7 +1135,9 @@ public partial class PowerQuestEditor
 
 				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) )
 				{
-					if ( GUI.Button(layout, "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+					//!
+					bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_USEINV_HOTSPOT+ itemComponent.GetData().ScriptName);
+					if ( GUI.Button(layout, "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 					{
 						// UseItem
 						QuestScriptEditor.Open( m_selectedRoom, QuestScriptEditor.eType.Hotspot,
@@ -865,6 +1145,9 @@ public partial class PowerQuestEditor
 							PowerQuestEditor.SCRIPT_PARAMS_USEINV_HOTSPOT);
 					}
 				}
+				
+				//!
+				EndHighlightingMethodButtons();
 				
 				/* Not sure if want this for hotspots/props yet				
 				if ( GUI.Button(layout, "...", EditorStyles.miniButtonRight ) )
@@ -893,16 +1176,21 @@ public partial class PowerQuestEditor
 				EditorLayouter layout = new EditorLayouter(new Rect(rect){y= rect.y+2,height=EditorGUIUtility.singleLineHeight});
 				layout.Variable(1);
 				for (int i = 0; i< actionCount; ++i)
-					layout.Fixed(34);
+					layout.Fixed(36);
 
 				EditorGUI.LabelField(layout, itemComponent.GetData().ScriptName);
 
+				//!
+				BeginHighlightingMethodButtons(m_selectedRoom.GetData());
+				
 				int actionNum = 0;
 				if ( hasCollider )
 				{
 					if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) )
 					{
-						if ( GUI.Button(layout, "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+						//!
+						bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_LOOKAT_PROP+ itemComponent.GetData().ScriptName);
+						if ( GUI.Button(layout, "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 						{
 							// Lookat
 							QuestScriptEditor.Open( 
@@ -913,7 +1201,9 @@ public partial class PowerQuestEditor
 					}
 					if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Use) )
 					{
-						if ( GUI.Button(layout, "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+						//!
+						bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_INTERACT_PROP+ itemComponent.GetData().ScriptName);
+						if ( GUI.Button(layout, "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 						{
 							// Interact
 							QuestScriptEditor.Open( 
@@ -924,7 +1214,9 @@ public partial class PowerQuestEditor
 					}
 					if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) )
 					{
-						if ( GUI.Button(layout, "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+						//!
+						bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_USEINV_PROP+ itemComponent.GetData().ScriptName);
+						if ( GUI.Button(layout, "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 						{
 							// UseItem
 							QuestScriptEditor.Open( 
@@ -934,6 +1226,9 @@ public partial class PowerQuestEditor
 						}
 					}
 				}
+				
+				//!
+				EndHighlightingMethodButtons();
 			}
 		}
 	}
@@ -954,36 +1249,48 @@ public partial class PowerQuestEditor
 				int actionCount = 2;
 				EditorGUI.LabelField(layout, itemComponent.GetData().ScriptName);
 
+				//!
+				BeginHighlightingMethodButtons(m_selectedRoom.GetData());
+				
 				int actionNum = 0;
-				if ( GUI.Button(layout, "Enter", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+				bool bold = false;
+				//!
+				bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_ENTER_REGION+ itemComponent.GetData().ScriptName);
+				if ( GUI.Button(layout, "Enter", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
+				{
+				QuestScriptEditor.Open( m_selectedRoom, QuestScriptEditor.eType.Region,
+					PowerQuest.SCRIPT_FUNCTION_ENTER_REGION+ itemComponent.GetData().ScriptName,
+					PowerQuestEditor.SCRIPT_PARAMS_ENTER_REGION);
+				}
+				//!
+				bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_ENTER_REGION_BG + itemComponent.GetData().ScriptName);
+				if (GUI.Button(layout, "BG", QuestEditorUtils.GetMiniButtonStyle(actionNum++, actionCount, bold)))
+				{
+					QuestScriptEditor.Open(m_selectedRoom, QuestScriptEditor.eType.Region,
+						PowerQuest.SCRIPT_FUNCTION_ENTER_REGION_BG + itemComponent.GetData().ScriptName,
+						PowerQuestEditor.SCRIPT_PARAMS_ENTER_REGION,false);
+				}
+				//!
+				bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_EXIT_REGION+ itemComponent.GetData().ScriptName);
+				if ( GUI.Button(layout, "Exit", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 				{
 					QuestScriptEditor.Open( m_selectedRoom, QuestScriptEditor.eType.Region,
-						PowerQuest.SCRIPT_FUNCTION_ENTER_REGION+ itemComponent.GetData().ScriptName,
-						PowerQuestEditor.SCRIPT_PARAMS_ENTER_REGION);
-					}
-					if (GUI.Button(layout, "BG", QuestEditorUtils.GetMiniButtonStyle(actionNum++, actionCount)))
-					{
-						QuestScriptEditor.Open(m_selectedRoom, QuestScriptEditor.eType.Region,
-							PowerQuest.SCRIPT_FUNCTION_ENTER_REGION_BG + itemComponent.GetData().ScriptName,
-							PowerQuestEditor.SCRIPT_PARAMS_ENTER_REGION,false);
-					}
-
-					if ( GUI.Button(layout, "Exit", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
-					{
-						QuestScriptEditor.Open( m_selectedRoom, QuestScriptEditor.eType.Region,
-							PowerQuest.SCRIPT_FUNCTION_EXIT_REGION+ itemComponent.GetData().ScriptName,
-							PowerQuestEditor.SCRIPT_PARAMS_EXIT_REGION);
-					}
-
-					if (GUI.Button(layout, "BG", QuestEditorUtils.GetMiniButtonStyle(actionNum++, actionCount)))
-					{
-						QuestScriptEditor.Open(m_selectedRoom, QuestScriptEditor.eType.Region,
-							PowerQuest.SCRIPT_FUNCTION_EXIT_REGION_BG + itemComponent.GetData().ScriptName,
-							PowerQuestEditor.SCRIPT_PARAMS_EXIT_REGION,false);
-					}
-
-
+						PowerQuest.SCRIPT_FUNCTION_EXIT_REGION+ itemComponent.GetData().ScriptName,
+						PowerQuestEditor.SCRIPT_PARAMS_EXIT_REGION);
 				}
+				//!
+				bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_EXIT_REGION_BG + itemComponent.GetData().ScriptName);
+				if (GUI.Button(layout, "BG", QuestEditorUtils.GetMiniButtonStyle(actionNum++, actionCount, bold)))
+				{
+					QuestScriptEditor.Open(m_selectedRoom, QuestScriptEditor.eType.Region,
+						PowerQuest.SCRIPT_FUNCTION_EXIT_REGION_BG + itemComponent.GetData().ScriptName,
+						PowerQuestEditor.SCRIPT_PARAMS_EXIT_REGION,false);
+				}
+				
+				//!
+				EndHighlightingMethodButtons();
+
+			}
 		}
 	}
 
@@ -1030,106 +1337,95 @@ public partial class PowerQuestEditor
 
 			PolygonCollider2D itemComponent = m_selectedRoom.GetWalkableAreas()[index].PolygonCollider;
 			if ( itemComponent != null )
-			{               
-				float fixedWidth = 130;
+			{
+				EditorLayouter layout = new EditorLayouter(rect).Stretched.Fixed(60);
+				
+				float fixedWidth = 60;
 				float totalFixedWidth = fixedWidth*1;
 				float offset = rect.x;
-				EditorGUI.LabelField(new Rect(rect.x, rect.y+2, rect.width-totalFixedWidth, EditorGUIUtility.singleLineHeight), "Id: "+index.ToString());
+				//EditorGUI.LabelField(new Rect(rect.x, rect.y+2, rect.width-totalFixedWidth, EditorGUIUtility.singleLineHeight), "Id: "+index.ToString());
+				EditorGUI.LabelField(layout, "Id: "+index.ToString());
 
 				offset += rect.width - totalFixedWidth;
-				bool wasEditingPoly = m_walkableAreaEditingId == index && m_walkableAreaEditor != null;
-
-				#if UNITY_2019_3_OR_NEWER
-					if ( Selection.activeGameObject != itemComponent.gameObject )
-						return;
-				#endif
-
-				bool isEditingPoly = GUI.Toggle(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), wasEditingPoly, "Edit Polygon", EditorStyles.miniButton);
-				
-				if ( wasEditingPoly == true && isEditingPoly == false )
-				{
-					//if ( GUI.Button(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), "Hide Polygon Editor", EditorStyles.miniButton) )
-					//if ( GUI.Toggle(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), true, "Edit Polygon", EditorStyles.miniButton) == false )					
-					/*QuestEditorUtils.HidePolygonEditor();
-					if ( m_walkableAreaEditor != null ) 
-						Editor.DestroyImmediate(m_walkableAreaEditor);
-					m_walkableAreaEditingId = -1;	*/
-					UnselectSceneTools();
-				}
-				else if ( wasEditingPoly == false && isEditingPoly == true)
-				{
-					Selection.activeGameObject = null;
-					UnselectSceneTools();
-					
-					//m_selectedRoom.SetActiveWalkableArea(index); // NB: This doesn't change the active walkable area in the prefab,  just the active polygon in the pathfinder. But not sure why I do this tbh
+		
+				EditorGUI.BeginChangeCheck();
+				GUI.Toolbar(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), QuestPolyTool.Active(itemComponent.gameObject)?0:-1, new string[]{"Edit"}, EditorStyles.miniButton);
+				if ( EditorGUI.EndChangeCheck())
+				{ 
 					m_listWalkableAreas.index = index;
-
-					m_walkableAreaEditor = Editor.CreateEditor(itemComponent);
-					m_walkableAreaEditingId = index;
-
-					QuestEditorUtils.ShowPolygonEditor(itemComponent);
-
-					/* Removed, now we're auto-editing polys
-					// Scroll down to show editor
-					m_scrollPosition = new Vector2(0,100000);
-					*/
-
-					EditorUtility.SetDirty(m_powerQuest);
+					QuestPolyTool.Toggle(itemComponent.gameObject);
 				}
-
 			}
 		}
 	}
 
-	// Character on room panel
 	void LayoutRoomCharacterGUI(Rect rect, int index, bool isActive, bool isFocused)
 	{
-		if ( m_powerQuest != null && m_powerQuest.GetCharacterPrefabs().IsIndexValid(index))
+		if ( m_powerQuest == null )
+			return;
+
+		List<CharacterComponent> list = m_showRoomCharacters ? m_powerQuest.GetCharacterPrefabs() : m_charactersWithFunctions;
+		if ( list.IsIndexValid(index) == false )
+			return;
+
+		CharacterComponent itemComponent = list[index];
+		if ( itemComponent == null || itemComponent.GetData() == null )
+			return;
+			
+		int actionCount = (PowerQuestEditor.GetActionEnabled(eQuestVerb.Look)?1:0)
+			+ (PowerQuestEditor.GetActionEnabled(eQuestVerb.Use)?1:0)
+			+ (PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory)?1:0);
+		float totalFixedWidth = /*60+*/(36 *actionCount);
+		float offset = rect.x;
+		EditorGUI.LabelField(new Rect(rect.x, rect.y+2, rect.width-totalFixedWidth, EditorGUIUtility.singleLineHeight), itemComponent.GetData().GetScriptName(), (IsHighlighted(itemComponent)?EditorStyles.whiteLabel:EditorStyles.label) );
+		offset += rect.width - totalFixedWidth;
+		float fixedWidth = 36;
+				
+		//!
+		BeginHighlightingMethodButtons(m_selectedRoom.GetData());
+				
+		int actionNum = 0; // start at one since there's already a left item
+		bool bold = false;
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) )
 		{
-			CharacterComponent itemComponent = m_powerQuest.GetCharacterPrefabs()[index];
-			if ( itemComponent != null && itemComponent.GetData() != null )
+			//!
+			bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_LOOKAT_CHARACTER+ itemComponent.GetData().ScriptName);
+			if ( GUI.Button(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount+1, bold) ) )
 			{
-				int actionCount = (PowerQuestEditor.GetActionEnabled(eQuestVerb.Look)?1:0)
-					+ (PowerQuestEditor.GetActionEnabled(eQuestVerb.Use)?1:0)
-					+ (PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory)?1:0);
-				float totalFixedWidth = /*60+*/(34 *actionCount);
-				float offset = rect.x;
-				EditorGUI.LabelField(new Rect(rect.x, rect.y+2, rect.width-totalFixedWidth, EditorGUIUtility.singleLineHeight), itemComponent.GetData().GetScriptName(), (IsHighlighted(itemComponent)?EditorStyles.whiteLabel:EditorStyles.label) );
-				offset += rect.width - totalFixedWidth;
-				float fixedWidth = 34;
-				int actionNum = 0; // start at one since there's already a left item
-				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) )
-				{
-					if ( GUI.Button(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount+1) ) )
-					{
-						// Lookat
-						QuestScriptEditor.Open( m_selectedRoom, PowerQuest.SCRIPT_FUNCTION_LOOKAT_CHARACTER+ itemComponent.GetData().ScriptName, PowerQuestEditor.SCRIPT_PARAMS_LOOKAT_ROOM_CHARACTER);
-					}
-					offset += fixedWidth;
-					actionNum++;
-				}
-				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Use) )
-				{
-					if ( GUI.Button(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount+1) ) )
-					{
-						// Interact
-						QuestScriptEditor.Open( m_selectedRoom, PowerQuest.SCRIPT_FUNCTION_INTERACT_CHARACTER+ itemComponent.GetData().ScriptName, PowerQuestEditor.SCRIPT_PARAMS_INTERACT_ROOM_CHARACTER);
-					}
-					offset += fixedWidth;
-					actionNum++;
-				}
-				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) )
-				{
-					if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) && GUI.Button(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount+1) ) )
-					{
-						// UseItem
-						QuestScriptEditor.Open( m_selectedRoom, PowerQuest.SCRIPT_FUNCTION_USEINV_CHARACTER+ itemComponent.GetData().ScriptName, PowerQuestEditor.SCRIPT_PARAMS_USEINV_ROOM_CHARACTER);
-					}
-					offset += fixedWidth;
-					actionNum++;
-				}
+				// Lookat
+				QuestScriptEditor.Open( m_selectedRoom, PowerQuest.SCRIPT_FUNCTION_LOOKAT_CHARACTER+ itemComponent.GetData().ScriptName, PowerQuestEditor.SCRIPT_PARAMS_LOOKAT_ROOM_CHARACTER);
 			}
+			offset += fixedWidth;
+			actionNum++;
 		}
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Use) )
+		{
+			//!
+			bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_INTERACT_CHARACTER+ itemComponent.GetData().ScriptName);
+			if ( GUI.Button(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount+1, bold) ) )
+			{
+				// Interact
+				QuestScriptEditor.Open( m_selectedRoom, PowerQuest.SCRIPT_FUNCTION_INTERACT_CHARACTER+ itemComponent.GetData().ScriptName, PowerQuestEditor.SCRIPT_PARAMS_INTERACT_ROOM_CHARACTER);
+			}
+			offset += fixedWidth;
+			actionNum++;
+		}
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) )
+		{
+			//!
+			bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_USEINV_CHARACTER+ itemComponent.GetData().ScriptName);
+			if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) && GUI.Button(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount+1, bold) ) )
+			{
+				// UseItem
+				QuestScriptEditor.Open( m_selectedRoom, PowerQuest.SCRIPT_FUNCTION_USEINV_CHARACTER+ itemComponent.GetData().ScriptName, PowerQuestEditor.SCRIPT_PARAMS_USEINV_ROOM_CHARACTER);
+			}
+			offset += fixedWidth;
+			actionNum++;
+		}
+					
+		//!
+		EndHighlightingMethodButtons();
+		
 	}
 
 	#endregion 
@@ -1146,33 +1442,10 @@ public partial class PowerQuestEditor
 
 		float scale = QuestEditorUtils.GameResScale;
 
-		// Update walkable area editor
-		if ( m_walkableAreaEditor != null && m_walkableAreaEditor.target != null )
-		{
-			// if ( m_listWalkableAreas != null && m_selectedRoom.GetWalkableAreas().IsIndexValid(m_listWalkableAreas.index)) // could move this so visible whenevern walkable areas are selected
-			{
-				
-				Handles.color = Color.yellow;
-				Vector2[] walkablePoints = m_selectedRoom.GetWalkableAreas()[m_listWalkableAreas.index].Points;
-				Vector2 offset = m_selectedRoom.GetWalkableAreas()[m_listWalkableAreas.index].PolygonCollider.offset;
-				Handles.DrawAAPolyLine(4*scale,System.Array.ConvertAll<Vector2,Vector3>(walkablePoints, item=>item+offset));	
-				if (  walkablePoints.Length > 2 )
-					Handles.DrawAAPolyLine(4*scale,walkablePoints[walkablePoints.Length-1]+offset, walkablePoints[0]+offset);	
-			}
-			
-			
-			//GUILayout.Label("Walkable Area "+m_walkableAreaEditingId.ToString()+":", EditorStyles.boldLabel);
-			MethodInfo methodInfo = m_walkableAreaEditor.GetType().GetMethod("OnSceneGUI"); //.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
-			if ( methodInfo != null )
-			{
-				methodInfo.Invoke(m_walkableAreaEditor,null);
-
-				
-				if ( UnityEditorInternal.EditMode.editMode != EditMode.SceneViewEditMode.Collider )
-					QuestEditorUtils.ShowPolygonEditor(m_walkableAreaEditor.target as PolygonCollider2D);
-
-			}
-		}
+		/* Show the walkable area editor always? /
+		if ( m_listWalkableAreas != null && m_selectedRoom.GetWalkableAreas().IsIndexValid(m_listWalkableAreas.index) )
+			QuestPolyTool.DrawCollider(m_selectedRoom.GetWalkableAreas()[m_listWalkableAreas.index].gameObject);
+		/**/
 
 		// Update Room Points
 		if ( m_selectedRoom != null && m_selectedTab == eTab.Room )
@@ -1241,11 +1514,14 @@ public partial class PowerQuestEditor
 
 	void UpdatePlayFromFuncs()
 	{
+		//! Play From Func Selector
 		// Generate debug funcs list from attribtues in script
 		if ( m_selectedRoom == null )
 			return;
 		m_playFromFuncs.Clear();
+		m_playFromFuncsNicified.Clear();
 		m_playFromFuncs.Add("None");
+		m_playFromFuncsNicified.Add("...");
 		System.Type type = System.Type.GetType( string.Format("{0}, {1}", m_selectedRoom.GetData().GetScriptClassName(),  typeof(PowerQuest).Assembly.FullName ));
 		if (type == null)
 			return;
@@ -1255,6 +1531,11 @@ public partial class PowerQuestEditor
 			{
 				// Debug.Log( method.Name );		
 				m_playFromFuncs.Add(method.Name);
+
+				var niceName = ObjectNames
+						.NicifyVariableName(method.Name)
+						.Replace("Play From ", ""); 
+				m_playFromFuncsNicified.Add(niceName);
 			}
 		}
 	}

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using PowerTools.Quest;
 using PowerTools;
 
+
 namespace PowerTools.Quest
 {
 
@@ -15,22 +16,71 @@ namespace PowerTools.Quest
 public class CharacterComponentEditor : Editor 
 {
 	float m_oldYPos = float.MaxValue;
+	
+	[SerializeField]PowerSprite m_spriteComponent = null;
 
 	public override void OnInspectorGUI()
 	{
 		CharacterComponent component = (CharacterComponent)target;
 		if ( component == null ) 
 			return;
+		if ( m_spriteComponent == null || m_spriteComponent.gameObject != component.gameObject )
+			m_spriteComponent = component.transform.GetComponent<PowerSprite>();
+
 		Character data = component.GetData();
 		float oldBaseline = data.Baseline;
 
-		EditorGUILayout.LabelField("Setup", EditorStyles.boldLabel);		
+		bool editingPrefab = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null;
+		
+		if ( editingPrefab == false && component.gameObject.activeInHierarchy )
+		{ 
+			EditorGUILayout.HelpBox("This is a preview instance of the character. \n\nClick Edit Prefab to make permanent changes. (or hit the Overrides -> Apply All to apply changes you make here)", MessageType.Warning);
+		}
+		if ( editingPrefab == false && GUILayout.Button("Edit Prefab") ) // edit prefab if not already editing one
+		{ 
+			Selection.activeObject = target;
+			EditorGUIUtility.PingObject(target);
+			AssetDatabase.OpenAsset(QuestEditorUtils.GetPrefabParent(component.gameObject,true));
+		}	
+		
+		EditorGUILayout.LabelField("Setup", EditorStyles.boldLabel);	
+
+
+		if ( editingPrefab )
+		{			
+			EditorGUI.BeginChangeCheck();
+			GUILayout.Toolbar(QuestPolyTool.Active(component.gameObject)?0:-1, new string[]{"Edit Hotspot Shape"}, EditorStyles.miniButton);
+			if ( EditorGUI.EndChangeCheck())
+				QuestPolyTool.Toggle(component.gameObject);	
+
+			EditorGUI.BeginChangeCheck();
+			m_spriteComponent.Offset = EditorGUILayout.Vector2Field(new GUIContent("Character Pivot"), m_spriteComponent.Offset );
+			if ( EditorGUI.EndChangeCheck())
+			{ 
+				EditorUtility.SetDirty(m_spriteComponent);
+			}
+		}
+
+
 		DrawDefaultInspector();
 		
 		// Update baseline on renderers if it changed
 		if ( oldBaseline != data.Baseline || m_oldYPos != component.transform.position.y )
 			QuestClickableEditorUtils.UpdateBaseline(component.transform, data, false);
 		m_oldYPos = component.transform.position.y;
+
+		// Sprite offset from PowerSprite component
+		EditorGUI.BeginChangeCheck();
+		m_spriteComponent.Offset = EditorGUILayout.Vector2Field(new GUIContent("Character Pivot"), m_spriteComponent.Offset );
+		if ( EditorGUI.EndChangeCheck())
+		{ 
+			EditorUtility.SetDirty(m_spriteComponent);
+		}
+		
+		EditorGUI.BeginChangeCheck();
+		GUILayout.Toolbar(QuestPolyTool.Active(component.gameObject)?0:-1, new string[]{"Edit Hotspot Shape"}, EditorStyles.miniButton);
+		if ( EditorGUI.EndChangeCheck())
+			QuestPolyTool.Toggle(component.gameObject);	
 		
 		GUILayout.Space(5);
 		GUILayout.Label("Script Functions",EditorStyles.boldLabel);

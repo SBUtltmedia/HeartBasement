@@ -27,9 +27,10 @@ public partial class Image : GuiControl, IImage
 	
 	#endregion
 	#region Funcs: Unity
-
-	void Start()
+	
+	protected override void Start()
 	{
+		base.Start();
 		OnAnimationChanged();	
 	}
 
@@ -129,17 +130,6 @@ public partial class Image : GuiControl, IImage
 		return result;
 	}
 
-	public void EditorUpdateSprite()
-	{
-		if ( m_sprite == null )
-			m_sprite = GetComponentInChildren<SpriteRenderer>();
-		if ( m_sprite != null )
-		{			
-			GuiComponent guiComponent = GetComponentInParent<GuiComponent>();				
-			guiComponent.GetAnimation(m_anim);
-		}
-	}
-
 	#endregion
 	#region Funcs: Unity
 
@@ -195,8 +185,8 @@ public partial class Image : GuiControl, IImage
 			return false;
 
 		// Find anim in gui's list of anims
-		AnimationClip clip = GetAnimation(animName);
-		if ( clip != null && m_spriteAnimator != null )
+		AnimationClip clip = GetAnimation(animName);		
+		if ( clip != null && FindSpriteAnimator() != null )
 		{
 			if ( fromStart || m_spriteAnimator.Clip == null  )
 			{
@@ -263,6 +253,16 @@ public partial class Image : GuiControl, IImage
 		return m_overrideAnimPlaying && m_spriteAnimator.Playing;
 	}
 
+	SpriteAnim FindSpriteAnimator()
+	{ 
+		if ( m_spriteAnimator != null )
+			return m_spriteAnimator;
+		if ( m_sprite != null )
+			m_spriteAnimator = m_sprite.gameObject.AddComponent<SpriteAnim>();
+		return m_spriteAnimator;		
+	}
+	
+
 	// Handles setting up defaults incase items have been added or removed since last loading a save file
 	/*[System.Runtime.Serialization.OnDeserializing]
 	void CopyDefaults( System.Runtime.Serialization.StreamingContext sc )
@@ -283,7 +283,7 @@ public partial class Image : GuiControl, IImage
 		}
 		if ( PowerQuest.Get.GetSkippingCutscene() )
 		{
-			SpriteAnim animComponent = GetComponent<SpriteAnim>();
+			SpriteAnim animComponent = FindSpriteAnimator();
 			if ( animComponent != null )
 			{
 				// Skip to "end" of animation, and force update so that any animation changes are applied

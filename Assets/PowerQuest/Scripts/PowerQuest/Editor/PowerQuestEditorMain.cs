@@ -51,6 +51,10 @@ public partial class PowerQuestEditor
 		new List<PrefabGroupListItem<GuiComponent>>();
 	
 	bool m_focusSearch = false;
+	//! [Room search accelerator]
+	bool m_canQuickSelectRoom = false;
+	bool m_doQuickSelectRoom = false;
+	int m_quickSelectRoomIndex = -1;
 
 	#endregion
 	#region Variables: Private	
@@ -69,7 +73,6 @@ public partial class PowerQuestEditor
 		// Create reorderable lists
 		//
 			
-
 		Assert.IsTrue(m_gamePath.EndsWith("/"), "GamePath MUST end with '/', all code here expects it");
 
 		m_listRooms = FilterAndCreateReorderable("Rooms",
@@ -146,10 +149,16 @@ public partial class PowerQuestEditor
 			},
 			(prefabs, list) => DeleteQuestObject(list.index, "Gui", prefabs)
 		);
+		
+		//! [Room search accelerator]
+		// Update whether can select the room - Could just rely on the m_quickSelectRoomIndex, but this is a minor optimisation.
+		m_canQuickSelectRoom = m_listRooms.count > 0 && IsString.Valid(m_searchString);
+	
 	}
 
 	#endregion
 	#region Gui Layout: Main
+
 
 	void OnGuiMain()
 	{
@@ -160,17 +169,25 @@ public partial class PowerQuestEditor
 		m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
 
 		GUILayout.Space(5);
+		GUILayout.BeginHorizontal();
 
-		if ( GUILayout.Button("Global Script") )
-		{
+		if ( GUILayout.Button("Global Script", EditorStyles.miniButtonLeft ) )
 			QuestScriptEditor.Open(PATH_GLOBAL_SCRIPT, PowerQuest.GLOBAL_SCRIPT_NAME, QuestScriptEditor.eType.Global );
+		else if ( GUILayout.Button("...", new GUIStyle(EditorStyles.miniButtonRight){fixedWidth=30} ) )
+		{
+			GenericMenu menu = new GenericMenu();
+			OnGuiGlobalScriptContext(menu);
+			menu.ShowAsContext();			
+			//Event.current.Use();
 		}
+
+		GUILayout.EndHorizontal();
 
 		GUILayout.Space(5);
 
 		// Layout rooms
 		LayoutMainObjectList(eMainTab.Rooms, m_filterRooms, m_listRooms, "Rooms");
-
+		
 		// Layout characters
 		LayoutMainObjectList(eMainTab.Chars, m_filterCharacters, m_listCharacters, "Characters");				
 
@@ -188,6 +205,124 @@ public partial class PowerQuestEditor
 		EditorGUILayout.EndScrollView();
 	}
 
+	void OnGuiGlobalScriptContext(GenericMenu menu)
+	{ 
+		menu.AddItem(
+			"Header", true,()=> QuestScriptEditor.Open(PATH_GLOBAL_SCRIPT, PowerQuest.GLOBAL_SCRIPT_NAME, QuestScriptEditor.eType.Global ));
+
+		menu.AddSeparator("");
+
+		menu.AddItem(
+			"On Game Start  (BG)",true, () => QuestScriptEditor.Open( 
+			"OnGameStart","", false) );
+			
+		menu.AddItem(
+			"Post-Restore Game (BG)",true, () => QuestScriptEditor.Open(
+			"OnPostRestore", " int version ", false) );
+
+		menu.AddItem(
+			"On Enter Room (BG)",true, () => QuestScriptEditor.Open(
+			"OnEnterRoom","", false) );
+
+		menu.AddItem(
+			"On Enter Room After Fade",true, () => QuestScriptEditor.Open(
+			"OnEnterRoomAfterFade") );
+
+		menu.AddItem(
+			"On Exit Room",true, () => QuestScriptEditor.Open( 
+			"OnExitRoom") );
+
+		menu.AddSeparator("");
+
+		menu.AddItem(
+			"Update Blocking",true, () => QuestScriptEditor.Open(
+			"UpdateBlocking") );
+
+		menu.AddItem(
+			"Update (BG)",true, () => QuestScriptEditor.Open(
+			"Update","", false) );
+			
+		menu.AddItem(
+			"UpdateNoPause (BG)",true, () => QuestScriptEditor.Open(
+			"UpdateNoPause","", false) );
+			
+			
+		menu.AddSeparator("");
+			
+		menu.AddItem(
+			"On Mouse Click (BG)",true, () => QuestScriptEditor.Open(
+			"OnMouseClick", " bool leftClick, bool rightClick ", false) );
+
+		menu.AddItem(
+			"Update Input (BG)",true, () => QuestScriptEditor.Open(
+			"UpdateInput", "", false) );
+				
+		menu.AddSeparator("");
+
+		menu.AddItem(
+			"On Any Click",true, () => QuestScriptEditor.Open(
+			"OnAnyClick") );
+
+		menu.AddItem(
+			"On Walk To",true, () => QuestScriptEditor.Open(
+			"OnWalkTo") );
+
+			
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Parser) )
+		{ 
+			menu.AddSeparator("");
+			menu.AddItem(
+				"On Parser",true, () => QuestScriptEditor.Open(
+				"OnParser") );
+		}
+			
+		menu.AddSeparator("");
+		
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Use) )
+			menu.AddItem(
+				"Unhandled Interact",true, () => QuestScriptEditor.Open(
+				"UnhandledInteract", " IQuestClickable mouseOver ", true) );
+				
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) )
+			menu.AddItem(
+				"Unhandled Look At",true, () => QuestScriptEditor.Open(
+				"UnhandledLookAt", " IQuestClickable mouseOver ", true) );
+		
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) )		
+			menu.AddItem(
+				"Unhandled Inventory",true, () => QuestScriptEditor.Open(
+				"UnhandledUseInv", " IQuestClickable mouseOver, Inventory item ", true) );
+
+		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) )
+			menu.AddItem(
+				"Unhandled Inventory on Inventory",true, () => QuestScriptEditor.Open(
+				"UnhandledUseInvInv", " Inventory invA, Inventory invB ", true) );
+	}
+
+	RoomComponent GetQuickSelectedRoom()
+	{ 
+		if ( m_canQuickSelectRoom )
+		{ 
+			int index = 0;
+			for (int i = 0; i < m_listRooms.count; ++i)
+			{
+				if (m_listRooms.list[i] is PrefabGroupListItem<RoomComponent> group)
+				{
+					for (int j = 0; j < group.Members.Count; ++j)
+					{
+						if (index == m_quickSelectRoomIndex)
+							return group.Members[j];
+						index++;
+					}
+				}
+			}				
+		}
+
+		// if not found, reset room selected to zero
+		m_quickSelectRoomIndex = 0;
+		return null;
+	}
+
 	void LayoutQuickSearch()
 	{
 		//EditorGUIUtility.LookLikeInspector();
@@ -200,7 +335,30 @@ public partial class PowerQuestEditor
 		GUIStyle searchStyle = GUI.skin.FindStyle("ToolbarSeachTextField");
 		GUIStyle searchCancelStyle = GUI.skin.FindStyle("ToolbarSeachCancelButton");
 		#endif
-		GUI.SetNextControlName(STR_PQ_SEARCH);		
+		GUI.SetNextControlName(STR_PQ_SEARCH);	
+		
+		//! [Room search accelerator]
+		if (m_canQuickSelectRoom && GUI.GetNameOfFocusedControl() == STR_PQ_SEARCH && 
+		    Event.current.type == EventType.KeyDown)
+		{
+			if ( Event.current.keyCode == KeyCode.Return )
+			{ 
+				m_doQuickSelectRoom = true;
+		}
+			else if ( Event.current.keyCode == KeyCode.DownArrow )
+			{ 
+				m_quickSelectRoomIndex++;
+				Event.current.Use();
+			}
+			else if	( Event.current.keyCode == KeyCode.UpArrow )
+			{ 
+				m_quickSelectRoomIndex--;
+				Event.current.Use();
+			}
+		}
+		if ( m_canQuickSelectRoom == false )
+			m_quickSelectRoomIndex = 0;
+		//!
 		
 		string newSearchString = m_searchString;
 		string test = GUI.GetNameOfFocusedControl();
@@ -247,7 +405,6 @@ public partial class PowerQuestEditor
 			m_dirty = false;
 			CreateMainGuiLists();
 		}
-
 	}
 
 	void LayoutMainObjectList( eMainTab tab, FilterContext filter, ReorderableList list, string name )
@@ -262,6 +419,10 @@ public partial class PowerQuestEditor
 				filter.Show = EditorGUILayout.Foldout(filter.Show, name, true);
 			GUILayout.Space(5);
 		}
+		
+		//! [Room search accelerator]
+		if ( Event.current.keyCode != KeyCode.Return )
+			m_doQuickSelectRoom = false;
 	}
 	
 	//
@@ -327,7 +488,7 @@ public partial class PowerQuestEditor
 			if ( System.DateTime.Compare(nextCheck,System.DateTime.UtcNow) < 0 )
 			{
 				// Time for another check
-				Debug.Log("Checking for Powerquest Update");
+				//Debug.Log("Checking for Powerquest Update");
 				m_newVersionCheckTime = System.DateTime.UtcNow.ToFileTimeUtc();
 
 				UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get("http://powerquest.powerhoof.com/version.txt");
@@ -385,32 +546,19 @@ public partial class PowerQuestEditor
 			RoomComponent itemComponent = rooms[index];
 			if ( itemComponent != null && itemComponent.GetData() != null )
 			{			
-				QuestEditorUtils.LayoutQuestObjectContextMenu( eQuestObjectType.Room, m_listRooms, itemComponent.GetData().GetScriptName(), itemComponent.gameObject, rect, index, true, (menu,prefab) =>
-				{
-					// Trying out adding scripts to context menu. If useful, add it to other lists.
-					menu.AddSeparator(string.Empty);
-					string path="Scripts/";
-					RoomComponent component = prefab.GetComponent<RoomComponent>();
-					menu.AddItem(path+"On Enter Room",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnEnterRoom","", false) );
-					menu.AddItem(path+"On Enter Room (After fading in)",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnEnterRoomAfterFade") );
-					menu.AddItem(path+"On Exit Room",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnExitRoom", " IRoom oldRoom, IRoom newRoom ") );
-					menu.AddItem(path+"Update (Blocking)",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "UpdateBlocking") );
-					menu.AddItem(path+"Update",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "Update","", false) );
-					menu.AddItem(path+"On Any Click",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnAnyClick") );
-					menu.AddItem(path+"After Any Click",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "AfterAnyClick") );
-					menu.AddItem(path+"On Walk To",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnWalkTo") );
-					menu.AddItem(path+"Post-Restore Game",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnPostRestore", " int version ", false) );
-					menu.AddItem(path+"Unhandled Interact",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "UnhandledInteract", " IQuestClickable mouseOver ", true) );
-					menu.AddItem(path+"Unhandled Use Inv",true, () => QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "UnhandledUseInv", " IQuestClickable mouseOver, IInventory item ", true) );
-				});
-
+				Rect contextRect = rect; // Cache rect for right click context menu
 				float totalFixedWidth = 60+50+22;
 				rect.width -= totalFixedWidth;
 				
-				EditorGUI.LabelField(rect, itemComponent.GetData().ScriptName, ((m_filterRooms.State == FilterState.All && IsHighlighted(itemComponent))?EditorStyles.whiteLabel:EditorStyles.label) );
+				bool isQuickSelectedRoom = GetQuickSelectedRoom() == itemComponent;
+				
+				EditorGUI.LabelField(rect, itemComponent.GetData().ScriptName, (((m_filterRooms.State == FilterState.All && IsHighlighted(itemComponent)) || isQuickSelectedRoom)?EditorStyles.whiteLabel:EditorStyles.label) );
 				rect.y += 2;
-				rect = rect.SetNextWidth(60);				
-				if ( GUI.Button(rect, Application.isPlaying ? "Teleport"  : "Scene", EditorStyles.miniButtonLeft ) )
+				rect = rect.SetNextWidth(60);	
+				
+				//! [Room search accelerator]
+				if ( GUI.Button(rect, Application.isPlaying ? "Teleport"  : "Scene", EditorStyles.miniButtonLeft ) 
+				     || (m_doQuickSelectRoom && isQuickSelectedRoom) )
 				{					
 					if ( IsString.Valid(m_searchString) )
 					{
@@ -420,6 +568,8 @@ public partial class PowerQuestEditor
 						m_searchString = string.Empty;
 						m_dirty=true;
 						m_selectedTab = eTab.Room;
+						m_doQuickSelectRoom=false;
+						m_quickSelectRoomIndex = 0;
 					}
 					// Load the scene					
 					LoadRoomScene(itemComponent);
@@ -432,9 +582,16 @@ public partial class PowerQuestEditor
 				}
 				
 				rect = rect.SetNextWidth(22);		
-				if ( GUI.Button(rect, "...", EditorStyles.miniButtonRight ) )
-					QuestEditorUtils.LayoutQuestObjectContextMenu( eQuestObjectType.Room, m_listRooms, itemComponent.GetData().GetScriptName(), itemComponent.gameObject, rect, index, false );
+				bool contextButtonPressed = GUI.Button(rect, "...", EditorStyles.miniButtonRight );
 				
+				// Passing in context menu. NB: there's error here because m_listRooms might not be the actual reorderable list we're in (because of all the folders stuff). and the reorderable list might not have the callback functions for add/delete...
+				ReorderableList reordList = FindReorderableList(itemComponent); // maybe need this? // m_listRooms
+				QuestEditorUtils.LayoutQuestObjectContextMenu( eQuestObjectType.Room, reordList, itemComponent.GetData().GetScriptName(), itemComponent.gameObject, contextRect, index, contextButtonPressed==false, (menu,prefab) =>
+				{
+					// If this is useful, add context menus for other scripts too
+					menu.AddSeparator(string.Empty);										
+					LayoutRoomScriptsContextMenu(menu, prefab.GetComponent<RoomComponent>(), "Scripts/");
+				});
 			}
 		}
 	}
@@ -460,7 +617,7 @@ public partial class PowerQuestEditor
 					+ (PowerQuestEditor.GetActionEnabled(eQuestVerb.Use)?1:0)
 					+ (PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory)?1:0)
 					+ (Application.isPlaying ? 1 : 0);
-				float fixedWidth = 34;
+				float fixedWidth = 36;
 				float totalFixedWidth = 50+(fixedWidth*actionCount)+22;
 				actionCount += 2;
 
@@ -475,11 +632,16 @@ public partial class PowerQuestEditor
 					QuestScriptEditor.Open( itemComponent );		
 				}
 
+				//!
+				BeginHighlightingMethodButtons(itemComponent.GetData());
+				
 				int actionNum = 1; // Start at 1 since there's already a left item
 				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) )
 				{
+					//!
+					bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_LOOKAT_INVENTORY);
 					rect = rect.SetNextWidth(fixedWidth);
-					if (  GUI.Button(rect, "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+					if (  GUI.Button(rect, "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 					{
 						// Lookat
 						QuestScriptEditor.Open( itemComponent, PowerQuest.SCRIPT_FUNCTION_LOOKAT_INVENTORY, PowerQuestEditor.SCRIPT_PARAMS_LOOKAT_INVENTORY);
@@ -487,8 +649,10 @@ public partial class PowerQuestEditor
 				}
 				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Use) )
 				{
+					//!
+					bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_INTERACT_INVENTORY);
 					rect = rect.SetNextWidth(fixedWidth);
-					if ( GUI.Button(rect, "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+					if ( GUI.Button(rect, "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 					{
 						// Interact
 						QuestScriptEditor.Open(itemComponent, PowerQuest.SCRIPT_FUNCTION_INTERACT_INVENTORY, PowerQuestEditor.SCRIPT_PARAMS_INTERACT_INVENTORY);
@@ -496,13 +660,19 @@ public partial class PowerQuestEditor
 				}
 				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) )
 				{
+					//!
+					bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_USEINV_INVENTORY);
 					rect = rect.SetNextWidth(fixedWidth);
-					if ( GUI.Button(rect, "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+					if ( GUI.Button(rect, "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 					{
 						// UseItem
 						QuestScriptEditor.Open( itemComponent, PowerQuest.SCRIPT_FUNCTION_USEINV_INVENTORY, PowerQuestEditor.SCRIPT_PARAMS_USEINV_INVENTORY);
 					}
 				}
+
+				//!
+				EndHighlightingMethodButtons();
+
 				if ( Application.isPlaying )
 				{
 					rect = rect.SetNextWidth(37);
@@ -512,7 +682,7 @@ public partial class PowerQuestEditor
 						itemComponent.GetData().Add();
 					}
 				}
-
+				
 				rect = rect.SetNextWidth(22);
 				if ( GUI.Button(rect, "...", EditorStyles.miniButtonRight ) )
 					QuestEditorUtils.LayoutQuestObjectContextMenu( eQuestObjectType.Inventory, m_listInventory, itemComponent.GetData().GetScriptName(), itemComponent.gameObject, rect, index,false );
@@ -647,13 +817,18 @@ public partial class PowerQuestEditor
 					// Open the script
 					QuestScriptEditor.Open( itemComponent );		
 				}
-
+				
+				//! Highlight for existing functions
+				BeginHighlightingMethodButtons(itemComponent.GetData());
+				
 				//GUIStyle nextStyle = EditorStyles.miniButtonLeft;
 				int actionNum = 1; // start at one since there's already a left item
 				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) )
 				{
+					//!
+					bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_LOOKAT);
 					rect = rect.SetNextWidth(34);
-					if ( GUI.Button(rect, "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+					if ( GUI.Button(rect, "Look", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 					{
 						// Lookat
 						QuestScriptEditor.Open( itemComponent, PowerQuest.SCRIPT_FUNCTION_LOOKAT, PowerQuestEditor.SCRIPT_PARAMS_LOOKAT_CHARACTER);
@@ -661,22 +836,29 @@ public partial class PowerQuestEditor
 				}
 				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Use) )
 				{
+					//!
+					bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_INTERACT);
 					rect = rect.SetNextWidth(34);
-					if ( GUI.Button(rect, "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+					if ( GUI.Button(rect, "Use", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 					{
 						// Interact
 						QuestScriptEditor.Open( itemComponent, PowerQuest.SCRIPT_FUNCTION_INTERACT, PowerQuestEditor.SCRIPT_PARAMS_INTERACT_CHARACTER);
 					}
 				}
 				if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) )
-				{				
+				{			
+					//!
+					bool bold = HighlightMethodButton(PowerQuest.SCRIPT_FUNCTION_USEINV);
 					rect = rect.SetNextWidth(34);	
-					if ( GUI.Button(rect, "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount) ) )
+					if ( GUI.Button(rect, "Inv", QuestEditorUtils.GetMiniButtonStyle(actionNum++,actionCount, bold) ) )
 					{
 						// UseItem
 						QuestScriptEditor.Open( itemComponent, PowerQuest.SCRIPT_FUNCTION_USEINV, PowerQuestEditor.SCRIPT_PARAMS_USEINV_CHARACTER);
 					}
 				}
+				
+				//!
+				EndHighlightingMethodButtons();
 				
 				rect = rect.SetNextWidth(22);
 				if ( GUI.Button(rect, "...", EditorStyles.miniButtonRight ) )

@@ -18,10 +18,8 @@ public class WalkableComponentEditor : Editor
 {
 	ReorderableList m_listHoles = null;
 	List<PolygonCollider2D> m_holes = new List<PolygonCollider2D>();
-
-	Editor m_holeEditor = null;
-	int m_holeEditingId = -1;
-
+	
+	bool m_first = false;
 	public void OnEnable()
 	{
 		UpdateHoleList();
@@ -31,20 +29,22 @@ public class WalkableComponentEditor : Editor
 		m_listHoles.onAddCallback = AddHole;
 		//m_listHoles.onSelectCallback = SelectHole;
 		m_listHoles.onRemoveCallback = DeleteHole;
+		m_first=true;
 	}
 
 	void OnDestroy()
 	{
-		if ( m_holeEditor != null ) 
-			Editor.DestroyImmediate(m_holeEditor);
-		m_holeEditingId = -1;
 	}
+
 
 	public override void OnInspectorGUI()
 	{
 		//DrawDefaultInspector();
 		WalkableComponent component = (WalkableComponent)target;
 		if ( component == null ) return;
+		if ( m_first )
+			QuestPolyTool.Show(component);
+		m_first = false;
 
 		GUILayout.Space(10);
 
@@ -60,13 +60,6 @@ public class WalkableComponentEditor : Editor
 		//EditorGUILayout.LabelField("Holes", EditorStyles.boldLabel);
 		serializedObject.Update();
 		if ( m_listHoles != null ) m_listHoles.DoLayoutList();
-
-		if ( m_holeEditor != null && m_holeEditor.target != null )
-		{
-			GUILayout.Space(10);
-			GUILayout.Label("Editing Hole "+m_holeEditingId.ToString()+":", EditorStyles.boldLabel);
-			m_holeEditor.OnInspectorGUI();
-		} 
 
 		if (GUI.changed)
 			EditorUtility.SetDirty(target);
@@ -119,13 +112,6 @@ public class WalkableComponentEditor : Editor
 		PolygonCollider2D hole = m_holes[index];
 		if ( hole == null )
 			return;
-		//Selection.activeObject = hole;
-
-		if ( m_holeEditor != null ) 
-			Editor.DestroyImmediate(m_holeEditor);
-		m_holeEditingId = -1;
-
-		/**/
 
 		// if index is -1, deletes the end
 		if ( hole != null )
@@ -163,12 +149,10 @@ public class WalkableComponentEditor : Editor
 
 	} 
 
-
 	void DrawHoleHeader(Rect rect)
 	{
 		EditorGUI.LabelField(rect, "Holes" );
 	}
-
 
 	void DrawHole(Rect rect, int index, bool isActive, bool isFocused)
 	{
@@ -178,80 +162,18 @@ public class WalkableComponentEditor : Editor
 		if ( hole == null )
 			return;
 		
-		//rect.y += 2;
+		EditorLayouter layout = new EditorLayouter(rect).Stretched.Fixed(100);
 
-		float totalFixedWidth = 50+120;
-		float offset = rect.x;
-		rect = new Rect(offset, rect.y, rect.width - totalFixedWidth, EditorGUIUtility.singleLineHeight);
-		EditorGUI.LabelField(rect,"Index: "+index);
+		EditorGUI.LabelField(layout,"Index: "+index);
 
-		//hole.Name = EditorGUI.TextField(new Rect(offset, rect.y,80, EditorGUIUtility.singleLineHeight), hole.Name );
-		//if ( hole.Name.Length > 1 )
-			//hole.Name = hole.Name[0].ToString().ToUpperInvariant() + hole.Name.Substring(1);
-
-		rect.x = rect.x+rect.width;
-		rect.width = 50;
-		if ( GUI.Button(rect, "Select" ) )
-		{
-			//  Select the child 
-			Selection.activeObject = hole;
-		}
-
-		rect.x = rect.x+rect.width;
-		rect.width = 120;
-
-		if ( m_holeEditingId == index && m_holeEditor != null )
-		{
-			if ( GUI.Button(rect, "Hide Polygon Editor", EditorStyles.miniButton) )
-			{
-				Editor.DestroyImmediate(m_holeEditor);
-				m_holeEditingId = -1;
-			}
-		}
-		else if ( GUI.Button(rect, "Show Polygon Editor", EditorStyles.miniButton) )
-		{
-			if ( m_holeEditor != null ) 
-				Editor.DestroyImmediate(m_holeEditor);
-			m_holeEditor = Editor.CreateEditor(hole);
-			m_holeEditingId = index;
-		}
-
-		/*
-		rect.x = rect.x+rect.width;
-		rect.width = 20;
-
-		if ( GUI.Button(rect, "x", EditorStyles.miniButtonRight ) )
-		{
-			// Delete
-			m_listHoles.index = index;
-			DeleteHole(m_listHoles);
-		}
-		offset += 20;
-		*/
-
+		if ( GUI.Button(layout, "Edit Polygon", EditorStyles.miniButton) )
+			QuestPolyTool.Show(hole);
 	}
-
-	void SelectHole(ReorderableList list)
-	{
-		if ( list.index >= m_holes.Count )
-			return;
-		PolygonCollider2D hole = m_holes[list.index];
-		if ( hole == null )
-			return;
-		//Selection.activeObject = hole;
-
-
-		if ( m_holeEditor != null ) 
-			Editor.DestroyImmediate(m_holeEditor);
-		m_holeEditor = Editor.CreateEditor(hole);
-		m_holeEditingId = list.index;
-
-	}
-
 
 	public void OnSceneGUI()
 	{	
-		// Draw walkable area (maybe just rely on polygon collider for that...
+		// Draw walkable area (maybe just rely on polygon collider for that...)
+		QuestPolyTool.DrawCollider((target as MonoBehaviour).gameObject);
 
 		// Draw holes
 		Handles.color = Color.red;
@@ -261,27 +183,7 @@ public class WalkableComponentEditor : Editor
 			if (  hole.points.Length > 2 )
 				Handles.DrawAAPolyLine(4f,hole.points[hole.points.Length-1], hole.points[0]);	
 		}
-
-				
-		// Update walkable area editor
-		if ( m_holeEditor != null && m_holeEditor.target != null )
-		{
-			//GUILayout.Label("Walkable Area "+m_walkableAreaEditingId.ToString()+":", EditorStyles.boldLabel);
-			MethodInfo methodInfo = m_holeEditor.GetType().GetMethod("OnSceneGUI"); //.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
-			if ( methodInfo != null )
-			{
-				methodInfo.Invoke(m_holeEditor,null);
-			}
-		}
 	}
-
-	/*
-	static Vector2[] ReversedPoly(Vector2[] poly)
-	{
-		Vector2 result = new Vector2[poly.Length];
-		for (int i = 0; i < poly.Length; ++i )
-			result[i] = poly[poly.Length-i];
-	}*/
 
 }
 

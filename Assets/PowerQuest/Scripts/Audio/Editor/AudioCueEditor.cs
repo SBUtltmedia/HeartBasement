@@ -5,10 +5,170 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.IO;
 
+
+
 namespace PowerTools.Quest
 {
 
 
+[CustomPropertyDrawer(typeof(QuestAudioCueName))]
+public class AudioCueNameDrawer : PropertyDrawer
+{
+	public override float GetPropertyHeight(SerializedProperty property,
+											GUIContent label)
+	{
+		return EditorGUI.GetPropertyHeight(property, label, true);
+	}
+
+	public override void OnGUI(Rect pos,
+							   SerializedProperty prop,
+							   GUIContent label)
+	{
+		//Debug.Log("audioCue thing");
+		string result = prop.stringValue;		
+		EditorGUI.BeginProperty(pos, label, prop);
+		EditorGUI.BeginChangeCheck();		
+		bool set = false;
+		bool hasAudio = PowerQuestEditor.Get != null && PowerQuestEditor.Get.GetSystemAudio() != null;
+		if ( hasAudio == false )
+		{
+			result = EditorGUI.TextField( pos, label, result );
+		}
+		else 
+		{		
+			EditorLayouter layout = new EditorLayouter(pos);
+			layout.Variable(.75f).Fixed(-10).Variable(0.25f).Fixed(40);
+			
+			result = EditorGUI.TextField( layout, label, result );
+			layout.Skip();			
+			AudioCue cue = PowerQuestEditor.Get.GetSystemAudio().EditorGetAudioCues().Find(item=>item.name.EqualsIgnoreCase(result));	
+			Object obj = EditorGUI.ObjectField(layout, cue, typeof(AudioCue),false);
+			if ( obj != cue )
+			{
+				//Debug.Log("set"+obj);			
+				cue = obj as AudioCue;
+				result = obj == null ? string.Empty : obj.name;		
+				//set=true;
+			}
+
+			
+			if ( cue != null && SystemAudio.GetValid() && SystemAudio.IsPlaying(cue.name) )
+			{
+				if ( GUI.Button(layout,"Stop", EditorStyles.miniButton) )
+				{
+					AudioProjectWindowDetails.StopAllClips();
+					if ( Application.isEditor && SystemAudio.GetValid() )
+							GameObject.DestroyImmediate( SystemAudio.Get.gameObject );
+					SystemAudio.Stop(cue.name,0.1f);
+				}			
+			}
+			else if ( GUI.Button(layout,"Play", EditorStyles.miniButton) )
+			{			
+				if ( Application.isEditor && SystemAudio.GetValid() )
+						GameObject.DestroyImmediate( SystemAudio.Get.gameObject );
+					
+				AudioProjectWindowDetails.StopAllClips();
+				SystemAudio.Play(cue);//(asset as GameObject).GetComponent<AudioCue>());
+			}
+			
+		}
+
+		//EditorGUI.PropertyField(pos, prop, label, true);
+		
+		if ( EditorGUI.EndChangeCheck() || set)
+		{
+			prop.stringValue = result;
+		}
+
+		EditorGUI.EndProperty();
+	}
+}
+
+
+[CustomPropertyDrawer(typeof(AudioCue))]
+public class AudioCuePropertyDrawer : PropertyDrawer
+{
+	public override float GetPropertyHeight(SerializedProperty property,
+											GUIContent label)
+	{
+		return EditorGUI.GetPropertyHeight(property, label, true);
+	}
+
+	public override void OnGUI(Rect pos,
+							   SerializedProperty prop,
+							   GUIContent label)
+	{
+		Object result = prop.objectReferenceValue;		
+		
+		bool hasAudio = PowerQuestEditor.Get != null && PowerQuestEditor.Get.GetSystemAudio() != null;
+		if ( hasAudio == false )
+		{
+			EditorGUI.PropertyField(pos, prop, label, true);
+		}
+		else 
+		{		
+			EditorLayouter layout = new EditorLayouter(pos);
+			layout.Variable(.75f).Fixed(40);
+			EditorGUI.PropertyField(layout, prop, label, true);
+
+			Object obj = prop.objectReferenceValue;
+			AudioCue cue = obj as AudioCue;
+							
+			if ( cue != null && SystemAudio.GetValid() && SystemAudio.IsPlaying(cue.name) )
+			{
+				if ( GUI.Button(layout,"Stop", EditorStyles.miniButton) )
+				{
+					AudioProjectWindowDetails.StopAllClips();
+					if ( Application.isEditor && SystemAudio.GetValid() )
+							GameObject.DestroyImmediate( SystemAudio.Get.gameObject );
+					SystemAudio.Stop(cue.name,0.1f);
+				}			
+			}
+			else if ( GUI.Button(layout,"Play", EditorStyles.miniButton) )
+			{			
+				if ( Application.isEditor && SystemAudio.GetValid() )
+						GameObject.DestroyImmediate( SystemAudio.Get.gameObject );
+					
+				AudioProjectWindowDetails.StopAllClips();
+				SystemAudio.Play(cue);//(asset as GameObject).GetComponent<AudioCue>());
+			}			
+		}
+	}
+}
+
+[CustomPropertyDrawer(typeof(AudioClip))]
+public class AudioClipPropertyDrawer : PropertyDrawer
+{
+	public override float GetPropertyHeight(SerializedProperty property,
+											GUIContent label)
+	{
+		return EditorGUI.GetPropertyHeight(property, label, true);
+	}
+
+	public override void OnGUI(Rect pos,
+							   SerializedProperty prop,
+							   GUIContent label)
+	{
+		Object result = prop.objectReferenceValue;		
+				
+		EditorLayouter layout = new EditorLayouter(pos);
+		layout.Variable(.75f).Fixed(40);
+		EditorGUI.PropertyField(layout, prop, label, true);
+
+		Object obj = prop.objectReferenceValue;
+		AudioClip clip = obj as AudioClip;
+							
+		if ( GUI.Button(layout,"Play", EditorStyles.miniButton) )
+		{			
+			if ( Application.isEditor && SystemAudio.GetValid() )
+					GameObject.DestroyImmediate( SystemAudio.Get.gameObject );					
+			
+			AudioProjectWindowDetails.StopAllClips();
+			AudioProjectWindowDetails.PlayClip(clip,0,false);
+		}			
+		
+	}
+}
 
 // Use this for initializatio
 [CustomEditor(typeof(AudioCue))]
@@ -319,7 +479,18 @@ public class AudioCueEditor : Editor {
 	void BuildClipInspector( int i )
 	{	
 		EditorGUILayout.BeginVertical();		
-			m_items[i].m_sound = EditorGUILayout.ObjectField("", (Object)m_items[i].m_sound, typeof(AudioClip), false) as AudioClip; // false is "allowSceneObjects"
+			
+			EditorGUILayout.BeginHorizontal();
+			m_items[i].m_sound = EditorGUILayout.ObjectField("", (Object)m_items[i].m_sound, typeof(AudioClip), false) as AudioClip; // false is "allowSceneObjects"							
+			if ( GUILayout.Button("Play", EditorStyles.miniButton) )
+			{			
+				if ( Application.isEditor && SystemAudio.GetValid() )
+						GameObject.DestroyImmediate( SystemAudio.Get.gameObject );					
+			
+				AudioProjectWindowDetails.StopAllClips();
+				AudioProjectWindowDetails.PlayClip(m_items[i].m_sound,0,false);
+			}	
+			EditorGUILayout.EndHorizontal();
 			EditorGUILayout.BeginHorizontal();
 			EditorGUI.LabelField( EditorGUILayout.GetControlRect( GUILayout.Width(50)), (100.0f*m_object.GetShuffledIndex().GetRatio(i)).ToString ("0.00")+"%");
 			m_items[i].m_weight = EditorGUILayout.Slider( ""/*(100.0f*m_object.GetShuffledIndex().GetRatio(i)).ToString ("0.00")+"%"*/, m_items[i].m_weight, 0,m_object.GetShuffledIndex().GetMaxWeight()*1.2f);				

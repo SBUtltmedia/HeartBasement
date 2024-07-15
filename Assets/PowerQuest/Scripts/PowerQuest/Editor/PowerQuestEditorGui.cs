@@ -195,12 +195,18 @@ public partial class PowerQuestEditor
 
 	}
 
-	void ShowAddControlMenu()
+	void ShowAddControlMenu(GenericMenu menu = null)
 	{	
+		bool menuPassedIn = menu != null;
 		try
 		{
-			
-			GenericMenu menu = new GenericMenu();
+			string prefix = "";
+			if (menuPassedIn)
+				prefix = "Add/";
+			else
+				menu = new GenericMenu();
+			 
+				
 			string[] files = Directory.GetFiles("Assets/Game/Gui/GuiControls","*.prefab",SearchOption.TopDirectoryOnly);
 			foreach ( string file in files )
 			{
@@ -208,10 +214,11 @@ public partial class PowerQuestEditor
 				if ( prefab != null && prefab.GetComponent<GuiControl>() != null )
 				{					
 					//GUILayout.Button($"Add new {prefab.name}");
-					menu.AddItem(prefab.name,true, ()=>AddControl(prefab) );
+					menu.AddItem(prefix+prefab.name,true, ()=>AddControl(prefab) );
 				}
 			}
-			menu.ShowAsContext();
+			if ( menuPassedIn == false )
+				menu.ShowAsContext();
 		}
 		catch (System.Exception e)
 		{
@@ -293,6 +300,9 @@ public partial class PowerQuestEditor
 		if ( itemComponent == null )
 			return;
 		
+			
+		LayoutGuiControlContextMenu( this, m_listControls, itemComponent.GetScriptName(), itemComponent.gameObject, rect, index, true);
+
 		//QuestEditorUtils.LayoutQuestObjectContextMenu( eQuestObjectType.Gui, m_listControls, itemComponent.GetScriptName(), itemComponent.gameObject, rect, index, true );
 								
 		List<float> widths = new List<float>(); // Element widths, including spaces
@@ -341,7 +351,6 @@ public partial class PowerQuestEditor
 		
 			if ( GUI.Button(rect, "On Click", QuestEditorUtils.GetMiniButtonStyle(widthIndex,widths.Count) ) )
 			{
-				// Lookat
 				QuestScriptEditor.Open( m_selectedGui,
 					PowerQuest.SCRIPT_FUNCTION_CLICKGUI+ itemComponent.ScriptName,
 					PowerQuestEditor.SCRIPT_PARAMS_ONCLICK_GUI);
@@ -350,25 +359,41 @@ public partial class PowerQuestEditor
 		rect = rect.SetNextWidth(widths[++widthIndex]);
 				
 		if ( GUI.Button(rect, "...", QuestEditorUtils.GetMiniButtonStyle(widthIndex,widths.Count) ) )
-		{
-			// Layout ... stuff
-			/*
-			// Lookat
-			QuestScriptEditor.Open( m_selectedRoom, QuestScriptEditor.eType.Hotspot,
-				PowerQuest.SCRIPT_FUNCTION_LOOKAT_HOTSPOT+ itemComponent.GetData().ScriptName,
-				PowerQuestEditor.SCRIPT_PARAMS_LOOKAT_HOTSPOT);
-			*/
+		{		 	
+			LayoutGuiControlContextMenu(this, m_listControls, itemComponent.GetScriptName(), itemComponent.gameObject, rect, index,false);
 		}
-				
-		/* Not sure if want this for hotspots/props yet
-		fixedWidth = 22;
-		if ( GUI.Button(new Rect(offset, rect.y, fixedWidth, EditorGUIUtility.singleLineHeight), "...", EditorStyles.miniButtonRight ) )
-			QuestEditorUtils.LayoutQuestObjectContextMenu( eQuestObjectType.Hotspot, m_listHotspots, itemComponent.GetData().GetScriptName(), itemComponent.gameObject, rect, index,false );
-		offset += fixedWidth;
-		*/
 	}
 
 	
+	public static void LayoutGuiControlContextMenu( PowerQuestEditor owner,/*eQuestObjectType questObjectType,*/ ReorderableList list, string scriptName,  GameObject guiPrefab, Rect rect, int index,bool onRightClick )//, System.Action<GenericMenu,GameObject> addItemsCallback=null )
+	{
+		if ( onRightClick== false || (Event.current.isMouse && Event.current.button == 1 && rect.Contains(Event.current.mousePosition) ) )
+		{
+			list.index = index;
+			GenericMenu menu = new GenericMenu();
+			menu.AddDisabledItem(new GUIContent("Gui Control" + ' ' + scriptName),false);
+			
+			//if ( addItemsCallback != null )
+				//addItemsCallback(menu,prefab);
+
+			menu.AddSeparator("");
+			
+			/* NB: Can't rename while prefab staged, it's a nightmare to figure out, so giving up for now
+			menu.AddItem("Rename", !Application.isPlaying, ()=>{
+				ScriptableObject.CreateInstance< RenameQuestObjectWindow >().ShowQuestWindow(
+					guiPrefab, eQuestObjectType.Gui, scriptName, PowerQuestEditor.OpenPowerQuestEditor().RenameQuestObject ); });
+			*/
+			owner.ShowAddControlMenu(menu);
+			menu.AddItem("Delete",  !Application.isPlaying, ()=>list.onRemoveCallback(list));
+
+			//menu.AddSeparator(string.Empty);
+			//menu.AddItem("Add New Control",  !Application.isPlaying, ()=>list.onAddCallback(list) );
+			
+			menu.ShowAsContext();			
+			Event.current.Use();	
+		}
+
+	}
 	
 	void UpdateControlOrder(ReorderableList list)
 	{

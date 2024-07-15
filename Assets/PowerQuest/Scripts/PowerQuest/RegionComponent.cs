@@ -11,7 +11,7 @@ namespace PowerTools.Quest
 // Region Data and functions. Persistant between scenes, as opposed to RegionComponent which lives on a GameObject in a scene.
 //
 [System.Serializable] 
-public partial class Region : IRegion, IQuestScriptable
+public partial class Region : IRegion, IQuestScriptable, IQuestSaveCachable
 {
 
 	#region Region: Editor data
@@ -145,6 +145,22 @@ public partial class Region : IRegion, IQuestScriptable
 	public string GetScriptClassName() { return PowerQuest.STR_REGION+m_scriptName; }
 	public void HotLoadScript(System.Reflection.Assembly assembly) { /*No-op*/ }
 	
+	
+	#endregion
+	#region Region Functions: Implementing IQuestSaveCachable
+	//
+	// Implementing IQuestSaveCachable
+	//	
+	bool m_saveDirty = true;
+	bool m_saveDirtyEver = false;
+	public bool SaveDirty { get=>m_saveDirty; set { m_saveDirty=value; 
+		if (value) 
+		{
+			//if ( m_saveDirtyEver == false ) Debug.Log($"Region {ScriptName} set dirty");
+			m_saveDirtyEver=true; 
+		} } }
+	public bool SaveDirtyEver => m_saveDirtyEver;
+
 	#endregion
 	#region Region: Functions: Private 
 
@@ -273,7 +289,7 @@ public class RegionComponent : MonoBehaviour
 	{
 		if ( m_polygonCollider == null )
 			m_polygonCollider = GetComponent<PolygonCollider2D>();
-		m_data.GetCharacterOnRegionMask().Length = PowerQuest.Get.GetCharacters().Count; // kind of hacky way to get this info :/
+		m_data.GetCharacterOnRegionMask().Length = PowerQuest.Get.GetCharacters_SaveFlagNotDirtied().Count; // kind of hacky way to get this info :/
 		m_data.GetCharacterOnRegionMaskOld(true).Length = m_data.GetCharacterOnRegionMask().Length;
 		m_data.GetCharacterOnRegionMaskOld(false).Length = m_data.GetCharacterOnRegionMask().Length;
 

@@ -149,6 +149,22 @@ public static class QuestUtils
 		return result;
 	}
 
+	// Deep copies a list of class objects. Used for copying default inventory item data and points data when a character/room is initialised from its prefab
+	public static T[] CopyListFields<T>(T[] from) where T : new()
+	{
+		// Deep copy inventory	
+		T[] result = new T[from.Length];
+		int i=0;
+		foreach ( T original in from )
+		{
+			T newItem = new T();
+			QuestUtils.CopyFields(newItem, original);
+			result[i]=newItem;	
+			++i;
+		}
+		return result;
+	}
+
 	// Used to copy data when assembly has changed due to hotloading a script
 	public static void CopyHotLoadFields<T>(T to, T from)
 	{

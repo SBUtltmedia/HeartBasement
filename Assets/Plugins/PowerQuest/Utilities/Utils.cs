@@ -58,7 +58,7 @@ public class Utils
 	}*/
 	
 		
- 	// Snap to a grid value
+	// Snap to a grid value
 	public static Vector3 Snap( Vector3 pos, float snapTo = 1 )
 	{	
 		return new Vector3( Snap(pos.x, snapTo), Snap(pos.y, snapTo), Snap(pos.z, snapTo) );
@@ -73,10 +73,10 @@ public class Utils
 	{		
 		if ( snapTo < 0.001f )
 			return pos;
-        return Mathf.Floor(pos / snapTo) * snapTo;
+		return Mathf.Floor(pos / snapTo) * snapTo;
 	}
 	
- 	// Snap to a grid value
+	// Snap to a grid value
 	
 	public static Vector2 SnapRound( Vector2 pos, float snapTo = 1 )
 	{	
@@ -87,12 +87,12 @@ public class Utils
 	{		
 		if ( snapTo < 0.001f )
 			return pos;
-        return Mathf.Round(pos / snapTo) * snapTo;
+		return Mathf.Round(pos / snapTo) * snapTo;
 	}
 
 	public static float Flip( float value, bool flip )
 	{
-	    return flip ? -value : value;
+		return flip ? -value : value;
 	}
 
 	public static bool Approximately(float a, float b, float epsilon)
@@ -112,8 +112,8 @@ public class Utils
 	
 	public static bool IsInLayerMask(GameObject obj, LayerMask mask)
 	{
-       return ((mask.value & (1 << obj.layer)) > 0);
-    }
+	   return ((mask.value & (1 << obj.layer)) > 0);
+	}
 		
 	public static float EaseCubic( float ratio )
 	{
@@ -195,10 +195,10 @@ public class Utils
 		
 	public static void Swap<T>(ref T lhs, ref T rhs)
 	{
-	    T temp;
-	    temp = lhs;
-	    lhs = rhs;
-	    rhs = temp;
+		T temp;
+		temp = lhs;
+		lhs = rhs;
+		rhs = temp;
 	}
 	
 	public static float ClampAngle( float angle, float min, float max )
@@ -618,18 +618,18 @@ public static class ExtentionMethods
 		return vector;
 	}
 
-     public static Vector2 Rotate(this Vector2 v, float degrees) 
+	 public static Vector2 Rotate(this Vector2 v, float degrees) 
 	 {
-         float radians = degrees * Mathf.Deg2Rad;
-         float sin = Mathf.Sin(radians);
-         float cos = Mathf.Cos(radians);
-         
-         float tx = v.x;
-         float ty = v.y;
-         v.x = (cos * tx) - (sin * ty);
-         v.y = (sin * tx) + (cos * ty);
-         return v;
-     }
+		 float radians = degrees * Mathf.Deg2Rad;
+		 float sin = Mathf.Sin(radians);
+		 float cos = Mathf.Cos(radians);
+		 
+		 float tx = v.x;
+		 float ty = v.y;
+		 v.x = (cos * tx) - (sin * ty);
+		 v.y = (sin * tx) + (cos * ty);
+		 return v;
+	 }
  
 
 	// Returns the Vector2 rotated 90 counterclockwise
@@ -644,7 +644,7 @@ public static class ExtentionMethods
 		return new Vector2(vector.y, -vector.x);
 	}
 		
- 	// Snap to a grid value
+	// Snap to a grid value
 	public static Vector3 Snap( this Vector3 pos, float snapTo )
 	{	
 		return new Vector3( Utils.Snap(pos.x, snapTo), Utils.Snap(pos.y, snapTo), Utils.Snap(pos.z, snapTo) );
@@ -657,14 +657,14 @@ public static class ExtentionMethods
 	
 	public static Vector3 SnapRound( this Vector3 pos, float snapTo )
 	{	
-		return new Vector3( Utils.SnapRound(pos.x, snapTo), Utils.Snap(pos.y, snapTo), Utils.Snap(pos.z, snapTo) );
+		return new Vector3( Utils.SnapRound(pos.x, snapTo), Utils.SnapRound(pos.y, snapTo), Utils.SnapRound(pos.z, snapTo) );
 	}	
 	
 	public static Vector2 SnapRound( this Vector2 pos, float snapTo )
 	{	
-		return new Vector2( Utils.SnapRound(pos.x, snapTo), Utils.Snap(pos.y, snapTo) );
+		return new Vector2( Utils.SnapRound(pos.x, snapTo), Utils.SnapRound(pos.y, snapTo) );
 	}
- 	// Checks if two vectors are approximately equal
+	// Checks if two vectors are approximately equal
 	public static bool ApproximatelyEquals( this Vector3 pos, Vector3 other )
 	{	
 		return (pos-other).sqrMagnitude < float.Epsilon;
@@ -677,8 +677,8 @@ public static class ExtentionMethods
 
 	public static bool IsInLayerMask(this GameObject obj, LayerMask mask)
 	{
-       return ((mask.value & (1 << obj.layer)) > 0);
-    }
+	   return ((mask.value & (1 << obj.layer)) > 0);
+	}
 
 	// Same as first.Equals(second, StringComparison.OrdinalIgnoreCase)
 	public static bool EqualsIgnoreCase(this string first, string second)
@@ -922,7 +922,7 @@ public class ShuffledIndex
 {
 	static Dictionary<int, ShuffledIndex> s_premadeShuffledIndexes = new Dictionary<int, ShuffledIndex>();
 
-    int m_current = -2; // -2 so if next() is called first, it'll still reshuffle the first time because the index will still be invalid
+	int m_current = -2; // -2 so if next() is called first, it'll still reshuffle the first time because the index will still be invalid
 	int[] m_ids = null;
 	
 	public ShuffledIndex(int count)
@@ -934,7 +934,7 @@ public class ShuffledIndex
 		}
 	}
 
-    /// Returns shuffled index with max range (inclusive). This is not a unique list, any callers will have the same. Useful when just want to shuffle something that's happening a few times in a row without creating a list first
+	/// Returns shuffled index with max range (inclusive). This is not a unique list, any callers will have the same. Useful when just want to shuffle something that's happening a few times in a row without creating a list first
 	public static int Random(int max)
 	{
 		int count = max+1; // increment so that it represents "count" rather than "max"
@@ -1008,10 +1008,10 @@ public class ShuffledIndex
 		}
 	}
 
-    public static ShuffledIndex operator ++(ShuffledIndex m)
-    {
-    	m.Next();
-    	return m;
+	public static ShuffledIndex operator ++(ShuffledIndex m)
+	{
+		m.Next();
+		return m;
 	}
 
 	/*
@@ -1541,18 +1541,17 @@ public struct BitMask
 
 public class ParallaxAttribute : PropertyAttribute 
 {
-    // Intentionally blank
+	// Intentionally blank
 }
  
 public class BitMaskAttribute : PropertyAttribute
 {
-    public System.Type propType;
-    public BitMaskAttribute(System.Type aType)
-    {
-        propType = aType;
-    }
+	public System.Type propType;
+	public BitMaskAttribute(System.Type aType)
+	{
+		propType = aType;
+	}
 }
-
 
 [System.Serializable]
 public struct Padding
@@ -1712,8 +1711,8 @@ public struct RectCentered
 	{
 		if ( ratio >= 1.0 )
 		{
-		    Encapsulate(point,radius);
-		    return;
+			Encapsulate(point,radius);
+			return;
 		}
 
 		float offset = point.x-radius;
@@ -1782,6 +1781,14 @@ public struct RectCentered
 		m_max.y -= padding.top;
 	}
 	
+	// Clamps a position to within the bounds
+	public Vector2 ClampPosition(Vector2 vector) 
+	{
+		return new Vector2(
+			Mathf.Clamp(vector.x, MinX, MaxX),
+			Mathf.Clamp(vector.y, MinY, MaxY));
+	}
+
 }
 
 
@@ -1811,50 +1818,50 @@ public class RunningAverage
 
 public class ColorX {
 	
-    static readonly string ALPHA_STRING = "0123456789abcdef";
+	static readonly string ALPHA_STRING = "0123456789abcdef";
 	
-    private static string GetHex(int num) {
-        return ALPHA_STRING[num].ToString();
-    }
+	private static string GetHex(int num) {
+		return ALPHA_STRING[num].ToString();
+	}
 
-    private static int HexToInt(char hexChar) {
-        switch (hexChar) {
-            case '0': return 0;
-            case '1': return 1;
-            case '2': return 2;
-            case '3': return 3;
-            case '4': return 4;
-            case '5': return 5;
-            case '6': return 6;
-            case '7': return 7;
-            case '8': return 8;
-            case '9': return 9;
-            case 'A': case 'a': return 10;
-            case 'B': case 'b': return 11;
-            case 'C': case 'c': return 12;
-            case 'D': case 'd': return 13;
-            case 'E': case 'e': return 14;
-            case 'F': case 'f': return 15;
-        }
-        return -1;
-    }
+	private static int HexToInt(char hexChar) {
+		switch (hexChar) {
+			case '0': return 0;
+			case '1': return 1;
+			case '2': return 2;
+			case '3': return 3;
+			case '4': return 4;
+			case '5': return 5;
+			case '6': return 6;
+			case '7': return 7;
+			case '8': return 8;
+			case '9': return 9;
+			case 'A': case 'a': return 10;
+			case 'B': case 'b': return 11;
+			case 'C': case 'c': return 12;
+			case 'D': case 'd': return 13;
+			case 'E': case 'e': return 14;
+			case 'F': case 'f': return 15;
+		}
+		return -1;
+	}
 
-    public static string RGBToHex(Color color) {
-        float red = color.r * 255;
-        float green = color.g * 255;
-        float blue = color.b * 255;
+	public static string RGBToHex(Color color) {
+		float red = color.r * 255;
+		float green = color.g * 255;
+		float blue = color.b * 255;
 
-        string a = GetHex(Mathf.FloorToInt(red / 16));
-        string b = GetHex(Mathf.RoundToInt(red) % 16);
-        string c = GetHex(Mathf.FloorToInt(green / 16));
-        string d = GetHex(Mathf.RoundToInt(green) % 16);
-        string e = GetHex(Mathf.FloorToInt(blue / 16));
-        string f = GetHex(Mathf.RoundToInt(blue) % 16);
+		string a = GetHex(Mathf.FloorToInt(red / 16));
+		string b = GetHex(Mathf.RoundToInt(red) % 16);
+		string c = GetHex(Mathf.FloorToInt(green / 16));
+		string d = GetHex(Mathf.RoundToInt(green) % 16);
+		string e = GetHex(Mathf.FloorToInt(blue / 16));
+		string f = GetHex(Mathf.RoundToInt(blue) % 16);
 
-        return a + b + c + d + e + f;
-    }
+		return a + b + c + d + e + f;
+	}
 
-    public static Color HexToRGB(string color) 
+	public static Color HexToRGB(string color) 
 	{
 		Color finalColor = Color.magenta;
 		if ( color.Length > 0 && color[0] == '#' )
@@ -1873,8 +1880,8 @@ public class ColorX {
 			float blue = (HexToInt(color[5]) + HexToInt(color[4]) * 16f) / 255f;
 			finalColor = new Color { r = red, g = green, b = blue, a = 1 };
 		}
-        return finalColor;
-    }
+		return finalColor;
+	}
 
 
 
@@ -2051,4 +2058,42 @@ public class NaturalComparer: Comparer<string>, System.IDisposable
 
 }
 
+public static class GizmosEx
+{
+	public static void DrawText(string text, Vector3 worldPos) 
+	{	
+		#if UNITY_EDITOR
+		UnityEditor.Handles.BeginGUI();
+		GUI.color = Gizmos.color;
+		var view = UnityEditor.SceneView.currentDrawingSceneView;
+		Vector3 screenPos = view.camera.WorldToScreenPoint(worldPos);
+		GUIStyle style = new GUIStyle(GUI.skin.label);
+		style.fontStyle = FontStyle.Bold;
+		Vector2 size = GUI.skin.label.CalcSize(new GUIContent(text));
+		GUI.Label(new Rect(screenPos.x, view.position.height-screenPos.y - size.y-8, size.x*2, size.y), text,style);
+		UnityEditor.Handles.EndGUI();
+		#endif
+	}
+
+
+	
+	public static void DrawCircle(Vector3 origin, float size)
+	{
+		float corners = 24; // How many corners the circle should have		
+		Vector3 startRotation = Vector3.right * size; // Where the first point of the circle starts
+		Vector3 lastPosition = origin + startRotation;
+		float angle = 0;
+		while (angle <= 360)
+		{
+			angle += 360 / corners;
+			Vector3 nextPosition = origin + (Quaternion.Euler(0, 0, angle) * startRotation);
+			Gizmos.DrawLine(lastPosition, nextPosition);
+			//Gizmos.DrawSphere(nextPosition, 1);
+
+			lastPosition = nextPosition;
+		}
+	}
 }
+
+}
+

@@ -18,13 +18,24 @@ public static class GuiUtils
 		// First check if it's a control, which specifies it's own Rect
 		if ( spriteRenderer == null && textMesh == null )
 		{
-			GuiControl control = includeChildren ? transform.GetComponentInChildren<GuiControl>(false) : transform.GetComponent<GuiControl>();
-			if ( control != null && (transform == control.transform || control.transform != excludeChildren) )
-			{
-				 RectCentered result = control.GetRect(transform);
-				 result.UndoTransform(transform);
-				 return result;
+			bool found = false;
+			RectCentered result = new RectCentered();
+			GuiControl[] controls = includeChildren ? transform.GetComponentsInChildren<GuiControl>(false) : new GuiControl[]{transform.GetComponent<GuiControl>()};
+			foreach ( GuiControl control in controls )
+			{ 
+				if ( control != null && (transform == control.transform || control.transform != excludeChildren) )
+				{					
+					 RectCentered rect = control.GetRect(transform);
+					 rect.UndoTransform(transform);
+					 if ( found == false )
+						result = rect;
+					else 
+						result.Encapsulate(rect);
+					found = true;
+				}
 			}
+			if ( found )
+				return result;
 		}
 
 		// If it's not a control, get the size from the sprite renderer or textmesh

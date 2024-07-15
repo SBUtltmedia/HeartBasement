@@ -151,6 +151,7 @@ public partial class PowerQuestEditor : EditorWindow
 	[SerializeField] string m_systemAudioPath = PATH_SYSTEM_AUDIO;
 	[SerializeField] string m_gamePath = PATH_GAME;
 	[SerializeField] SystemText m_systemText = null;
+	[SerializeField] SystemParser m_systemParser = null;
 	[SerializeField] SystemAudio m_systemAudio = null;
 
 	[SerializeField] GameObject m_questCamera = null;
@@ -265,19 +266,6 @@ public partial class PowerQuestEditor : EditorWindow
 		AssetDatabase.ExportPackage( new string[] {@"Assets\PowerQuest",@"Assets\Plugins"}, @"..\Packages\PowerQuest.unitypackage", ExportPackageOptions.Recurse);
 	}	
 	
-	// Function to export the powerQuest package automatically
-	public static void ExportTemplatePackage()
-	{		
-		AssetDatabase.ExportPackage( new string[] {@"Assets\Audio", @"Assets\Fonts", @"Assets\Game"}, @"Assets\PowerQuest\Templates\DefaultGameTemplate.unitypackage", ExportPackageOptions.Recurse);
-	}
-	public static void ExportTemplatePackage9Verb()
-	{		
-		AssetDatabase.ExportPackage( new string[] {@"Assets\Audio", @"Assets\Fonts", @"Assets\Game"}, @"Assets\PowerQuest\Templates\9VerbGameTemplate.unitypackage", ExportPackageOptions.Recurse);
-	}
-	public static void ExportTemplatePackageHD()
-	{		
-		AssetDatabase.ExportPackage( new string[] {@"Assets\Audio", @"Assets\Fonts", @"Assets\Game"}, @"Assets\PowerQuest\Templates\HdGameTemplate.unitypackage", ExportPackageOptions.Recurse);
-	}
 
 	// Get/Set objects as "favorites", they just get highlighted for now
 	public static bool IsHighlighted(Object obj)
@@ -545,9 +533,12 @@ public partial class PowerQuestEditor : EditorWindow
 		powerQuestEditor.Repaint();
 		
 		powerQuestEditor.RequestAssetRefresh();
-
 		
 		QuestScriptEditor.UpdateAutoComplete(QuestScriptEditor.eAutoCompleteContext.Characters);
+
+		// Stage the character 		
+		EditorGUIUtility.PingObject(prefab);
+		AssetDatabase.OpenAsset(prefab);
 	}
 
 
@@ -815,11 +806,9 @@ public partial class PowerQuestEditor : EditorWindow
 
 	bool DeleteTemplateGameQuestObject(string name)
 	{
-		if ( EditorUtility.DisplayDialog("Really remove example object?", 
+		return EditorUtility.DisplayDialog("Really remove example object?", 
 		$"{name} is part of the template game.\n\nIt's recommended to keep these around for reference, or rename them and re-use them.\n\nIf you really want to delete them, make sure you remove all of them (Rooms, Dialogs, and Characters), or you'll get compile errors you'll have to fix yourself ;)",
-		"Yeah yeah, I know...", "Cancel") == false )
-			return false;
-		return true;
+		"Yeah yeah, I know...", "Cancel");
 	}
 
 	bool DeleteQuestObject<T>( int index, List<T> components, string typename, string name) where T : Component
@@ -844,7 +833,6 @@ public partial class PowerQuestEditor : EditorWindow
 		if ( component is InventoryComponent && (name == "Bucket") )
 			if ( DeleteTemplateGameQuestObject(name) == false )
 				return false;
-
 
 		if ( EditorUtility.DisplayDialog("Really Remove?", "Yo, you sure you wanna remove "+name+"?\n\nThis can't be undone.", "Yeah yeah", "Hmm, Nah") == false )
 			return false;
@@ -939,7 +927,6 @@ public partial class PowerQuestEditor : EditorWindow
 		return IsReady() ? GetPowerQuest().GetActionEnabled(action) : false;
 	}
 
-
 	public RoomComponent GetRoom(string roomName) 
 	{ 
 		if ( IsReady() )
@@ -983,6 +970,7 @@ public partial class PowerQuestEditor : EditorWindow
 			// Get powerquest in the scene and call change room
 			if ( PowerQuest.Exists )
 				PowerQuest.Get.StartRoomTransition( room.GetData(), true );			
+			//if ( PowerQuest.Exists )
 			// PowerQuest.Get.ChangeRoomBG(room.GetData());
 		}
 		else if ( askToSave == false || EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo() )
@@ -1067,9 +1055,9 @@ public partial class PowerQuestEditor : EditorWindow
 		case eQuestObjectType.Inventory: return m_powerQuest?.GetInventoryPrefabs().ConvertAll<IQuestScriptable>(item=>item.GetData());
 		case eQuestObjectType.Dialog: return m_powerQuest?.GetDialogTreePrefabs().ConvertAll<IQuestScriptable>(item=>item.GetData());
 		case eQuestObjectType.Gui: return m_powerQuest?.GetGuiPrefabs().ConvertAll<IQuestScriptable>(item=>item.GetData());
-		case eQuestObjectType.Prop: return inRoom?.GetProps().ConvertAll<IQuestScriptable>(item=>item);
-		case eQuestObjectType.Hotspot: return inRoom?.GetHotspots().ConvertAll<IQuestScriptable>(item=>item);
-		case eQuestObjectType.Region: return inRoom?.GetRegions().ConvertAll<IQuestScriptable>(item=>item);
+		case eQuestObjectType.Prop: return inRoom?.GetProps_SaveFlagNotDirtied().ConvertAll<IQuestScriptable>(item=>item);
+		case eQuestObjectType.Hotspot: return inRoom?.GetHotspots_SaveFlagNotDirtied().ConvertAll<IQuestScriptable>(item=>item);
+		case eQuestObjectType.Region: return inRoom?.GetRegions_SaveFlagNotDirtied().ConvertAll<IQuestScriptable>(item=>item);
 		}
 		return null;
 	}
@@ -1082,14 +1070,11 @@ public partial class PowerQuestEditor : EditorWindow
 	void UnselectSceneTools()
 	{
 		// Reset any walkable polygon being edited
-		QuestEditorUtils.HidePolygonEditor();
-		if ( m_walkableAreaEditor != null ) 
-			Editor.DestroyImmediate(m_walkableAreaEditor);
-		m_walkableAreaEditingId = -1;	
+		if ( QuestPolyTool.Active() && QuestPolyTool.Active(Selection.activeGameObject) == false )
+			QuestPolyTool.Hide();
 		
 		// Reset any point being editied
 		m_selectedRoomPoint = -1;
-
 	}
 
 	// Quick version converter function
@@ -1235,7 +1220,7 @@ public partial class PowerQuestEditor : EditorWindow
 		// Register with animator window for anim tag callbacks
 		if ( m_animatorWindow == null && EditorWindow.HasOpenInstances<SpriteAnimator>() )
 		{
-			m_animatorWindow = EditorWindow.GetWindow<SpriteAnimator>();
+			m_animatorWindow = (SpriteAnimator)EditorWindow.GetWindow(typeof(SpriteAnimator),false,null,false); //EditorWindow.GetWindow<SpriteAnimator>();
 		}		
 		else if ( m_animatorWindow != null && EditorWindow.HasOpenInstances<SpriteAnimator>() == false )
 		{
@@ -1373,12 +1358,8 @@ public partial class PowerQuestEditor : EditorWindow
 
 	protected virtual void OnScene(SceneView sceneView)
 	{
-		if ( Event.current != null )
-		{
-			m_mousePos = Event.current.mousePosition;
-			m_mousePos.y = Screen.height- (m_mousePos.y+40.0f); // Inverts, and removes offset caused by unity gui bar
-			m_mousePos = Camera.current.ScreenToWorldPoint(m_mousePos.WithZ(0));
-		}
+		if ( Event.current != null && Event.current.type == EventType.MouseMove )
+			m_mousePos = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition).origin;
 
 		OnSceneRoom(sceneView);
 		OnSceneGui(sceneView);
@@ -1460,11 +1441,32 @@ public partial class PowerQuestEditor : EditorWindow
 
 			}
 		}
+		else if (string.Equals(ev.m_functionName, "SoundStop", System.StringComparison.OrdinalIgnoreCase) )
+		{
+			if ( ev.m_paramType == SpriteAnimator.eAnimEventParameter.String )
+			{
+				CreateTempAudioSystem();
+				SystemAudio.Stop(ev.m_paramString);
+			}
+			else if ( ev.m_paramType == SpriteAnimator.eAnimEventParameter.Object )
+			{
+				if ( ev.m_paramObjectReference == null )
+					return;				
+				GameObject cue =  ev.m_paramObjectReference as GameObject;
+				if ( cue )
+				{
+					CreateTempAudioSystem();
+					SystemAudio.Stop(cue.name);
+				}
+
+			}
+		}
 		else if ( string.Equals(ev.m_functionName, "Footstep", System.StringComparison.OrdinalIgnoreCase) && m_listCharacterPrefabs.Count > 0)
 		{	
 			CreateTempAudioSystem();			
 			SystemAudio.Play(m_listCharacterPrefabs[0].GetData().FootstepSound);
 		}
+		//Debug.Log(ev.m_functionName);
 
 		// For extentions
 		exOnAnimatorWindowEvent(ev);
@@ -1667,6 +1669,69 @@ public partial class PowerQuestEditor : EditorWindow
 			window.Repaint();
 		}
 	}
+	
+	//! Highlight for existing functions
+	
+	//
+	// Highlighting buttons for existing methods
+	//	
+	Dictionary<string, HashSet<string>> m_buttonHighlightClassMethodsCache = new Dictionary<string, HashSet<string>>();
+	Dictionary<string, bool> m_buttonHighlightCheckResultsCache = new Dictionary<string, bool>();
+	Color m_guiColorBeforeButtonHighlight = Color.white;
+	readonly Color m_buttonHighlightGuiColor = Color.white;//new Color(0.67f, 1f, 0.72f);
+	HashSet<string> m_buttonHighlightClassMethods = null;
+	string m_buttonHighlightClassName = string.Empty;
+
+	public void BeginHighlightingMethodButtons(IQuestScriptable methodsOwner)
+	{
+		m_guiColorBeforeButtonHighlight = GUI.color;
+		
+		if ( methodsOwner == null )
+			return;
+
+		string className = methodsOwner.GetScriptClassName();
+		m_buttonHighlightClassName = className;
+		// For resetting after
+		
+		if (!m_buttonHighlightClassMethodsCache.TryGetValue(className, out m_buttonHighlightClassMethods))
+		{
+			Type buttonHighlightClassType = Type.GetType($"{className}, Assembly-CSharp");
+			MethodInfo[] methods = 
+				buttonHighlightClassType?.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			if (methods != null)
+			{
+				m_buttonHighlightClassMethods = new HashSet<string>(); // removed linq here 				
+				foreach ( MethodInfo item in methods )
+					m_buttonHighlightClassMethods.Add(item.Name);
+			}
+			m_buttonHighlightClassMethodsCache[className] = m_buttonHighlightClassMethods;
+		}
+	}
+
+	public bool HighlightMethodButton(string methodName)
+	{
+		bool methodExists;
+
+		string methodUniqueName = $"{m_buttonHighlightClassName}.{methodName}";
+		if (!m_buttonHighlightCheckResultsCache.TryGetValue(methodUniqueName, out methodExists))
+		{
+			// method hasn't been cached, so check if it exists
+			methodExists = m_buttonHighlightClassMethods != null && 
+			               m_buttonHighlightClassMethods.Contains(methodName);
+			m_buttonHighlightCheckResultsCache[methodUniqueName] = methodExists;
+		}
+ 
+		GUI.color = methodExists
+			? EditorSettings.m_scriptBtnUsedCol 
+			: EditorSettings.m_scriptBtnUnusedCol ;//m_guiColorBeforeButtonHighlight;
+
+		return methodExists;
+	}
+
+	public void EndHighlightingMethodButtons()
+	{
+		GUI.color = m_guiColorBeforeButtonHighlight;
+	}
 
 	//
 	// Creates tab style layout
@@ -1704,7 +1769,7 @@ public partial class PowerQuestEditor : EditorWindow
 		GUI.backgroundColor = storeColor;	 
 		return selected;
 	}
-
+	
 
 	public void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
 	{
@@ -1936,7 +2001,7 @@ public partial class PowerQuestEditor : EditorWindow
 						dirty = false;
 						foreach ( PropComponent component in room.GetPropComponents() )
 						{		
-							dirty |= UpdateDefaultSprite( component, component.GetData().Animation, room.GetAnimations(), null, room.GetSprites() ); // Now only updating sprites if anim was changed.
+							dirty |= UpdateDefaultSprite( component, component.GetData().Animation, room.GetAnimations(), room.GetSprites() ); // Now only updating sprites if anim was changed.
 						}
 						
 						if ( dirty && EditorSceneManager.GetActiveScene().name == room.GetData().GetSceneName() )
@@ -2104,16 +2169,51 @@ public partial class PowerQuestEditor : EditorWindow
 		return changed;
 	}
 
-	// NB: Can either set anim name and animation list, sprites list, or just the clip. Returns true if set
-	public static bool UpdateDefaultSprite( MonoBehaviour owner, string animName, AnimationClip clip ) { return UpdateDefaultSprite(owner,animName,null,clip); }
-	public static bool UpdateDefaultSprite( MonoBehaviour owner, string animName, List<AnimationClip> animations, AnimationClip clip = null, List<Sprite> spriteList = null )
+	public static Sprite GetFirstSpriteInAnim( AnimationClip clip )
 	{
-		if ( owner == null || (animations == null && spriteList == null ))
+		if ( clip == null )
+			return null;
+	
+		// There's no sprite set, but there is an animation set, so set the sprite as the first frame of the animation				        						
+		EditorCurveBinding m_curveBinding = new EditorCurveBinding();
+		m_curveBinding = System.Array.Find( AnimationUtility.GetObjectReferenceCurveBindings(clip), item=>item.propertyName == PROPERTYNAME_SPRITE ); 
+		if ( m_curveBinding.isPPtrCurve )
+		{
+			// Convert frames from ObjectReferenceKeyframe (struct with time & sprite) to our easier to use list of AnimFrame
+			ObjectReferenceKeyframe[] objRefKeyframes = AnimationUtility.GetObjectReferenceCurve(clip, m_curveBinding );
+			if ( objRefKeyframes.Length > 0 && objRefKeyframes[0].value != null )
+			{
+				return objRefKeyframes[0].value as Sprite;
+			}
+		}
+		return null;
+	}
+
+	// NB: Can either set anim name and animation list, sprites list, or just the clip. Returns true if set
+	public static bool UpdateDefaultSprite( MonoBehaviour owner, AnimationClip clip ) 
+	{
+		if ( owner == null || clip == null )
 			return false;
 		SpriteRenderer sprite = owner.GetComponentInChildren<SpriteRenderer>(true);
 		if ( sprite == null || sprite.sprite != null )
 			return false;
-		if ( string.IsNullOrEmpty(animName) )
+		
+		Sprite newSprite = GetFirstSpriteInAnim(clip);
+		if ( newSprite != null )
+		{
+			sprite.sprite = newSprite;
+			EditorUtility.SetDirty(sprite);
+			return true;		
+		}
+		return false;
+		
+	}
+	public static bool UpdateDefaultSprite( MonoBehaviour owner, string animName, List<AnimationClip> animations,List<Sprite> spriteList = null )
+	{
+		if ( owner == null || string.IsNullOrEmpty(animName) || (animations == null && spriteList == null ))
+			return false;
+		SpriteRenderer sprite = owner.GetComponentInChildren<SpriteRenderer>(true);
+		if ( sprite == null || sprite.sprite != null )
 			return false;
 
 		if ( spriteList != null )
@@ -2127,6 +2227,8 @@ public partial class PowerQuestEditor : EditorWindow
 			}
 		}
 		
+		AnimationClip clip = null;
+		
 		//
 		// Try animation list
 		//
@@ -2136,24 +2238,14 @@ public partial class PowerQuestEditor : EditorWindow
 				clip = animations.Find(item=> item != null && string.Equals(item.name, animName, System.StringComparison.OrdinalIgnoreCase));
 		
 			// Check if sprite has animation now
-			if ( clip != null )
+			Sprite newSprite = GetFirstSpriteInAnim(clip);
+			if ( newSprite != null )
 			{
-				// There's no sprite set, but there is an animation set, so set the sprite as the first frame of the animation				        						
-				EditorCurveBinding m_curveBinding = new EditorCurveBinding();
-				m_curveBinding = System.Array.Find( AnimationUtility.GetObjectReferenceCurveBindings(clip), item=>item.propertyName == PROPERTYNAME_SPRITE ); 
-				if ( m_curveBinding.isPPtrCurve )
-				{
-					// Convert frames from ObjectReferenceKeyframe (struct with time & sprite) to our easier to use list of AnimFrame
-					ObjectReferenceKeyframe[] objRefKeyframes = AnimationUtility.GetObjectReferenceCurve(clip, m_curveBinding );
-					if ( objRefKeyframes.Length > 0 && objRefKeyframes[0].value != null )
-					{
-						sprite.sprite = objRefKeyframes[0].value as Sprite;
+				sprite.sprite = newSprite;
 						EditorUtility.SetDirty(sprite);
 						return true;
 					}
 				}
-			}
-		}
 		
 		//
 		// Try sprites folder		

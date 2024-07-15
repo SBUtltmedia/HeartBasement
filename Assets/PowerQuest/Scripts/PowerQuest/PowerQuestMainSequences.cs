@@ -195,6 +195,7 @@ public partial class PowerQuest
 		m_initialised = true;
 
 		if ( room.GetInstance() != null ) room.GetInstance().OnLoadComplete();
+		ExOnRoomLoad(); // this was useful for showing saving icon before a save on enter starts		
 		
 		// Call post restore on game scripts. This was moved here separate from other OnPostRestores so that you can do usual calls like R.MyRoom.Active and GetProp("blah").Instance.GetComponent<blah>()... in the functions and they'll work
 		if ( m_restoring )
@@ -212,6 +213,7 @@ public partial class PowerQuest
 			}
 			//scriptables.ForEach( item => CallScriptPostRestore(item, onPostRestoreParams) );						
 		}
+
 
 		if ( m_restoring && SV.m_callEnterOnRestore == false )
 		{
@@ -259,6 +261,7 @@ public partial class PowerQuest
 
 			// Remove any camera override set in the previous room
 			m_cameraData.ResetPositionOverride();
+						
 
 			// Necessary, incase things haven't completely loaded yet (first time game loads)
 			yield return new WaitForEndOfFrame(); 
@@ -429,6 +432,12 @@ public partial class PowerQuest
 					}
 				}
 
+				if ( clickHandled == false && m_enableParser && SystemParser.Get.ParserReady )
+				{ 
+					SystemParser.Get.OnParserHandled();
+					ProcessClick(eQuestVerb.Parser);
+				}
+
 				//
 				// Run through any queued interactions. 
 				// These would have been added in "OnMouseClick" from ProcessClick calls. This could optionally be added after "update" I guess, incase wanna do controls in update instead.
@@ -515,6 +524,10 @@ public partial class PowerQuest
 							RegionComponent.eTriggerResult result = regionComponent.UpdateCharacterOnRegionState(charId, false);
 							if ( region.Enabled && (region.PlayerOnly == false || character == m_player) )
 							{
+								// mark region + character dirty for save system
+								region.SaveDirty=true;
+								character.SaveDirty=true;
+
 								if ( result == RegionComponent.eTriggerResult.Enter )
 								{
 									ExOnCharacterEnterRegion(character, regionComponent);

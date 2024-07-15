@@ -303,12 +303,14 @@ public partial class Button : GuiControl, IButton
 		ExAwake();
 
 		// Set state if clickable/not clickable.
-		// NB: set this in Awake, since if color is changed by fading on show, it'll be overriden by this state change
+		// NB: set this in Awake, since if color is changed by fading on show, it'll be overriden by this state change. But this causes a warning about anim playing before awake called...
 		SetState(Clickable ? eState.Default : eState.Off);
 	}
 
-	void Start()
+	protected override void Start()
 	{		
+		base.Start();
+
 		InitComponentReferences();
 
 		StartStateAnimation();
@@ -462,10 +464,11 @@ public partial class Button : GuiControl, IButton
 			PlayAnimInternal(m_anim);		
 	}
 	
+	
 	// Plays anim. Returns false if clip not found	
 	bool PlayAnimInternal(string animName, bool fromStart = true)
 	{
-		if ( m_spriteAnimator == null )
+		if ( m_sprite == null )
 			return true;
 
 		m_stopOverrideAnimDelay = 0;
@@ -475,17 +478,17 @@ public partial class Button : GuiControl, IButton
 
 		// Find anim in gui's list of anims
 		AnimationClip clip = GetAnimation(animName);
-		if ( clip != null && m_spriteAnimator != null )
+		if ( clip != null && FindSpriteAnimator() )
 		{
-			if ( fromStart || m_spriteAnimator.Clip == null  )
-			{
-				m_spriteAnimator.Play(clip);
-			}
-			else
-			{
-				float animTime = m_spriteAnimator.Time;
-				m_spriteAnimator.Play(clip);
-				m_spriteAnimator.Time = animTime;
+				if ( fromStart || m_spriteAnimator.Clip == null  )
+				{
+					m_spriteAnimator.Play(clip);
+				}
+				else
+				{
+					float animTime = m_spriteAnimator.Time;
+					m_spriteAnimator.Play(clip);
+					m_spriteAnimator.Time = animTime;
 			}
 			return true;
 		}
@@ -495,15 +498,24 @@ public partial class Button : GuiControl, IButton
 			Sprite sprite = GetSprite(animName);
 			if ( sprite != null )
 			{
-				m_spriteAnimator.Stop();
+				if ( m_spriteAnimator != null )
+					m_spriteAnimator.Stop();
 				m_sprite.sprite=sprite;
 				return true;
 			}
 		}
 		
 		return false;
+	}	
+
+	SpriteAnim FindSpriteAnimator()
+	{ 
+		if ( m_spriteAnimator != null )
+			return m_spriteAnimator;
+		if ( m_sprite != null )
+			m_spriteAnimator = m_sprite.gameObject.AddComponent<SpriteAnim>();
+		return m_spriteAnimator;		
 	}
-	
 	
 	#endregion
 	#region Partial Functions for extentions

@@ -396,16 +396,18 @@ public partial class Gui : IQuestClickable, IQuestScriptable, IGui
 			
 		}
 	}
+	
+	/// Returns true if gui navigation key is pressed which hasn't been consumed by a control (consumes this keypress)
+	public bool GetKeyPressed( eGuiNav key )
+	{ 
+		return HasFocus && QuestMenuManager.Get.ConsumeGuiKey(key);
+	}
 		
-	// Returns true
+	// Returns true if handled by gui
 	public bool Navigate( eGuiNav key )
 	{		
-		// Process the keyboard input with menu manager. Returns true if key should be used
-		if ( QuestMenuManager.Get.ProcessKeyboardInput(key) == false )
-			return false;
-
 		GuiControl focusedControl = PowerQuest.Get.GetFocusedGuiControl() as GuiControl;
-		if ( focusedControl != null && focusedControl.isActiveAndEnabled && focusedControl.HandleKeyboardInput(key) )
+		if ( focusedControl != null && focusedControl.isActiveAndEnabled && focusedControl.HandleKeyboardInput(key)  )		
 			return true;
 		
 		if ( key == eGuiNav.Up 
@@ -413,9 +415,21 @@ public partial class Gui : IQuestClickable, IQuestScriptable, IGui
 			|| key == eGuiNav.Left 
 			|| key == eGuiNav.Right )
 		{
-			NavigateToControl(GetNextNavControl(key));		
-		}	
-		return true;
+			IGuiControl navToControl = null;
+
+			// Check if focused control has navigation component, which override
+			if ( focusedControl != null && focusedControl.NavigationComponent != null )
+				navToControl = focusedControl.NavigationComponent.GetNextNavControl(key,this);
+			else 
+				navToControl = GetNextNavControl(key);
+
+			if ( navToControl != null && navToControl != (IGuiControl)focusedControl )
+			{ 
+				NavigateToControl(navToControl);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	bool IsActuallyVisible() { return Visible && HiddenBySystem == false; }
@@ -433,8 +447,7 @@ public partial class Gui : IQuestClickable, IQuestScriptable, IGui
 				PowerQuest.Get.Pause(m_scriptName);
 			else
 				PowerQuest.Get.UnPause(m_scriptName);
-		}
-			
+		}			
 	}
 
 	//
@@ -484,8 +497,10 @@ public partial class Gui : IQuestClickable, IQuestScriptable, IGui
 		float closestDist = float.MaxValue;
 		float closestSecondary = float.MaxValue;
 		
+		bool washidden = !focusedControl.Visible; // fix for edge case where focused control is clickable but hidden, so need its rect.
+		if ( washidden ) focusedControl.Visible=true;
 		RectCentered myRect = GetNavHotspotRect(focusedControl);
-		
+		if ( washidden ) focusedControl.Visible=false;
 		foreach ( GuiControl control in m_controls )
 		{
 			if ( control == focusedControl )
@@ -670,13 +685,20 @@ public class GuiComponent : MonoBehaviour
 	{
 		Sprite sprite = PowerQuest.FindSpriteInList(m_sprites, animName);
 
+		PowerQuest pq = PowerQuest.Get;
+		#if UNITY_EDITOR
+		// Hack to preview images from name
+		if ( pq == null && Application.isEditor )			
+			pq = (UnityEditor.AssetDatabase.LoadAssetAtPath(@"Assets\Game\PowerQuest.prefab", typeof(GameObject)) as GameObject).GetComponent<PowerQuest>();
+		#endif			
+
 		// Try in shared gui sprites
-		if ( sprite == null && PowerQuest.Get != null )		
-			sprite = PowerQuest.Get.GetGuiSprite(animName);
+		if ( sprite == null && pq != null )		
+			sprite = pq.GetGuiSprite(animName);
 
 		// Try in inventory sprites
-		if ( sprite == null && PowerQuest.Get != null )		
-			sprite = PowerQuest.Get.GetInventorySprite(animName);
+		if ( sprite == null && pq != null )		
+			sprite = pq.GetInventorySprite(animName);
 
 		return sprite;
 	}

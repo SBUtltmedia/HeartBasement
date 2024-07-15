@@ -27,6 +27,13 @@ public class RoomComponentEditor : Editor
 
 	}
 
+	void ScriptButton(string description, string functionName, string parameters = "", bool isCoroutine = true )
+	{ 
+		bool bold = PowerQuestEditor.Get.HighlightMethodButton(functionName);
+		if ( GUILayout.Button(description, QuestEditorUtils.EditorStylesBold.Button(bold)) )
+			QuestScriptEditor.Open( (RoomComponent)target, QuestScriptEditor.eType.Room, functionName, parameters, isCoroutine);
+	}
+
 	public override void OnInspectorGUI()
 	{
 		EditorGUILayout.LabelField("Setup", EditorStyles.boldLabel);
@@ -40,50 +47,24 @@ public class RoomComponentEditor : Editor
 		GUILayout.Space(5);
 		//GUILayout.Label("Script Functions",EditorStyles.centeredGreyMiniLabel);
 		EditorGUILayout.LabelField("Script Functions", EditorStyles.boldLabel);
-		if ( GUILayout.Button("On Enter Room") )
-		{
-			QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnEnterRoom","", false);
-		}
-		if ( GUILayout.Button("On Enter Room (After fading in)") )
-		{
-			QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnEnterRoomAfterFade");
-		}
-		if ( GUILayout.Button("On Exit Room") )
-		{
-			QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnExitRoom", " IRoom oldRoom, IRoom newRoom ");
-		}
-		if ( GUILayout.Button("Update (Blocking)") )
-		{
-			QuestScriptEditor.Open(  component, QuestScriptEditor.eType.Room, "UpdateBlocking");
-		}
-		if ( GUILayout.Button("Update") )
-		{
-			QuestScriptEditor.Open(  component, QuestScriptEditor.eType.Room, "Update","", false);
-		}
-		if ( GUILayout.Button("On Any Click") )
-		{
-			QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnAnyClick");
-		}
-		if ( GUILayout.Button("After Any Click") )
-		{
-			QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "AfterAnyClick");
-		}
-		if ( GUILayout.Button("On Walk To") )
-		{
-			QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnWalkTo");
-		}
-		if ( GUILayout.Button("Post-Restore Game") )
-		{
-			QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "OnPostRestore", " int version ", false);
-		}
-		if ( GUILayout.Button("Unhandled Interact") )
-		{
-			QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "UnhandledInteract", " IQuestClickable mouseOver ");
-		}
-		if ( GUILayout.Button("Unhandled Use Inv") )
-		{
-			QuestScriptEditor.Open( component, QuestScriptEditor.eType.Room, "UnhandledUseInv", " IQuestClickable mouseOver, IInventory item ");
-		}
+
+		PowerQuestEditor.Get.BeginHighlightingMethodButtons(component.GetData());
+		
+		ScriptButton("On Enter Room (BG)", "OnEnterRoom","", false);
+		ScriptButton("On Enter Room After Fade", "OnEnterRoomAfterFade");		
+		ScriptButton("On Exit Room", "OnExitRoom", " IRoom oldRoom, IRoom newRoom ");
+		ScriptButton("Update Blocking", "UpdateBlocking");
+		ScriptButton("Update (BG)", "Update","", false);		
+		ScriptButton("On Parser", "OnParser");
+		ScriptButton("On Any Click", "OnAnyClick");
+		ScriptButton("After Any Click", "AfterAnyClick");
+		ScriptButton("On Walk To", "OnWalkTo");
+		ScriptButton("Post-Restore Game (BG)", "OnPostRestore", " int version ", false);			
+		ScriptButton("Unhandled Interact", "UnhandledInteract", " IQuestClickable mouseOver ");
+		ScriptButton("Unhandled Look At", "UnhandledLookAt", " IQuestClickable mouseOver ");
+		ScriptButton("Unhandled Use Inv", "UnhandledUseInv", " IQuestClickable mouseOver, IInventory item ");
+		
+		PowerQuestEditor.Get.EndHighlightingMethodButtons();
 
 		GUILayout.Space(5);
 		EditorGUILayout.LabelField("Utils", EditorStyles.boldLabel);
@@ -216,6 +197,7 @@ public class RoomComponentEditor : Editor
 public class PropComponentEditor : Editor 
 {	
 	float m_oldYPos = float.MaxValue;
+	PolygonCollider2D m_collider = null;
 	
 	public override void OnInspectorGUI()
 	{
@@ -223,7 +205,18 @@ public class PropComponentEditor : Editor
 		PropComponent component = (PropComponent)target;
 		if ( component == null ) 
 			return;
+
+		if (m_collider == null )
+			m_collider = component.GetComponent<PolygonCollider2D>();
 					
+		if (m_collider != null )
+		{ 		
+			EditorGUI.BeginChangeCheck();
+			GUILayout.Toolbar(QuestPolyTool.Active(m_collider.gameObject)?0:-1, new string[]{"Edit Hotspot Shape"}, EditorStyles.miniButton);
+			if ( EditorGUI.EndChangeCheck())
+				QuestPolyTool.Toggle(m_collider.gameObject);	
+		}
+
 		Prop data = component.GetData();
 		float oldBaseline = data.Baseline;
 		bool oldBaselineFixed = data.BaselineFixed;
@@ -235,41 +228,59 @@ public class PropComponentEditor : Editor
 			QuestClickableEditorUtils.UpdateBaseline(component.transform, data, data.BaselineFixed);
 		m_oldYPos = component.transform.position.y;
 		
-		GUILayout.Space(5);
-		GUILayout.Label("Script Functions",EditorStyles.boldLabel);
-		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Use) && GUILayout.Button("On Interact") )
-		{
-			RoomComponent room = component.transform.parent.GetComponent<RoomComponent>();
+		if (m_collider != null )
+		{ 			
 
-			QuestScriptEditor.Open( room, QuestScriptEditor.eType.Prop,
-				PowerQuest.SCRIPT_FUNCTION_INTERACT_PROP+ component.GetData().ScriptName,
-				PowerQuestEditor.SCRIPT_PARAMS_INTERACT_PROP);
-		}
-		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) && GUILayout.Button("On Look") )
-		{
-			RoomComponent room = component.transform.parent.GetComponent<RoomComponent>();
+			GUILayout.Space(5);
+			GUILayout.Label("Script Functions",EditorStyles.boldLabel);
+			if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Use) && GUILayout.Button("On Interact") )
+			{
+				RoomComponent room = component.transform.parent.GetComponent<RoomComponent>();
 
-			QuestScriptEditor.Open( room, QuestScriptEditor.eType.Prop,
-				PowerQuest.SCRIPT_FUNCTION_LOOKAT_PROP+ component.GetData().ScriptName,
-				PowerQuestEditor.SCRIPT_PARAMS_LOOKAT_PROP);
-		}
-		if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) && GUILayout.Button("On Use Item") )
-		{
-			RoomComponent room = component.transform.parent.GetComponent<RoomComponent>();
+				QuestScriptEditor.Open( room, QuestScriptEditor.eType.Prop,
+					PowerQuest.SCRIPT_FUNCTION_INTERACT_PROP+ component.GetData().ScriptName,
+					PowerQuestEditor.SCRIPT_PARAMS_INTERACT_PROP);
+			}
+			if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Look) && GUILayout.Button("On Look") )
+			{
+				RoomComponent room = component.transform.parent.GetComponent<RoomComponent>();
 
-			QuestScriptEditor.Open( room, QuestScriptEditor.eType.Prop,
-				PowerQuest.SCRIPT_FUNCTION_USEINV_PROP+ component.GetData().ScriptName,
-				PowerQuestEditor.SCRIPT_PARAMS_USEINV_PROP);
+				QuestScriptEditor.Open( room, QuestScriptEditor.eType.Prop,
+					PowerQuest.SCRIPT_FUNCTION_LOOKAT_PROP+ component.GetData().ScriptName,
+					PowerQuestEditor.SCRIPT_PARAMS_LOOKAT_PROP);
+			}
+			if ( PowerQuestEditor.GetActionEnabled(eQuestVerb.Inventory) && GUILayout.Button("On Use Item") )
+			{
+				RoomComponent room = component.transform.parent.GetComponent<RoomComponent>();
+
+				QuestScriptEditor.Open( room, QuestScriptEditor.eType.Prop,
+					PowerQuest.SCRIPT_FUNCTION_USEINV_PROP+ component.GetData().ScriptName,
+					PowerQuestEditor.SCRIPT_PARAMS_USEINV_PROP);
+			}
 		}
 
 		GUILayout.Space(5);
 		EditorGUILayout.LabelField("Utils", EditorStyles.boldLabel);
 		
-		if ( GUILayout.Button("Create Polygon from Sprite") )
+		if (m_collider != null ) 
 		{
-			Undo.RecordObject(target, "Polygon from sprite");
-			EditorUtils.UpdateClickableCollider(component.gameObject);
-			EditorUtility.SetDirty(component.gameObject);
+			if ( GUILayout.Button("Create Polygon from Sprite") )
+			{
+				Undo.RecordObject(target, "Polygon from sprite");
+				EditorUtils.UpdateClickableCollider(component.gameObject);
+				EditorUtility.SetDirty(component.gameObject);
+			}
+		}
+		else 
+		{ 
+			if ( GUILayout.Button("Make Clickable") )
+			{
+				Undo.RecordObject(component,"Made prop clickable");
+				data.Clickable=true;
+				m_collider = component.gameObject.AddComponent<PolygonCollider2D>();
+				m_collider.isTrigger = true;
+				EditorUtility.SetDirty(m_collider.gameObject);
+			}
 		}
 		if ( GUILayout.Button("Rename") )
 		{
@@ -293,11 +304,27 @@ public class PropComponentEditor : Editor
 [CustomEditor(typeof(HotspotComponent))]
 public class HotspotComponentEditor : Editor 
 {	
+	PolygonCollider2D m_collider = null;
+
 	public override void OnInspectorGUI()
 	{
-		EditorGUILayout.LabelField("Setup", EditorStyles.boldLabel);
-		DrawDefaultInspector();
+	
 		HotspotComponent component = (HotspotComponent)target;
+
+		if (m_collider == null )
+			m_collider = component.GetComponent<PolygonCollider2D>();
+					
+		EditorGUILayout.LabelField("Setup", EditorStyles.boldLabel);
+
+		if (m_collider != null )
+		{ 		
+			EditorGUI.BeginChangeCheck();
+			GUILayout.Toolbar(QuestPolyTool.Active(m_collider.gameObject)?0:-1, new string[]{"Edit Hotspot Shape"}, EditorStyles.miniButton);
+			if ( EditorGUI.EndChangeCheck())
+				QuestPolyTool.Toggle(m_collider.gameObject);	
+		}
+
+		DrawDefaultInspector();
 
 		GUILayout.Space(5);
 		GUILayout.Label("Script Functions",EditorStyles.boldLabel);
@@ -349,12 +376,38 @@ public class HotspotComponentEditor : Editor
 [CanEditMultipleObjects]
 [CustomEditor(typeof(RegionComponent))]
 public class RegionComponentEditor : Editor 
-{	
+{
+	bool m_first = false;
+	PolygonCollider2D m_collider = null;
+
+	public void OnEnable()
+	{	
+		m_first = true;
+	}
+
 	public override void OnInspectorGUI()
 	{
+	
+		RegionComponent component = (RegionComponent)target;
+		if ( component == null )
+			return;
+		if ( m_first )
+			QuestPolyTool.Show(component);
+		m_first = false;
+		
+		if (m_collider == null )
+			m_collider = component.GetComponent<PolygonCollider2D>();
+					
+		if (m_collider != null )
+		{ 		
+			EditorGUI.BeginChangeCheck();
+			GUILayout.Toolbar(QuestPolyTool.Active(m_collider.gameObject)?0:-1, new string[]{"Edit Hotspot Shape"}, EditorStyles.miniButton);
+			if ( EditorGUI.EndChangeCheck())
+				QuestPolyTool.Toggle(m_collider.gameObject);	
+		}
+
 		EditorGUILayout.LabelField("Setup", EditorStyles.boldLabel);
 		DrawDefaultInspector();
-		RegionComponent component = (RegionComponent)target;
 
 		GUILayout.Space(5);
 		GUILayout.Label("Script Functions",EditorStyles.boldLabel);

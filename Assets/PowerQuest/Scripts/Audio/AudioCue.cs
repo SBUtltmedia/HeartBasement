@@ -58,14 +58,14 @@ public class AudioCue : MonoBehaviour
 
 	public enum eAudioType
 	{
-		Sound = 1<<0,
-		Music = 1<<1,
+		Sound =  1<<0,
+		Music =  1<<1,
 		Dialog = 1<<2,
-		User1 = 1<<3,
-		User2 = 1<<4,
-		User3 = 1<<5,
-		User4 = 1<<6,
-		User5 = 1<<7,
+		User1 =  1<<3,
+		User2 =  1<<4,
+		User3 =  1<<5,
+		User4 =  1<<6,
+		User5 =  1<<7,
 	};
 	
 	[System.Serializable]
@@ -114,6 +114,10 @@ public class AudioCue : MonoBehaviour
 	public float m_chance = 1;	
 	[Tooltip("Delay before playing sound, after cue is played")]
 	public MinMaxRange m_startDelay = new MinMaxRange(0.0f);
+	[Tooltip("Time ove which the sound fades in")]
+	public float m_fadeInTime = 0;
+	//[Tooltip("Time before the end of the sound before it fades out")]
+	//public bool m_fadeOutTime = 0;
 	
 	[Tooltip("If >= 0 this overrides the default delay before the same sound can be repeated")] 
 	public float m_noDuplicateTime = -1;
@@ -123,7 +127,9 @@ public class AudioCue : MonoBehaviour
 	public UnityEngine.Audio.AudioMixerGroup m_mixerGroup = null;
 	[Header("Effects")]
 	[Tooltip("Reverb setting")]
-	public AudioReverbPreset m_reverbPreset = AudioReverbPreset.Off;
+	public AudioReverbPreset m_reverbPreset = AudioReverbPreset.Off;	
+	[Range(0,1)]
+	public float m_reverbLevel = 0.0f;
 	[Range(0,0.9f)]
 	[Tooltip("Distortion amount")]
 	public float m_distortionLevel = 0;
