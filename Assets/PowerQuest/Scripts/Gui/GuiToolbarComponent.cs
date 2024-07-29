@@ -83,9 +83,9 @@ public class GuiToolbarComponent : MonoBehaviour
 			}
 		}
 		m_btnAudio.sprite = m_audioSettings[m_audioSetting].m_buttonsprite;
-		m_dialogSetting = (int)PowerQuest.Get.Settings.DialogDisplay;
-		m_btnDialog.sprite = m_spriteDialog[m_dialogSetting];
-		m_btnDialog.GetComponent<GuiComponent>().GetData().Description = TEXT_DISPLAY_STRINGS[m_dialogSetting];
+		//m_dialogSetting = (int)PowerQuest.Get.Settings.DialogDisplay;
+		//m_btnDialog.sprite = m_spriteDialog[m_dialogSetting];
+		//m_btnDialog.GetComponent<GuiComponent>().GetData().Description = TEXT_DISPLAY_STRINGS[m_dialogSetting];
 	}
 
 
