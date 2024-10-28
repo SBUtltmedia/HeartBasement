@@ -677,7 +677,7 @@ public class QuestSaveManager
 		{
 			
 			#if ENABLE_DONTSAVE_ATTRIB
-			if ( Attribute.IsDefined(finfo, TYPE_QUESTDONTSAVE)	&& (manualSaveType == false || Attribute.IsDefined(finfo, TYPE_QUESTSAVE) ) )
+			if ( (manualSaveType == false || Attribute.IsDefined(finfo, TYPE_QUESTSAVE) ) && Attribute.IsDefined(finfo, TYPE_QUESTDONTSAVE) == false )
 			#else
 			if ( (manualSaveType == false || Attribute.IsDefined(finfo, TYPE_QUESTSAVE) ) )
 			#endif

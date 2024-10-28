@@ -604,7 +604,8 @@ public class QuestEditorUtils
 					if ( i > 1 &&  Regex.IsMatch(allLines[i - 1], @"^\s*$") )
 						allLines.RemoveRange(i - 1, 1);
 
-					File.WriteAllLines(path, allLines.ToArray());
+					WriteAllLines(path, allLines);
+					//File.WriteAllLines(path, allLines.ToArray());
 					break;
 				}
 			}
@@ -649,7 +650,7 @@ public class QuestEditorUtils
 					if (allLines[i - 1] == "")
 						allLines.RemoveRange(i - 1, 1);
 
-					File.WriteAllLines(path, allLines.ToArray());
+					WriteAllLines(path, allLines);
 					break;
 				}
 			}

@@ -998,6 +998,11 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 				WalkToBG(clickable.IClickable.WalkToPoint, anywhere, thenFace);
 		}
 	}
+	
+	public void WalkToBG( Vector2 pos, eFace thenFace ) { WalkToBG(pos,false,thenFace); }
+	public void WalkToBG( float x, float y, eFace thenFace ) { WalkToBG(x,y,false,thenFace); }
+	public void WalkToBG(IQuestClickableInterface clickable,eFace thenFace) { WalkToBG(clickable,false,thenFace); }
+	
 	public Coroutine WalkTo(float x, float y, bool anywhere = false) {	return PowerQuest.Get.StartQuestCoroutine(CoroutineWalkTo(new Vector2(x,y), anywhere)); }
 	public Coroutine WalkTo(Vector2 pos, bool anywhere = false) {	return PowerQuest.Get.StartQuestCoroutine(CoroutineWalkTo(pos, anywhere)); }
 	public Coroutine WalkTo(IQuestClickableInterface clickable, bool anywhere = false) 

@@ -353,7 +353,7 @@ public partial class PowerQuest
 			}
 
 			// Call post restore on SaveManager (which calls it to custom save data)
-			m_saveManager.OnPostRestore();
+			//m_saveManager.OnPostRestore(); // 24/7/24 - this has been moved with other OnPostRestore's to after the room is loaded, so its possible to do stuff to the room that's been restored.
 
 
 			// unblock again
@@ -361,6 +361,7 @@ public partial class PowerQuest
 			
 			// Need to load the scene the player's in, and start main loop
 			StartRoomTransition((Room)GetPlayer().Room, true);
+			
 		}
 		Unblock();
 

@@ -38,6 +38,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 		public List<string> m_currentInteractionOccurrences = new List<string>();
 		public List<string> m_captureInputSources = new List<string>();
 		public List<Timer> m_timers = new List<Timer>();
+		public Dictionary<string,ShuffledIndex> m_shuffledItems = new Dictionary<string,ShuffledIndex>();
 		public bool m_callEnterOnRestore = false; // when true, restoring a game will call "OnEnterAfterFade, etc again"		
 		public bool m_useFancyParallaxSnapping = true;
 	}
@@ -206,7 +207,8 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	bool m_displayActive = false;		// True when Display dialog is visible or audio is playing (triggered by Display or DisplayBG)
 	bool m_skipCutsceneButtonConsumed = false; // true when skip cutscene button is pressed, and waiting for it to be released (so don't process "held down esc" events)
 	bool m_waitingForBGDialogSkip = false; // Used for "WaitForDialogSkip", which turns any background dialog into foreground dialog. Experimental feature.
-	bool m_restartOnUpdate = false;	// Flag used to restart at start of next update	
+	bool m_restartOnUpdate = false;	// Flag used to restart at start of next update
+	int m_nextOption = -1;			// Used for FirstOption, NextOption, NextOccurrence, etc
 	
 	static bool s_hasRestarted = false;
 	static string s_restartScene = null;	
@@ -1259,9 +1261,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			SetAutoLoadScript( clickable.GetScriptable(), function, result != null, true ); // set skipCallingFunction so it loads after its called function.
 		if ( m_enableParser )
 		{	// when parser's enabled- 'Handle' functions call through to unhandled events so "look at bklajsdf" will still call UnhandledLook
-			if ( result == null || result == m_consumedInteraction )
+			if ( result == null ) //|| result != m_consumedInteraction ) // removed this check during PowerJam3 - it wsa stopping Consume working in LookAt
 				result = StartScriptInteractionCoroutine( m_currentRoom.GetScript(), unhandledFunc, unhandledParams, true );
-			if ( result == null || result == m_consumedInteraction )
+			if ( result == null ) //|| result != m_consumedInteraction )
 				result = StartScriptInteractionCoroutine( GetScript(), unhandledFunc, unhandledParams, true );
 		}
 		return result;
@@ -1359,7 +1361,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	{
 		if ( m_allowEnableCancel )
 			SV.m_currentInteractionOccurrences.Add(uniqueString);
-		return SV.m_occurrences.Add(uniqueString) <= 1;
+		int result = SV.m_occurrences.Add(uniqueString)-1;
+		m_nextOption = result-1;
+		return result <= 0;
 	}
 	// Checks how many times something has occurred without incrementing the occurrence
 	public int GetOccurrenceCount(string thing)
@@ -1374,7 +1378,46 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			SV.m_currentInteractionOccurrences.Add(thing);
 		return SV.m_occurrences.Add(thing) - 1;
 	}
+
+	public bool NextOccurrence { get 
+	{
+		// Return whether we've reached the correct occurrence, and decrement for the next Option
+		return m_nextOption-- == 0;
+	} }	
 	
+	////////////////
+	// Shuffle/NextOption stuff
+
+	//! Returns a random int from 0 to max inclusive. items will not repeat until all items have been used, and will not be repeated twice in a row.
+	public int Shuffle(int max, string source = null)
+	{ 
+		if ( source != null )
+		{
+			ShuffledIndex index = null;
+			if ( SV.m_shuffledItems.TryGetValue(source, out index) )
+				return index.Next();
+			else 
+			{ 
+				 index = new ShuffledIndex(max+1);
+				 SV.m_shuffledItems.Add(source,index);
+				 return index;
+			}
+		}
+		return ShuffledIndex.Random(max);
+	}
+	
+	public bool FirstOption(int count, string source = null)
+	{
+		m_nextOption = Shuffle(count-1, source);
+		return NextOption;
+	}
+
+	public bool NextOption {
+	get {
+		// Return whether we've reached the correct option, and decrement for the next Option
+		return m_nextOption-- == 0;
+	} }
+
 	
 	/// Helper function that temporarily disables all clickables, except those specified (will probably move to PowerQuest system)
 	public void DisableAllClickablesExcept()

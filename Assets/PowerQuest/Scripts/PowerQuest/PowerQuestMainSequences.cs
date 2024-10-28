@@ -199,7 +199,10 @@ public partial class PowerQuest
 		
 		// Call post restore on game scripts. This was moved here separate from other OnPostRestores so that you can do usual calls like R.MyRoom.Active and GetProp("blah").Instance.GetComponent<blah>()... in the functions and they'll work
 		if ( m_restoring )
-		{
+		{		
+			// Call post restore on SaveManager (which calls it to custom save data)
+			m_saveManager.OnPostRestore();
+
 			object[] onPostRestoreParams = {m_restoredVersion};
 			List<IQuestScriptable> scriptables = GetAllScriptables();
 			foreach( IQuestScriptable scriptable in scriptables )

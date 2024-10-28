@@ -1193,7 +1193,7 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 				ClipInfo clipInfo = m_instance.m_activeAudio.Find( item=>item.handle == handle );
 				activeAudio.InitClipInfo(clipInfo);
 				handle.time = activeAudio.time;
-				handle.source.panStereo = activeAudio.pan;
+				handle.panStereo = activeAudio.pan;
 				if ( activeAudio.paused )
 					Pause(handle);
 				//else if ( clipInfo.targetVolume != clipInfo.defaultVolume )

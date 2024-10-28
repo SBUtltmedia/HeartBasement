@@ -464,9 +464,9 @@ public partial class PowerQuestEditor
 		GUILayout.Space(5);
 		GUILayout.BeginHorizontal();
 		if ( GUILayout.Button("Open Editor Manual") )
-			Application.OpenURL(Path.GetFullPath("Assets/PowerQuest/PowerQuest-Manual.pdf"));
+			Application.OpenURL("https://powerquest.powerhoof.com/manual_projectsetup.html"); //Path.GetFullPath("Assets/PowerQuest/PowerQuest-Manual.pdf"));
 		if ( GUILayout.Button("Open Scripting API") )
-			Application.OpenURL("http://powerquest.powerhoof.com/apipage.html");
+			Application.OpenURL("https://powerquest.powerhoof.com/apipage.html");
 		GUILayout.EndHorizontal();
 		GUILayout.Space(5);	
 
@@ -541,6 +541,7 @@ public partial class PowerQuestEditor
 
 	void LayoutRoomGUI(List<RoomComponent> rooms, Rect rect, int index, bool isActive, bool isFocused)
 	{
+		RoomComponent doLoadScene = null;
 		if ( m_powerQuest != null && rooms.IsIndexValid(index))
 		{
 			RoomComponent itemComponent = rooms[index];
@@ -572,7 +573,7 @@ public partial class PowerQuestEditor
 						m_quickSelectRoomIndex = 0;
 					}
 					// Load the scene					
-					LoadRoomScene(itemComponent);
+					doLoadScene = itemComponent; // setting this to do after layout to avoid error					
 				}
 				rect = rect.SetNextWidth(50);		
 				if ( GUI.Button(rect, "Script", EditorStyles.miniButtonMid ) )
@@ -594,6 +595,9 @@ public partial class PowerQuestEditor
 				});
 			}
 		}
+		
+		if ( doLoadScene != null )
+			LoadRoomScene(doLoadScene);
 	}
 
 

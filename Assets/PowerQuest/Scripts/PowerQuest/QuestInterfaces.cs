@@ -67,7 +67,7 @@ public partial interface IPowerQuest
 	// Timing/Waiting functions
 	//
 
-	/// Wait for time (or default 0.5 sec)
+	/// Wait for time (or default 0.5 sec). In the Quest Script editor you can also just write `...` with more or less dots for a shorter or longer time. \sa WaitSkip
 	Coroutine Wait(float time = 0.5f);
 
 	/// Wait for time (or default 0.5 sec). Pressing button will skip the waiting
@@ -79,23 +79,25 @@ public partial interface IPowerQuest
 	/// <summary>
 	/// Use this when you want to yield to another function that returns an IEnumerator
 	/// Usage: yield return E.WaitFor( SimpleExampleFunction ); or yield return E.WaitFor( ()=>ExampleFunctionWithParams(C.Dave, "lol") );
+	/// 
+	/// Note that it's best practice to always use WaitFor() instead calling other blocking functions directly (eg by `yield return MyFunction()` ). This is so PQ knows its happening and if you change scenes or restore a game the function can be stopped, avoiding wierd bugs.
 	/// </summary>
 	/// 
 	/// <param name="functionToWaitFor">A function that returns IEnumerator. Eg: `SimpleExampleFunction` or, `()=/>ExampleFunctionWithParams(C.Dave, 69)` if it has params</param>
 	Coroutine WaitFor( PowerQuest.DelegateWaitForFunction functionToWaitFor, bool autoLoadQuestScript = true );
 
 	/// Use this when you want to wait until a condition is net. You need the ()=> to 
-	/// Usage: yield return E.WaitWhile( ()=> C.Player.Walking )
+	/// Usage: yield return E.WaitWhile( ()=> C.Player.Walking ) \sa WaitUntil
 	Coroutine WaitWhile( System.Func<bool> condition, bool skippable = false );
 
 	/// Use this when you want to wait until a condition is net. You need the ()=> to 
-	/// Usage: yield return E.WaitUntil( ()=> C.Player.Position.x > 0 )
+	/// Usage: yield return E.WaitUntil( ()=> C.Player.Position.x > 0 ) \sa WaitWhile
 	Coroutine WaitUntil( System.Func<bool> condition, bool skippable = false );
 
-	/// Waits until the current dialog has finished. Useful for waiting to the end of SayBG commands
+	/// Waits until the current dialog has finished. Useful for waiting to the end of SayBG commands \sa SayBG \sa WaitForDialogSkip
 	Coroutine WaitForDialog();
 	
-	/// Waits until the current dialog has finished, allowing it to be skipped. Useful when you start a SayBG, do a bunch of other things, then want to be able to skip the rest of the SayBG()
+	/// Waits until the current dialog has finished, allowing it to be skipped. Useful when you start a SayBG, do a bunch of other things, then want to be able to skip the rest of the SayBG()  \sa SayBG \sa WaitForDialog
 	Coroutine WaitForDialogSkip();
 
 	/// Shows gui and waits for it to disappear. Useful for prompts.
@@ -459,11 +461,11 @@ public partial interface IPowerQuest
 	/**
 	 * Usage:
 	 * if ( FirstOccurrence("unlockdoor") ) 
-	 * 		C.Display("You unlock the door");
+	 * 		Display: You unlock the door
 	 * else
-	 * 		C.Display("It's already unlocked");
+	 * 		Display: It's already unlocked
 	 * 		
-	 *  \sa Occurrence \sa GetOccurrenceCount
+	 *  \sa Occurrence \sa GetOccurrenceCount \sa NextOccurrence
 	 */
 	bool FirstOccurrence(string uniqueString);
 
@@ -471,9 +473,9 @@ public partial interface IPowerQuest
 	/**
 	 * Usage:
 	 * if ( Occurrence("knocked on door") < 3 )
-	 * 		C.Display("You knock on the door");
+	 * 		Display: You knock on the door
 	 * 		
-	 *  \sa FirstOccurrence \sa GetOccurrenceCount
+	 *  \sa FirstOccurrence \sa GetOccurrenceCount \sa NextOccurrence
 	 */
 	int Occurrence(string uniqueString);
 
@@ -481,11 +483,47 @@ public partial interface IPowerQuest
 	/**
 	 * Usage:
 	 * if ( GetOccurrenceCount("knocked on door") == 3 )
-	 * 		C.Doorman("Who's there?");
+	 * 		Doorman: Who's there?
 	 * 		
 	 *  \sa FirstOccurrence \sa Occurrrence
 	 */
 	int GetOccurrenceCount(string uniqueString);
+
+	//! Continues a sequence of Occurrence checks, started with FirstOccurence.
+	/**
+	Usage
+			if ( E.FirstOccurrence("Ham") )
+				Display: You take a bite of ham
+			else if ( E.NextOccurrence )
+				Display: You take another bite of ham
+			else if ( E.NextOccurrence )
+				Display: You take a third bite of ham
+
+	\sa FirstOccurrence \sa FirstOption  \sa NextOption
+	*/
+	bool NextOccurrence {get;}
+
+	//! Start a sequence of options, passing in the total number of options in your list. Then call NextOption for the remaining options
+	/**
+	Usage:
+			if ( E.FirstOption(4) )
+				Display: I can't do that
+			else if ( E.NextOption )
+				Display: Won't work
+			else if ( E.NextOption )
+				Display: Not gonna happen
+			else if ( E.NextOption )
+				Display: Nope
+	  
+	You can also pass a string "source", if you want it to remember which ones have been used before to avoid repeats until whole list is used.
+	\sa NextOption
+	 */
+	bool FirstOption(int count, string source = null);
+	//! Continues a if/else sequence starting with FirstOption \sa FirstOption
+	bool NextOption {get;}
+		
+	//! Returns a random int from 0 up to and including the "max". The id will not repeat until all ids have been used, and will not be repeated twice in a row.
+	//int Shuffle(int max, string source = null);
 
 	/// Restart the game from the first scene
 	void Restart();
@@ -753,7 +791,7 @@ public partial interface ICharacter : IQuestClickableInterface
 	/// Resets the text position again after a call to SetTextPosition or LockTextPosition  \sa SetTextPosition() \sa LockTextPosition() \sa TextPositionOverride
 	void ResetTextPosition();
 	/// Distance that dialog text is offset from the top of the sprite, added to the global one set in PowerQuest settings. Will flip with the character. Defaults is zero.
-	Vector2 TextPositionOffset { get;set; }
+	Vector2 TextPositionOffset { get;set; }	
 
 	/// Gets or sets the idle animation of the character
 	string AnimIdle { get;set; }
@@ -848,6 +886,24 @@ public partial interface ICharacter : IQuestClickableInterface
 	void WalkToBG(IQuestClickableInterface clickable, bool anywhere = false, eFace thenFace = eFace.None);
 	/// Make the character walk to the walk-to-point of the last object clicked on. In QuestScripts you can use the shortcut `WalkToClicked`
 	Coroutine WalkToClicked(bool anywhere = false);
+	
+	/// Make the character walk to a position in game coords without halting the script, then face the passed in direction
+	/**
+	eg: `C.Barney.WalkToBG(43,21,eFace.Left);`
+	\sa WalkTo() \sa StopWalking()
+	*/
+	void WalkToBG( float x, float y, eFace thenFace);
+	/// Make the character walk to a position in game coords without halting the script, then face the passed in direction
+	/**
+	\sa WalkTo() \sa StopWalking()
+	*/
+	void WalkToBG( Vector2 pos, eFace thenFace);
+	/// Make the character walk to the walk-to-point of a clickable object without halting the script, then face the passed in direction
+	/**
+	eg. `Plr.WalkToBG( H.Door, eFace.UpRight );
+	\sa WalkTo() \sa StopWalking()
+	*/
+	void WalkToBG(IQuestClickableInterface clickable,eFace thenFace);
 	
 	/// Stop the character walking or moving. Also clears any waypoints.
 	void StopWalking();
@@ -1068,7 +1124,7 @@ public partial interface ICharacter : IQuestClickableInterface
 
 	/// Make chracter speak a line of dialog. eg. `C.Barney.Say("Hello");` Note that in QuestScript window you can just type `Barney: Hello` \sa SayBG() \sa E.Display()
 	Coroutine Say(string dialog, int id = -1);
-	/// Make chracter speak a line of dialog, without halting the script.  eg. `C.Barney.SayBG("Some dialog I'm saying in the background");` \sa Say() \sa E.DisplayBG() \sa CancelSay()
+	/// Make chracter speak a line of dialog, without halting the script.  eg. `C.Barney.SayBG("Some dialog I'm saying in the background");` \sa Say() \sa E.DisplayBG() \sa CancelSay() \sa WaitForDialog() \sa WaitForDialogSkip()
 	Coroutine SayBG(string dialog, int id = -1);
 	/// Cancel any current dialog the character's speaking
 	void CancelSay();
@@ -1221,6 +1277,11 @@ public partial interface ICharacter : IQuestClickableInterface
 
 			if ( R.Current.FirstTimeVisited )
 				R.Kitchen.ActiveWalkableArea = 2;
+			else if ( R.Previous == R.Treehouse )
+				Plr.SetPosition(Points.EntryFromTreeHouse);
+				
+			E.ChangeRoom(R.Bedroom);
+
 */
 public partial interface IRoom
 {
@@ -1697,7 +1758,18 @@ public partial interface IDialogOption
 #endregion
 #region ICamera - eg. E.Camera.Lock(...)
 
-/// Camera: contains functions and data for manipulating the game camera - Interface to QuestCamera
+
+/** Camera: contains functions and data for manipulating the game camera - Interface to QuestCamera
+
+			Camera.SetZoom(2,0.5f);
+			Camera.SetPositionOverride( Points.Volcano, 2 );
+			Camera.Shake(5,2,1);
+			Dave: The volcano's erupting!
+			...
+			Camera.ResetPositionOverride(2);
+			Camera.ResetZoom(2);
+
+*/
 public partial interface ICamera
 {
 	/// Returns the camera's game object component

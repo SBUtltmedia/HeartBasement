@@ -133,7 +133,10 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			new Regex(@"(?<=^|\W)C\.Plr\.", RegexOptions.Compiled), 	// C.Plr. -> Plr.
 			new Regex(@"(?<=^|\W)GlobalScript\.Script\.", RegexOptions.Compiled), 	// GlobalScript.Script. -> Globals. No longer needed, but left to cleanup old scripts that might still be using GlobalScript.Script
 			new Regex(@"(?<=^|\W)(R|C|I|G|D)(?:oom|haracter|nventory|ui|ialog)(\w*)\.Script\.", RegexOptions.Compiled), 	// RoomKitchen.Script. => R.Kitchen.Script. (or CharacterDave => C.Dave, or InventoryBucket => I.Bucket, GuiBlah => G.GuiBlah, DialogBlah...)
-
+			
+			new Regex(@"(\s*)E\.WaitFor\(\s*(\w+)\s*\)\;", RegexOptions.Compiled),                   // => Blah -> E.WaitFor(Blah);
+			new Regex(@"(\s*)E\.WaitFor\(\(\)\s*\=\>\s*(.*)\s*\)\s*\;?\)\;", RegexOptions.Compiled), // => Blah(what) -> E.WaitFor(()=>Blah(what));
+			
 		};
 
 	static readonly string[] REGEX_LOAD_REPLACE = 
@@ -171,6 +174,9 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			@"Plr.",
 			@"Globals.",
 			@"$1.$2.Script.",
+			
+			@"$1=> $2",   
+			@"$1=> $2);", 		
 		};
 
 	// Don't match the following (exceptions to REGEX_SAVE_MATCH)
@@ -227,6 +233,13 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			new Regex(@"(^|[^\w.])I\.(\w+)\.Script\.", RegexOptions.Compiled),
 			new Regex(@"(^|[^\w.])G\.(\w+)\.Script\.", RegexOptions.Compiled),
 			new Regex(@"(^|[^\w.])D\.(\w+)\.Script\.", RegexOptions.Compiled),
+			
+			new Regex(@"^(\s*)\=\>\s*(.*)\)\;?", RegexOptions.Compiled),
+
+			new Regex(@"^(\s*)\=\>\s*(\w+)\;?", RegexOptions.Compiled),
+			
+
+
 		};
 
 	// The $1 preserves any spacing that's at the start
@@ -276,6 +289,9 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			@"$1Inventory$2.Script.", // I.Bucket.Script. -> InventoryBucket.Script.
 			@"$1Gui$2.Script.", // G.Prompt.Script. -> GuiPrompt.Script.
 			@"$1Dialog$2.Script.", // G.Prompt.Script. -> GuiPrompt.Script.
+			
+			@"$1E.WaitFor(()=> $2) );", // => Blah(what) -> E.WaitFor(()=>Blah(what));
+			@"$1E.WaitFor( $2 );",     // => Blah -> E.WaitFor(Blah);
 		};
 
 
@@ -300,10 +316,11 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			new Regex(@"(?<=^\s*)(\.\.+\s*)$", RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase),
 			// Check for keywords. There's an extra check for any previous <color> on the same line (indicating a comment was there, not perfect, but better than nothing)
 			new Regex(@"(?<=^|\W)((?<!<c.*)(?:bool|int|float|string|Vector2|enum|if|else|while|for|switch|case|default|break|continue|new|public|private|true|false)(?!\w))", RegexOptions.Compiled | RegexOptions.Multiline),
+			new Regex(@"(?<=^\s*)(=>)", RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase),
 		};
 
 	static readonly Regex[] REGEX_COLOR_COMMENT = 
-	{
+	{ 
 		new Regex(@"(//.*)", RegexOptions.Compiled | RegexOptions.Multiline),			// blah
 		new Regex(@"(/\*.*?\*/)", RegexOptions.Compiled | RegexOptions.Singleline),		/* blah */
 	};
@@ -1149,8 +1166,9 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		// Remove Empty Function	
 		bool doRemove = false;	
 		bool empty = m_text != null 
+		             && m_editingHeader == false
 		             && m_text.Length < 10
-		             && REGEX_EMPTY_FUNC.IsMatch(m_text);
+		             && REGEX_EMPTY_FUNC.IsMatch(m_text) ;
 		if ( empty == false ) GUILayout.Button("", Styles.TOOLBAR_BUTTON, GUILayout.MaxWidth(0)) ; // dummy button so txt doesn't lose focus when it changes
 		doRemove = empty && GUILayout.Button("Remove Empty Script", Styles.TOOLBAR_BUTTON, GUILayout.MaxWidth(140)) ;
 

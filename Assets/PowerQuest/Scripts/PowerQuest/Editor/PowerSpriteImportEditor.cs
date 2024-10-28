@@ -30,6 +30,8 @@ public class PowerSpriteImportEditor : Editor
 	
 	static readonly string PATH_POSTFIX_FULLRECT = "-FullRect";
 
+	static readonly char SLASH = Path.DirectorySeparatorChar; // Platform agnostic directory seperator
+
 	string m_console = string.Empty;
 
 	// Data structure for importing aseprite json data
@@ -519,10 +521,10 @@ public class PowerSpriteImportEditor : Editor
 			string spritePath = GetSubdirectory(m_component.m_spriteDirectory);
 			string componentPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(m_component));
 			bool spriteFound = File.Exists(spritePath + data.m_name + "_0.png");
-			bool animFound = File.Exists(componentPath+"/"+ data.m_name+".anim");
+			bool animFound = File.Exists(componentPath+SLASH+ data.m_name+".anim");
 			if ( animFound )
 			{
-				AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(componentPath+"/"+ data.m_name+".anim");
+				AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(componentPath+SLASH+ data.m_name+".anim");
 				if ( animClip != null )
 					data.m_loop = animClip.isLooping;
 			}
@@ -613,7 +615,7 @@ public class PowerSpriteImportEditor : Editor
 		data.m_loop=!data.m_loop;
 		
 		string componentPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(m_component));
-		AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(componentPath+"/"+ data.m_name+".anim");
+		AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(componentPath+SLASH+ data.m_name+".anim");
 		if ( animClip != null )
 		{		
 			AnimationClipSettings settings = AnimationUtility.GetAnimationClipSettings(animClip);
@@ -630,21 +632,21 @@ public class PowerSpriteImportEditor : Editor
 	void OpenAnim(AnimImportData data)
 	{
 		string componentPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(m_component));
-		AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(componentPath+"/"+ data.m_name+".anim");
+		AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(componentPath+SLASH+ data.m_name+".anim");
 		if ( animClip != null )
 			PowerTools.SpriteAnimator.Show(animClip);
 	}
 	void LocateAnim(AnimImportData data)
 	{
 		string componentPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(m_component));
-		AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(componentPath+"/"+ data.m_name+".anim");
+		AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(componentPath+SLASH+ data.m_name+".anim");
 		if ( animClip != null )
 			EditorGUIUtility.PingObject(animClip);
 	}
 	void LocateSprite(AnimImportData data)
 	{
 		string componentPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(m_component));
-		string spritePath = componentPath+'\\'+m_component.m_spriteDirectory+'\\'+ data.m_name + "_0.png";
+		string spritePath = componentPath+ SLASH +m_component.m_spriteDirectory+ SLASH + data.m_name + "_0.png";
 		Texture2D sprite = AssetDatabase.LoadAssetAtPath<Texture2D>(spritePath);
 		if ( sprite != null )
 			EditorGUIUtility.PingObject(sprite);
@@ -660,12 +662,12 @@ public class PowerSpriteImportEditor : Editor
 
 		string componentPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(m_component));
 		string spritePath = GetSubdirectory(m_component.m_spriteDirectory);
-		string spritePathLocal = componentPath+"/"+m_component.m_spriteDirectory+"/";
+		string spritePathLocal = componentPath+SLASH+m_component.m_spriteDirectory+SLASH;
 		
 		string resultString = data.m_name+".anim\n";
 
 		// Find animation, delete it
-		AssetDatabase.DeleteAsset(componentPath+"/"+ data.m_name+".anim");
+		AssetDatabase.DeleteAsset(componentPath+SLASH+ data.m_name+".anim");
 		
 		// Find all sprites, delete them too
 		bool found = true;
@@ -707,11 +709,11 @@ public class PowerSpriteImportEditor : Editor
 
 		string componentPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(m_component));
 		string spritePath = GetSubdirectory(m_component.m_spriteDirectory);
-		string spritePathLocal = componentPath+"/"+m_component.m_spriteDirectory+"/";
+		string spritePathLocal = componentPath+SLASH+m_component.m_spriteDirectory+SLASH;
 
 
 		// Find animation, rename it
-		AssetDatabase.RenameAsset(componentPath+"/"+ data.m_name+".anim",newName);
+		AssetDatabase.RenameAsset(componentPath+SLASH+ data.m_name+".anim",newName);
 		resultString += $"{data.m_name}.anim to {newName}.anim\n";
 
 		// Find sprites, rename them too
@@ -911,7 +913,7 @@ public class PowerSpriteImportEditor : Editor
 				if ( m_component.m_trimSprites )
 					arguments += $" -trim";
 				arguments += $" \"{Path.GetFullPath(m_component.m_sourcePSD)}\"";
-				arguments += $" --save-as \"{Path.GetFullPath(m_component.m_sourceDirectory)}\\{Path.GetFileNameWithoutExtension(m_component.m_sourcePSD)}_1.png\"";
+				arguments += $" --save-as \"{Path.GetFullPath(m_component.m_sourceDirectory) + SLASH + Path.GetFileNameWithoutExtension(m_component.m_sourcePSD)}_1.png\"";
 				arguments += $" --data \"{ Path.GetFullPath(jsonFile)}\" --list-tags --format json-array";
 
 				process.StartInfo.Arguments = arguments;
@@ -1262,7 +1264,7 @@ public class PowerSpriteImportEditor : Editor
 		}
 
 		bool isNew = false;
-		string animFileName = componentPath+"/"+ data.m_name+".anim";
+		string animFileName = componentPath+ SLASH + data.m_name+".anim";
 		AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(animFileName);
 		if ( animClip == null )
 		{
@@ -1397,7 +1399,7 @@ public class PowerSpriteImportEditor : Editor
 		// Create anims
 		//
 		bool isNew = false;
-		string animFileName = spritePath+"/"+ animName+".anim";
+		string animFileName = spritePath+Path.DirectorySeparatorChar+ animName+".anim";
 		AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(animFileName);
 		if ( animClip == null )
 		{
@@ -1469,20 +1471,19 @@ public class PowerSpriteImportEditor : Editor
 	string GetSubdirectory(string subDirectoryName )
 	{
 		string result = Path.GetDirectoryName(AssetDatabase.GetAssetPath(m_component));
+
 		if ( string.IsNullOrEmpty(subDirectoryName) == false )
 		{
-			result += "/" + subDirectoryName;
+			result += SLASH + subDirectoryName;
 			Directory.CreateDirectory( result );
 		}
 		result = Path.GetFullPath(result);
+		result = result.Replace('\\', SLASH );
 
-		result = result.Replace("\\", "/");
-
-		if (result.EndsWith("/") == false )
-			result += "/";
+		if (result[result.Length-1] != SLASH )
+			result += SLASH;
 		return result;
 	}
-
 
 	void RecalcLengths()
 	{

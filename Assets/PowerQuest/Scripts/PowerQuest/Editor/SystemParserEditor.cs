@@ -128,12 +128,15 @@ public class SystemParserEditor : Editor
 
 			//
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_words"), new GUIContent("Synonyms"));
+			if ( serializedObject.ApplyModifiedProperties() )
+				EditorUtility.SetDirty(target);
 						
 			if ( EditorGUI.EndChangeCheck() )
 			{					
 				//outLabels = outLabels.Replace(WHITESPACE,string.Empty);
 				outLabels = outLabels.ToLower();
 				m_component.EditorIgnoredWords = outLabels.Split(LABEL_DELIMITER_WRITE, System.StringSplitOptions.RemoveEmptyEntries);
+				EditorUtility.SetDirty(target);
 			}
 
 
