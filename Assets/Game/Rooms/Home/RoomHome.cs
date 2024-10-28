@@ -1083,7 +1083,9 @@ public class RoomHome : RoomScript<RoomHome>
 
 	IEnumerator OnUseInvHotspotWashingMachine( IHotspot hotspot, IInventory item )
 	{
-
+		if (item == I.Bucket || item == I.BilgePump) {
+		
+		}
 		yield return E.Break;
 	}
 
