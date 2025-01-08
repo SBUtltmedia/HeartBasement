@@ -9,8 +9,8 @@ namespace PowerTools
 
 /// Power sprite import- Tools for importing sprites/anims from photoshop/aseprite
 /**
-    SIMPLE IMPORT (PSP only):
-    - Right click a directory->Import from Photoshop
+	SIMPLE IMPORT (PSP only):
+	- Right click a directory->Import from Photoshop
 		- Photoshop must be open with file you wanna import sprites from
 
 	CUSTOM IMPORT:

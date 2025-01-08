@@ -34,7 +34,8 @@ public class LanguageData
 	public string[] m_customData = null;
 }
 
-public class SystemText : PowerTools.Singleton<SystemText>
+
+public partial class SystemText : PowerTools.Singleton<SystemText>
 { 
 	public enum ePlayerName
 	{
@@ -63,7 +64,8 @@ public class SystemText : PowerTools.Singleton<SystemText>
 	[SerializeField, HideInInspector] List<TextData> m_strings = new List<TextData>(); 
 
 	[SerializeField] System.Text.Encoding m_csvEncoding = System.Text.Encoding.Default; 
-	
+		
+
 	// Dictionary of character to string for quick lookup
 	CharacterTextDataList m_characterStrings = null;
 
@@ -78,7 +80,10 @@ public class SystemText : PowerTools.Singleton<SystemText>
 	bool m_lipSyncUsesXShape = false;
 	
 	ePlayerName m_lastPlayerName = ePlayerName.Character;
-	
+		
+	// For alternate VO lines. Can be set before playing the next line to use an alternate take. Eg: NARR123B
+	string m_nextVoiceClipAffix = null;	
+	public string NextVoiceClipAffix { get=>m_nextVoiceClipAffix; set { m_nextVoiceClipAffix = value; } }
 
 	public int GetNumLanguages() { return m_languages.Length; }
 	// Returns the currently selected language id
@@ -360,7 +365,8 @@ public class SystemText : PowerTools.Singleton<SystemText>
 	// Gets the audio clip for a particular id/data.
 	AudioClip GetVoiceAudioClip(int id, string characterName)
 	{
-		string fileName = characterName + id.ToString();	
+		string fileName = characterName + id.ToString() + m_nextVoiceClipAffix;	
+		m_nextVoiceClipAffix = null; // reset VO affix after consuming it
 
 		// First try path with language code
 		string filePath = $"Voice/{GetLanguageData().m_code}/";		

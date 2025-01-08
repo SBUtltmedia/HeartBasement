@@ -291,6 +291,22 @@ public partial class DialogTree : IQuestScriptable, IDialogTree, IQuestSaveCacha
 			System.Reflection.FieldInfo fi = m_script.GetType().GetField("m_data", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy );
 			fi.SetValue(m_script,Data);
 		}
+		
+		//
+		// We've read in options, but there might have been more added, or some removed, so grab the list from prefab then copy data across by name
+		//
+		
+		// DialogOptions - Find the loaded data by name - if it matches, copy data from the list of loaded hotspots, otherwise copy data from the prefab
+		List<DialogOption> loadedOptions = m_options;
+		List<DialogOption> prefabOptions = prefab.GetComponent<DialogTreeComponent>().GetData().Options;
+		m_options = new List<DialogOption>(prefabOptions.Count);
+		foreach ( DialogOption prefabOption in prefabOptions )
+		{			
+			DialogOption restoredData = loadedOptions.Find(item=>item.ScriptName == prefabOption.ScriptName);
+			DialogOption data = new DialogOption();
+			QuestUtils.CopyFields(data, restoredData != null ? restoredData : prefabOption );
+			m_options.Add(data);
+		}
 
 		// Mark as dirty if the dialog is active, otherwise as clean
 		SaveDirty=(PowerQuest.Get.GetCurrentDialog() == this);

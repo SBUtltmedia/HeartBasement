@@ -30,12 +30,14 @@ It makes a good list of the functionality that are easily available when doing y
  * - Triggering "interactions" of other objects
  * - Little helper utilities
  * - Eg.
-		E.FadeOut(1);			
-		E.Wait(3);
-		if ( E.FirstOccurrence("AteBadPie") )
-			E.ChangeRoom(R.Vomitorium);
-		E.Save(1);
-		E.StartCutscene;
+ * ~~~
+ *		E.FadeOut(1);			
+ *		E.Wait(3);
+ *		if ( E.FirstOccurrence("AteBadPie") )
+ *			E.ChangeRoom(R.Vomitorium);
+ *		E.Save(1);
+ *		E.StartCutscene;
+ *~~~
  */
 public partial interface IPowerQuest
 {
@@ -44,53 +46,83 @@ public partial interface IPowerQuest
 	// Yield instructions
 	//
 	
-	/// yield return this in an empty function (so it doesn't give an error, and doesn't consume an update cycle like a doing "yield break" does)
-	YieldInstruction Break { get; }
-
-	/// yield return this if nothing is happening in a function, but you don't want to fall back to an Unhandled Event
+	/** @name Commands for empty blocking functions */	
+	///@{	
+	/// This is the same as `Consume` in quest scripts. It stops the script from falling back to Unhandled Event functions.
 	YieldInstruction ConsumeEvent { get; }
+	
+	/// This is the same as `End` in quest scripts. Empty functions need to return something and this stops the function consuming an update cycle like "yield break" does.
+	YieldInstruction Break { get; }
+	///@}
 
-	/// Returns true for developer builds, or if QUESTDEBUG is defined in player settings. Alternative to Debug.isDebugBuild, so you can have debug features enabled in non-developer builds.
+	/// Returns true for developer builds, or if `QUESTDEBUG` is defined in player settings. Alternative to `Debug.isDebugBuild`, so you can have debug features enabled in non-developer builds.
 	bool IsDebugBuild {get;}
 
 	//
 	// Access to other objects
 	//
+	
+	/** @name Access to other objects */	
+	///@{	
 
 	/// Convenient shortcut to the game camera
 	ICamera Camera { get; }
 
 	/// Convenient shortcut to the Cursor
 	ICursor Cursor { get; }
-
+	///@}
+	
 	//
 	// Timing/Waiting functions
 	//
-
+	/** @name Timing/Waiting functions 
+	Some of these have nice shortcuts in the quest script editor. Eg `...` or `=> FunctionToWaitFor`
+	*/	
+	
+	///@{	
 	/// Wait for time (or default 0.5 sec). In the Quest Script editor you can also just write `...` with more or less dots for a shorter or longer time. \sa WaitSkip
 	Coroutine Wait(float time = 0.5f);
 
 	/// Wait for time (or default 0.5 sec). Pressing button will skip the waiting
 	Coroutine WaitSkip(float time = 0.5f);
 
-	// Wait for a timer to expire (use the name used with E.SetTimer()). Will remove the timer on complete, even if skipped.
+	/// Wait for a timer to expire (use the name used with E.SetTimer()). Will remove the timer on complete, even if skipped.
 	Coroutine WaitForTimer(string timerName, bool skippable = false);
+		
+	/// Use this when you want to yield to another function that returns an IEnumerator. Note: In the Script Editor you can just do `=> MyFunction()`
+	/**
+	__Usage:__
 
-	/// <summary>
-	/// Use this when you want to yield to another function that returns an IEnumerator
-	/// Usage: yield return E.WaitFor( SimpleExampleFunction ); or yield return E.WaitFor( ()=>ExampleFunctionWithParams(C.Dave, "lol") );
-	/// 
-	/// Note that it's best practice to always use WaitFor() instead calling other blocking functions directly (eg by `yield return MyFunction()` ). This is so PQ knows its happening and if you change scenes or restore a game the function can be stopped, avoiding wierd bugs.
-	/// </summary>
-	/// 
-	/// <param name="functionToWaitFor">A function that returns IEnumerator. Eg: `SimpleExampleFunction` or, `()=/>ExampleFunctionWithParams(C.Dave, 69)` if it has params</param>
+	Create a new blocking function. Eg: 
+	~~~
+		public IEnumerator OpenDoor()
+		{				
+			P.Door.PlayAnimation("Open");
+			m_doorOpen = true;	
+			Display: The door is now open
+		}
+	~~~
+	Then call it from any sequence. Eg:
+	~~~
+	Display: Lets enter the door!
+	=> OpenDoor
+	~~~
+	Or if your function is used in multiple rooms, put it in your global script, then use `=> Globals.OpenDoor`
+
+	__Notes:__
+	- It is best practice to always use WaitFor() instead calling other blocking functions directly (eg by `yield return MyFunction()` ). This is so PQ knows its happening and if you change scenes or restore a game the function can be stopped, avoiding wierd bugs.
+	- If not using the Quest Script Editor, use `yield return E.WaitFor( SimpleExampleFunction );` or `yield return E.WaitFor( ()=>ExampleFunctionWithParams(C.Dave, "lol") );`
+	 
+	*/
 	Coroutine WaitFor( PowerQuest.DelegateWaitForFunction functionToWaitFor, bool autoLoadQuestScript = true );
 
-	/// Use this when you want to wait until a condition is net. You need the ()=> to 
+	/// Use this when you want to wait until a condition is net. Note, you need the ()=> bit to make it work!
+	/// 
 	/// Usage: yield return E.WaitWhile( ()=> C.Player.Walking ) \sa WaitUntil
 	Coroutine WaitWhile( System.Func<bool> condition, bool skippable = false );
 
-	/// Use this when you want to wait until a condition is net. You need the ()=> to 
+	/// Use this when you want to wait until a condition is net. Note, you need the ()=> bit to make it work!
+	/// 
 	/// Usage: yield return E.WaitUntil( ()=> C.Player.Position.x > 0 ) \sa WaitWhile
 	Coroutine WaitUntil( System.Func<bool> condition, bool skippable = false );
 
@@ -103,9 +135,43 @@ public partial interface IPowerQuest
 	/// Shows gui and waits for it to disappear. Useful for prompts.
 	Coroutine WaitForGui(IGui gui);
 
-	/// Invokes the specified function after the specified time has elapsed (non-blocking). EG: `E.DelayedInvoke(1, ()=/>{ C.Player.FaceLeft(); } );`
+	/// Invokes the specified function after the specified time has elapsed (non-blocking). EG: `E.DelayedInvoke(1, ()=>{ C.Player.FaceLeft(); } );`
 	void DelayedInvoke(float time, System.Action functionToInvoke);
 		
+	
+	/// Starts a sequence in the background that can be stopped again StopBackgroundSequence(). Use it for background conversations. Since they can't be skippable, use SayBG and WaitForDialog. 
+	/**
+	__Usage:__
+
+		- Create a blocking function, eg: `IEnumerator BackgroundChatter()`
+		- Call `E.StartBackroundSequence( BackgroundChatter );`
+		- If you want to interrupt the sequence, call `E.StopBackgroundSequence("BackgroundChatter");`
+		- These don't currently work when changing rooms, call `E.StopBackgroundSequence()` to stop all of them if leaving.
+		- Since a regular mouse click skips dialog, and WaitSkip commands, you need to use: 
+			- `E.Wait(0.5f)` instead of `...` when waiting
+			- `C.SayNoSkip("blah")` or `C.SayBG("blah");` followed by `E.WaitForDialog();`
+			- NB: Do NOT use `E.WaitFor()` or `=>` These will break the sequence if player cancels out of an interaction. Let Dave know if you need to do this.
+
+	__Saving/Restoring:__
+
+		- If the game is saved & restored when the background sequence is running, it'll be restarted. 
+		- If you want to be able to restore midway, you need to either:
+			- Save a variable to skip over the already-done part of the sequence.
+			- Or, have a chain of background sequences, so as one stops, it starts the next.
+
+	\sa StopBackgroundSequence  \sa ICharacter.SayNoSkip
+	*/
+	void StartBackgroundSequence( PowerQuest.DelegateWaitForFunction function );
+	
+	/// Stops the background sequence with the specified name, or all background sequences if none specified. 
+	/** 
+	Note: Only the base function will be stopped. You'll have to manually stop characters walking `C.Dave.StopWalking();`, and talking `E.CancelSay();` if desired. 
+	\sa StartBackgroundSequence
+	*/
+	void StopBackgroundSequence( string function = null );
+
+	///@}
+
 	/// <summary>
 	/// The instruction for the next line of dialog will unblock early by <paramref name="bySeconds"/> seconds. 
 	/// </summary>
@@ -128,10 +194,11 @@ public partial interface IPowerQuest
 	/// Returns the currently focused gui
 	IGui GetFocusedGui();
 	
-	/** Allows navigation of gui by keyboard/controller. 
+	/// Allows navigation of gui by keyboard/controller. 
+	/** 
 		Call from UpdateNoPause in GlobalScript when an input is held down. Eg.
 		~~~
-        if ( Input.GetKey(KeyCode.Right) || MyControllerSytem.LeftJoystick.x > 0.5f )
+		if ( Input.GetKey(KeyCode.Right) || MyControllerSytem.LeftJoystick.x > 0.5f )
 			E.NavigateGui(eGuiNav.Right);
 		~~~
 		
@@ -156,23 +223,29 @@ public partial interface IPowerQuest
 	//
 	// Cutscenes
 	//
+	
 
-	/// Starts a cutscene. If player presses esc, the game will skip forward until the next EndCutscene() \sa StartCutscene \sa EndCutscene
+	/// Flags the section of code as a cutscenes. If player presses esc, the game will skip forward until the next EndCutscene() \sa StartCutscene \sa EndCutscene
 	void StartCutscene();	
-	/// Ends a cutscene. When plyer presses esc after a "StartCutscene", this is where they'll skip to \sa StartCutscene \sa EndCutscene
+	/// Stops flagging a section of code as a cutscene. When plyer presses esc after a "StartCutscene", this is where they'll skip to \sa StartCutscene \sa EndCutscene
 	void EndCutscene();
-	/// Returns true when a cutscene is currently being skipped.
-	/// Can be used to check if your own code should be skipped, or if a sequence you're in has been skipped.
-	/// 
-	/// eg:  `while ( m_boolToWaitFor && E.GetSkippingCutscene() == false ) yield return E.Wait(0);`
-	/// 
-	/// \sa StartCutscene \sa EndCutscene
+	/// Returns true when a cutscene (The code between `StartCutscene()` and `EndCutscene()`) is currently being skipped.
+	/**
+		Can be used to check if your own code should be skipped, or if a sequence you're in has been skipped.
+	
+		eg:  `while ( m_boolToWaitFor && E.GetSkippingCutscene() == false ) yield return E.Wait(0);`
+	
+		\sa StartCutscene \sa EndCutscene
+	*/
 	bool GetSkippingCutscene();
 
 	//
 	// Screen transitions (fading to/from a color)
 	//
-
+	
+	/** @name Screen Fade Functions */
+	///@{
+		
 	/// Fade the screen from the current FadeColor
 	Coroutine FadeIn( float time = 0.2f, bool skippable = true);
 	/// Fade the screen to the current FadeColor
@@ -199,10 +272,14 @@ public partial interface IPowerQuest
 	Color FadeColorDefault { get; set; }
 	/// Return fade color to its default value. \sa FadeColor \sa FadeColorDefault
 	void FadeColorRestore();
-
+	///@}
+	
 	//
 	// Pause/Unpause the game
 	//
+	
+	/** @name Pause/Unpause the game */
+	///@{
 
 	/// Gets or sets whether the game is paused
 	bool Paused { get; set; }
@@ -210,13 +287,17 @@ public partial interface IPowerQuest
 	void Pause(string source = null); 
 	/// Unpauses the game. Use the same source string you paused the game with (if any).
 	void UnPause(string source = null);
-
+	///@}
+	
 	//
 	// Start/Stop timers
 	//
+	
+	/** @name Timers */
+	///@{
 
-	/** Starts timer with a *name*, counting down from `time` in seconds. 
-
+	/// Starts timer with a *name*, counting down from `time` in seconds. 
+	/**
 		Use the same *name* to check whether the timer has finished by calling the `GetTimerExpired(string name)` function. The name is NOT case sensitive.
 
 		You can check the current time remaining on a timer by calling the `GetTimer(string name)` function, using the same name used to start the timer.
@@ -226,9 +307,9 @@ public partial interface IPowerQuest
 		__NOTE:__ the timer will not tick while the game is paused.
 		
 		__Example:__
-
-		    E.SetTimer("egg",6) );
-
+		~~~
+			E.SetTimer("egg",6) );
+		~~~
 		Will set the timer "egg" to expire after 6 seconds.
 
 		__Rolling your own timers:__
@@ -241,38 +322,40 @@ public partial interface IPowerQuest
 
 		When you want to start a timer, in an interaction script for example: `m_myTimer = 4; // Set to 4 seconds`
 
-		And in your Update function:
-		
+		And in your Update function:		
+		~~~
 			if ( m_myTimer > 0) // If the timer is started
 			{
 				m_myTimer -= Time.deltaTime; // Subtract the time since last update
 				if ( m_myTimer <= 0 ) // Check if the timer's elapsed
 				{
-					// The timer has elapsed! Do something!
-					
+					... // The timer has elapsed! Do something!					
 				}
 			}
-		
+		~~~		
 		\sa GetTimerExpired \sa GetTimer
 		
 	*/
 	void SetTimer(string name, float time);
-	/** Checks whether the timer with specified `name` has expired. If the timeout set with SetTimer has elapsed, returns *true*. Otherwise, returns *false*.
 
+	/// Checks whether the timer with specified `name` has expired. If the timeout set with SetTimer has elapsed, returns *true*. Otherwise, returns *false*.
+	/** 
 		__Note that this function will only return true once__ - after that, the timer will always return false until restarted
 
 		__Example: (in UpdateBlocking)__
-
-		    if ( E.GetTimerExpired("egg") ) 
-                Display: Egg timer expired
-		
+		~~~
+			if ( E.GetTimerExpired("egg") ) 
+				Display: Egg timer expired
+		~~~
 		will display a message when timer "egg" expires.
 		\sa SetTimer \sa GetTimer 
 	*/
 	bool GetTimerExpired(string name);
-	/// Returns the time remaining on the timer with specified `name`. 
-	/// \sa SetTimer \sa GetTimerExpired 
+
+	/// Returns the time remaining on the timer with specified `name`. \sa SetTimer \sa GetTimerExpired 
 	float GetTimer(string name);
+
+	///@}
 
 	//
 	// Change room
@@ -280,16 +363,17 @@ public partial interface IPowerQuest
 
 	/// Change the current room. Same as calling C.Player.Room = room;
 	void ChangeRoomBG(IRoom room);
+
 	/// Change the current room. And blocks until after OnEnterAfterFade of the new room finishes.
 	/**
 		__Example:__ Have a player look through a window, show the other room, then change back, in a single script:
-
+		~~~		
 			Display: You peer into the window
 			E.ChangeRoom(R.InsideHouse);
 			Dave: Sure looks interesting in there!
 			E.ChangeRoom(R.OutsideHouse);
 			Dave: But I'll stay out here for now
-
+		~~~
 		\sa ChangeRoomBG
 	*/
 	Coroutine ChangeRoom(IRoom room);
@@ -312,7 +396,6 @@ public partial interface IPowerQuest
 	/// Set the current player controlled character. If in another room, will trigger room transition. If in the same room, the camera will pan to the new character over 'cameraPanTime' seconds
 	void SetPlayer(ICharacter character, float cameraPanTime = 0);
 
-
 	/// Retrieve a character by it's name. eg `E.GetCharacter("Dave");` Usually you would just use `C.Dave`
 	Character GetCharacter(string scriptName);
 
@@ -328,17 +411,20 @@ public partial interface IPowerQuest
 	/// Retrieve an dialog tree by it's name. Eg: `E.GetDialogTree("ChatWithBarney")`. Usually you would just use `D.ChatWithBarney`
 	DialogTree GetDialogTree(string scriptName);
 
-	/** Shows a dialog with the specified text options, and waits until something's selected before continuing. Use IPowerQuest.InlineDialogResult to check what was clicked on afterwards
+	// Shows a dialog with the specified text options, and waits until something's selected before continuing. Use IPowerQuest.InlineDialogResult to check what was clicked on afterwards
+	/**
+	 Example:
 		~~~
-        Barney: You fight like a dairy farmer!
-        E.WaitForInlineDialog("How appropriate, you fight like a cow", "I am rubber, you are glue", "I'm shakin' I'm shakin'");
-        if ( E.InlineDialogResult == 2 )
-            WinSwordFight();
+		Barney: You fight like a dairy farmer!
+		E.WaitForInlineDialog("How appropriate, you fight like a cow", "I am rubber, you are glue", "I'm shakin' I'm shakin'");
+		if ( E.InlineDialogResult == 2 )
+			WinSwordFight();
 		~~~
+		\sa InlineDialogResult
 	*/
 	Coroutine WaitForInlineDialog(params string[] options);
 
-	/// Retrieves the option that was picked in the last call to WaitForInlineDialog()
+	/// Retrieves the option that was picked in the last call to WaitForInlineDialog() \sa WaitForInlineDialog
 	int InlineDialogResult {get;}
 
 	/// Retreive a Gui item by it's name
@@ -457,48 +543,55 @@ public partial interface IPowerQuest
 	// Advanced function- allows you to cancel current sequence in progress. Use to interupt player interactions when something else happens (eg: on trigger or something in UpdateBlocking)
 	//void CancelCurrentInteraction();
 
-	/// Registers something "occuring", and returns whether it's the first time it's occurred
+	/// Registers something "occurring", and returns whether it's the first time it's occurred
 	/**
-	 * Usage:
-	 * if ( FirstOccurrence("unlockdoor") ) 
-	 * 		Display: You unlock the door
-	 * else
-	 * 		Display: It's already unlocked
-	 * 		
+	  Usage:
+
+	  ~~~
+	  if ( FirstOccurrence("unlockdoor") ) 
+	  		Display: You unlock the door
+	  else
+	  		Display: It's already unlocked
+	  ~~~	
 	 *  \sa Occurrence \sa GetOccurrenceCount \sa NextOccurrence
 	 */
 	bool FirstOccurrence(string uniqueString);
 
 	/// Registers something "occurring", and returns the number of time's it's occurred. Returns 0 the first time, then 1, etc.
 	/**
-	 * Usage:
-	 * if ( Occurrence("knocked on door") < 3 )
-	 * 		Display: You knock on the door
-	 * 		
-	 *  \sa FirstOccurrence \sa GetOccurrenceCount \sa NextOccurrence
+	  Usage:
+
+	  ~~~
+	  if ( Occurrence("knocked on door") < 3 )
+	  		Display: You knock on the door
+	  ~~~	
+	   \sa FirstOccurrence \sa GetOccurrenceCount \sa NextOccurrence
 	 */
 	int Occurrence(string uniqueString);
 
 	/// Checks how many times something has occurred, without incrementing the occurrence
 	/**
-	 * Usage:
-	 * if ( GetOccurrenceCount("knocked on door") == 3 )
-	 * 		Doorman: Who's there?
-	 * 		
-	 *  \sa FirstOccurrence \sa Occurrrence
+	  Usage:
+
+	  ~~~
+	  if ( GetOccurrenceCount("knocked on door") == 3 )
+	  		Doorman: Who's there?
+	  ~~~	
+	   \sa FirstOccurrence \sa Occurrrence
 	 */
 	int GetOccurrenceCount(string uniqueString);
 
 	//! Continues a sequence of Occurrence checks, started with FirstOccurence.
 	/**
-	Usage
+	Usage:
+	~~~
 			if ( E.FirstOccurrence("Ham") )
 				Display: You take a bite of ham
 			else if ( E.NextOccurrence )
 				Display: You take another bite of ham
 			else if ( E.NextOccurrence )
 				Display: You take a third bite of ham
-
+	~~~
 	\sa FirstOccurrence \sa FirstOption  \sa NextOption
 	*/
 	bool NextOccurrence {get;}
@@ -506,6 +599,7 @@ public partial interface IPowerQuest
 	//! Start a sequence of options, passing in the total number of options in your list. Then call NextOption for the remaining options
 	/**
 	Usage:
+	~~~
 			if ( E.FirstOption(4) )
 				Display: I can't do that
 			else if ( E.NextOption )
@@ -514,7 +608,7 @@ public partial interface IPowerQuest
 				Display: Not gonna happen
 			else if ( E.NextOption )
 				Display: Nope
-	  
+	~~~
 	You can also pass a string "source", if you want it to remember which ones have been used before to avoid repeats until whole list is used.
 	\sa NextOption
 	 */
@@ -549,6 +643,80 @@ public partial interface IPowerQuest
 	/// Resets all clickable cursors after a call to "SetAllClickableCursors"
 	void RestoreAllClickableCursors();
 	
+	
+	/** @name Enum shortcuts */
+	///@{
+	
+	/// Sets an enum with the specified value. eg: `E.Set(eDoor.Unlocked);`.
+	/**
+	This is a shortcut that makes c# enums much easier to use for tracking your puzzle stuff.
+	
+	__Usage:__
+
+	Add your enums to your GlobalScript and/or Room script file headers. Eg:
+	~~~
+	public enum eDog { Sleeping, Awake, Angry, Fed }
+	public eDog m_dogState = eDog.Sleeping;
+	~~~
+	Then use enum functions like this in any PowerQuest script:
+	~~~	
+	
+	Display: You pat the dog.
+
+	if ( E.Is(eDog.Fed) )
+		Display: It licks your hand.
+
+	if ( E.After(eDog.Sleeping) && E.Before(eDog.Fed) )
+	{
+		Display: It didnt like that!
+		E.Set(eDog.Angry);	
+	}
+		
+	~~~
+
+	\sa Set<tEnum>() \sa At<tEnum>() \sa Is<tEnum>() \sa Before<tEnum>() \sa Reached<tEnum>() \sa After<tEnum>()
+	*/
+	void Set<tEnum>(tEnum enumState) where tEnum : struct, System.IConvertible;	
+
+	/*
+	///  Returns true if this script has an enum with the specified enum value. Usage: `if ( E.At(eDoor.Unlocked) ) {...}`. This is shorthand for: `if ( m_door == eDoor.Unlocked ) {...}`
+	//bool At<tEnum>(tEnum enumState) where tEnum : struct, System.IConvertible, System.IComparable;
+	*/
+
+	///  Returns true if this script has an enum with the specified enum value. Usage: `if ( E.At(eSection.GettingMap) ) {...}`. 
+	/**
+	You can check multiple at the same time too. Eg: `if ( E.At(eSection.GettingMap, eSection.FindingShovel) )`	
+	
+	This is the same as the Is() function and is shorthand for: `if ( m_door == eSection.GettingMap ) {...}`
+	\sa Set<tEnum>() \sa At<tEnum>() \sa Is<tEnum>() \sa Before<tEnum>() \sa Reached<tEnum>() \sa After<tEnum>()
+	*/ 
+	bool At<tEnum>(params tEnum[] enumStates) where tEnum : struct, System.IConvertible, System.IComparable;
+
+	/*
+	/// Returns true if the enum has the specified value. Usage: `if ( E.Is(eDoor.Unlocked) ) {...}`. This is shorthand for: `if ( m_door == eDoor.Unlocked ) {...}`
+	//bool Is<tEnum>(tEnum enumState) where tEnum : struct, System.IConvertible, System.IComparable;
+	
+	/// Returns true if reached first state, but before second state (same as m_state >= eState.first && m_state < eState.second )
+	//bool Between<tEnum>(tEnum firstInclusive, tEnum secondExclusive) where tEnum : struct, System.IConvertible, System.IComparable;
+	*/
+
+	/// Returns true if the enum has the specified value. Usage: `if ( E.Is(eDoor.Unlocked) ) {...}`.
+	/**
+	You can check multiple at the same time too. Eg: `if ( E.At(eDoor.Unlocked,eDoor.Open) )`
+	
+	This is the same as the At() function and is shorthand for: `if ( m_door == eSection.Unlocked ) {...}`
+	\sa Set<tEnum>() \sa At<tEnum>() \sa Is<tEnum>() \sa Before<tEnum>() \sa Reached<tEnum>() \sa After<tEnum>()
+	*/ 
+	bool Is<tEnum>(params tEnum[] enumStates) where tEnum : struct, System.IConvertible, System.IComparable;
+	/// Returns true if reached state. Eg: `if ( E.Reached(eProgress.FoundTreasure) )`. (Shorthand for `m_state >= eState.myState` ) \sa Set<tEnum>() \sa At<tEnum>() \sa Is<tEnum>() \sa Before<tEnum>() \sa Reached<tEnum>() \sa After<tEnum>()
+	bool Reached<tEnum>(tEnum enumState) where tEnum : struct, System.IConvertible, System.IComparable;
+	/// Returns true if passed state. Eg: `if ( E.After(eState.EscapedLava) )`.  (Shorthand for `m_state > eState.myState` ) \sa Set<tEnum>() \sa At<tEnum>() \sa Is<tEnum>() \sa Before<tEnum>() \sa Reached<tEnum>() \sa After<tEnum>()
+	bool After<tEnum>(tEnum enumState) where tEnum : struct, System.IConvertible, System.IComparable;	
+	/// Returns true if haven't reached state. Eg: `if ( E.Before(eProgress.FoundTreasure) )`.  (Shorthand for `m_state < eState.myState` ) \sa Set<tEnum>() \sa At<tEnum>() \sa Is<tEnum>() \sa Before<tEnum>() \sa Reached<tEnum>() \sa After<tEnum>()
+	bool Before<tEnum>(tEnum enumState) where tEnum : struct, System.IConvertible, System.IComparable;
+
+	///@}
+	
 	//
 	// Save/Load
 	//
@@ -571,7 +739,7 @@ public partial interface IPowerQuest
 	/// Deletes a save game from a particular slot
 	bool DeleteSave(int slot);
 	
-	// Returns true if game is in process of being restored from a save file.
+	/// Returns true if game is in process of being restored from a save file.
 	/**
 	Useful in OnEnterAfterFade if you're saving games in OnEnter. eg.
 
@@ -609,12 +777,12 @@ public partial interface IPowerQuest
 	class MyComponent : Monobehaviour
 	{
 		// Class to store the save data in
-	 	class SaveData
-	 	{
+		class SaveData
+		{
 			public int myInt;
 			public float myFloat;
 			[QuestDontSave] public bool myNotSavedBool;
-	 	}
+		}
 	 
 		SaveData m_saveData;
 
@@ -664,17 +832,17 @@ public partial interface IPowerQuest
 
 /** Characters: Contains functions for manipluating Characters. Usually accessed with the __C.__ prefix. Eg. `C.Bob.FaceLeft();`
  * For example:
-	
-			C.Barney.Room = R.Current;
-			C.Player.WalkTo( P.Tree );
-			if ( C.Player.Talking == false )
-				C.Player.PlayAnimation("EatPizza");
-			C.Bill.Position =  Points.UnderTree;
-			C.Barney.SayBG("What's all this then?");
-			Dave: Ah... Nothing!
-			C.Player.AnimWalk = "Run";
-			C.Barney.Description = "A strange looking fellow with a rat-tail";
-
+	~~~
+		C.Barney.Room = R.Current;
+		C.Player.WalkTo( P.Tree );
+		if ( C.Player.Talking == false )
+			C.Player.PlayAnimation("EatPizza");
+		C.Bill.Position =  Points.UnderTree;
+		C.Barney.SayBG("Whats all this then?");
+		Dave: Ah... Nothing!
+		C.Player.AnimWalk = "Run";
+		C.Barney.Description = "A strange looking fellow with a rat-tail";
+	~~~
  */
 public partial interface ICharacter : IQuestClickableInterface
 {
@@ -705,6 +873,7 @@ public partial interface ICharacter : IQuestClickableInterface
 	\sa Position \sa Facing
 	*/
 	void SetPosition(float x, float y, eFace face = eFace.None);
+
 	/// Set the location of the character, with an optional 'facing' direction. 
 	/** 
 	Eg `C.Dave.SetPosition(new Vector2(12,34));` or `C.Barney.SetPosition(Points.UnderTree,eFace.Right);` 
@@ -719,8 +888,7 @@ public partial interface ICharacter : IQuestClickableInterface
 	*/
 	void SetPosition( IQuestClickableInterface atClickable, eFace face = eFace.None );
 
-
-	/// The position of the character's baseline (for sorting). This is local to the player, so to get/set in world space. Do Plr.Basline - Plr.Position.y
+	/// The position of the character's baseline (for sorting). This is local to the player, usually zero is at their feet. To get the player's baseline in world space do `float baseline =  Plr.Baseline - Plr.Position.y;`
 	float Baseline { get;set; }
 
 	/// The speed the character walks horizontally and vertically. Eg: `C.Player.WalkSpeed = new Vector2(10,20);` \sa ResetWalkSpeed()
@@ -753,9 +921,9 @@ public partial interface ICharacter : IQuestClickableInterface
 	/// The enumerated direction the character is facing. Useful when you want to set a character's face direction without them turning
 	/** 
 	 Example:	 
-	     // If Dave is facing right, immediately change him to be facing up-left 
-	     if ( C.Dave.Facing == eFace.Right )
-	         C.Dave.Facing = eFace.UpLeft;
+		 // If Dave is facing right, immediately change him to be facing up-left 
+		 if ( C.Dave.Facing == eFace.Right )
+			 C.Dave.Facing = eFace.UpLeft;
 	 */
 	eFace Facing{get;set; }
 
@@ -802,7 +970,9 @@ public partial interface ICharacter : IQuestClickableInterface
 	/// Gets or sets the lipsync mouth animation of the character, attached to a node
 	string AnimMouth { get;set; }
 	/// If an AnimPrefix is set, when an animation is played, the system will check if an anim exists with this prefix, before falling back to the regular anim. 
-	// Eg. if prefix is 'Angry', then, when a 'Walk' anim is played, it'll first check if there's an 'AngryWalk' anim.
+	/** 
+		Eg. if prefix is 'Angry', then, when a 'Walk' anim is played, it'll first check if there's an 'AngryWalk' anim.
+	*/
 	string AnimPrefix{get;set;}
 
 	/// Gets or sets the cursor to show when hovering over the object. If empty, default active cursor will be used
@@ -917,14 +1087,15 @@ public partial interface ICharacter : IQuestClickableInterface
 
 	__Example:__
 
-		C.Barney.Walk(160, 100);
+		C.Barney.WalkTo(160, 100);
 		C.Barney.AddWaypoint(50, 150);
 		C.Barney.AddWaypoint(50, 50, eFace.Right);
 
 	Tells character Barney to first of all walk to the centre of the screen normally (obeying walkable areas), then move to the bottom left corner and then top left corner afterwards, then face right.
-	\sa Walk \sa StopWalking
+	\sa WalkTo \sa StopWalking
 	 */
 	void AddWaypoint(float x, float y, eFace thenFace = eFace.None);
+
 	/// Tells the character to walk to a point directly, after it has finished its current move. Ignores walkable areas.
 	/** This function allows you to queue up a series of moves for the character to make, if you want them to take a preset path around the screen. Note that any moves made with this command ignore walkable areas.
 
@@ -934,12 +1105,12 @@ public partial interface ICharacter : IQuestClickableInterface
 
 	__Example:__
 
-		C.Barney.Walk(Points.Center);
+		C.Barney.WalkTo(Points.Center);
 		C.Barney.AddWaypoint(Points.BotLeft);
 		C.Barney.AddWaypoint(Points.TopLeft, eFace.Right);
 
 	Tells character Barney to first of all walk to the centre of the screen normally (obeying walkable areas), then move to the bottom left corner and then top left corner afterwards, Then face right.
-	\sa Walk \sa StopWalking
+	\sa WalkTo \sa StopWalking
 	 */
 	void AddWaypoint(Vector2 pos, eFace thenFace = eFace.None);
 
@@ -1153,10 +1324,10 @@ public partial interface ICharacter : IQuestClickableInterface
 	/// Stops any transition or turning animation, skipping to the end
 	void SkipTransition(); 
 
-	// Gets/Sets name of the sound used for footsteps for this character. Add "Footstep" event in the anim editor (with "Anim prefix" ticked)
+	/// Gets/Sets name of the sound used for footsteps for this character. Add "Footstep" event in the anim editor (with "Anim prefix" ticked)
 	string FootstepSound {get;set;}
 	
-	// Gets/Sets Anti-Glide option. When enabled, the character waits for an animation frame before moving, otherwise they "glide" smoothly across the ground.
+	/// Gets/Sets Anti-Glide option. When enabled, the character waits for an animation frame before moving, otherwise they "glide" smoothly across the ground.
 	bool AntiGlide {get;set;}
 
 	/// Adds a function to be called on an animation event here. Eg: to play a sound or effect on an animation tag. 
@@ -1378,6 +1549,8 @@ public partial interface IProp : IQuestClickableInterface
 	Vector2 Position { get; set; }
 	/// Set the location of the prop
 	void SetPosition(float x, float y);
+	/// Set the location of the prop
+	void SetPosition(Vector2 position);
 	/// Returns true while the prop is moving
 	bool Moving {get;}
 	/// Move the prop over time
@@ -1569,7 +1742,7 @@ public partial interface IRegion
 /** Inventory: Contains functions and data for manipluating Inventory Items - Eg.
 	
 			I.RubberChicken.Add();
-	        I.Active.Description = "A rubber chicken with a pulley in the middle"			
+			I.Active.Description = "A rubber chicken with a pulley in the middle"			
 			if ( I.Sword.Active )
 				Display: You can't use a sword on that
 			if ( I.HeavyRock.EverCollected )
@@ -1792,7 +1965,7 @@ public partial interface ICamera
 	bool GetHasPositionOverride();
 	/// Returns true if the camera's position is overriden, or if it's still transitioning back to the player
 	bool GetHasPositionOverrideOrTransition();
-	// Returns true if transitioning to/from position override or zoom
+	/// Returns true if transitioning to/from position override or zoom
 	bool GetTransitioning();
 
 	/// Overrides the camera position with a specific X,Y. Optionally, transitions to the new position over time.
@@ -1846,6 +2019,15 @@ public partial interface ICamera
 #region ICursor - eg. E.Cursor.Anim = "Crosshairs";
 
 /// Cursor: contains functions and data for manipulating the mouse cursor - Interface to QuestCursor
+/**
+	Eg:
+	~~~
+	Cursor.Hide();
+	Cursor.AnimationOverride = "SillyCursor";
+	if ( Cursor.NoneCursorActive == false )
+		E.ProcessClick(...);
+	~~~
+ */
 public partial interface ICursor
 {
 
@@ -1922,7 +2104,7 @@ public partial interface IGui
 	
 	/// Sets a gui visible and clickable
 	void Show();
-	// Sets a gui non-visible, and non-clickable
+	/// Sets a gui non-visible, and non-clickable
 	void Hide();
 
 	/// Gets or sets whether the object is visible
@@ -1939,8 +2121,11 @@ public partial interface IGui
 	/// Shows the gui, in front of a specific other gui.
 	void ShowInfront(IGui gui);
 
+	/// Returns true if this gui has focus in the game (ie: the current gui the player's looking at/clicking on)
 	bool HasFocus {get;}
 
+	/// Gets or Sets whether this gui is visible during blocking sequences
+	bool VisibleInCutscenes { get;set; }
 	/// Gets or Sets whether this gui blocks clicks behind it
 	bool Modal { get;set; }
 	/// Whether gameplay is paused while the gui is visible
@@ -1954,19 +2139,28 @@ public partial interface IGui
 	/// Returns true if gui navigation key is pressed which hasn't been consumed by a control (consumes this keypress)
 	bool GetKeyPressed( eGuiNav key );
 	/// Tells the gui to handle a keyboard or controller input. eg. Left/Right/Up/Down inputs will navigate between controls, or slide sliders, and 'Ok' will press buttons.	
-	/// Call this from your gui script or global script if the gui is focused. Returns true if button did something
+	/**
+		Call this from your gui script or global script if the gui is focused. Returns true if button did something
+		eg:
+		~~~
+			if ( Input.GetKeyDown(KeyCode.Esc) && Navigate(eGuiNav.Cancel) == false )
+				Gui.Hide();
+		~~~
+		 \sa NavigateToControl \sa ResetNavigation
+	*/
 	bool Navigate( eGuiNav button );
-	// Call this to specify which control should be navigated to. When using keyboard/controller for menues.
+	/// Call this to specify which control should be navigated to. When using keyboard/controller for menues.  \sa Navigate \sa ResetNavigation
 	void NavigateToControl(IGuiControl control);
-	// Resets any control that's been focused by navigation. The 
+	/// Resets any control that's been focused by keyboard navigation. \sa Navigate \sa NavigateToControl
 	void ResetNavigation();		
 	
+	/// Retreives a specific IGuiControl from the gui. 
 	/** Retreives a specific IGuiControl from the gui. 
 	 
 		Controls can be cast to Buttons, Labels, etc. Eg:
 	 
-		    IButton button = (IButton)G.Keypad.GetControl("AcceptButton");
-		    button.Color = Color.Red;
+			IButton button = (IButton)G.Keypad.GetControl("AcceptButton");
+			button.Color = Color.Red;
 
 		NB: The gui must be instantiated for this to work. It might not work in scene loading scripts.
 	*/
@@ -1986,14 +2180,14 @@ public partial interface IGui
 #region Gui controls
 
 
+
 /** All gui controls inherit from IGuiControl. (Buttons, Labels, etc)
 	
 			Label.ErrorMessage.Show();
 			Image.Crosshair.Position = E.MousePosition();
 			Button.Accept.Hide();
 
-	Also see specific gui controls: IButton, IImage, ILabel, IInventoryPanel
-	\sa IButton \sa IImage \sa ILabel \sa IInventoryPanel
+	Also see specific gui controls: IButton, IImage, ILabel, IInventoryPanel, ISlider, ITextField	
 */	
 public partial interface IGuiControl
 {	
@@ -2008,13 +2202,22 @@ public partial interface IGuiControl
 	void Hide();
 	/// Sets the position of the control. Note that this will be overridden if using AlignTo or FitTo component
 	void SetPosition(float x, float y);
-	// Gets/Sets the position of the control. Note that this will be overridden if using AlignTo or FitTo component
+	/// Gets/Sets the position of the control. Note that this will be overridden if using AlignTo or FitTo component
 	Vector2 Position {get;set;}
-	// Gets/Sets whether this control is focused (ie: the mouse is hovering over it, or it's selected with keyboard)
+	/// Gets/Sets whether this control is focused (ie: the mouse is hovering over it, or it's selected with keyboard)
 	bool Focused {get;}
-	// Gets/Sets whether this control has the current keyboard focus (can also be used for specifying which control has 'controller' focus)
+	/// Gets/Sets whether this control has the current keyboard focus (can also be used for specifying which control has 'controller' focus)
 	bool HasKeyboardFocus { get; set; }	
+	
+	/// Duplicates the control. Useful for adding elements dynamically to a gui. You can optionally specify a new name for the control, and a parent object (such as a grid container)
+	GuiControl DuplicateControl(string name = null, IGuiControl parent = null);
 
+	// Note: Not all gui controls implement these. But most do, so adding them here for convenience
+	string Description {get;set;}
+	string Cursor      {get;set;}		
+	string Text        {get;set;}
+	string Anim        {get;set;}	
+	Color Color        {get;set;}
 }
 
 /** Gui Button
@@ -2028,17 +2231,17 @@ public partial interface IGuiControl
 */	
 public partial interface IButton : IGuiControl
 {
-	string Description {get;set;}
-	string Cursor {get;set;}	
+	new string Description {get;set;}
+	new string Cursor {get;set;}	
 	
-	string Text				{get;set;}
+	new string Text				{get;set;}
 
-	string Anim	           {get;set;}
+	new string Anim	           {get;set;}
 	string AnimHover	   {get;set;}
 	string AnimClick	   {get;set;}
 	string AnimOff         {get;set;}
 	
-	Color Color	        {get;set;}
+	new Color Color	        {get;set;}
 	Color ColorHover    {get;set;}
 	Color ColorClick    {get;set;}
 	Color ColorOff {get;set;}
@@ -2072,8 +2275,8 @@ public partial interface IButton : IGuiControl
 */	
 public partial interface ILabel : IGuiControl
 {	
-	string Text {get;set;}
-	Color Color {get;set;}
+	new string Text {get;set;}
+	new Color Color {get;set;}
 	QuestText TextComponent {get;}
 	
 	/// Gets/Sets the transparency of the text
@@ -2086,12 +2289,13 @@ public partial interface ILabel : IGuiControl
 
 /** Gui Image
 	
-			Image.LockedIndicator.Image = "Unlocked";
+			Image.LockedIndicator.Anim = "Unlocked";
+			Image.LockedIndicator.PlayAnimationBG("Sparkle");
 			
 */	
 public partial interface IImage : IGuiControl
 {
-	string Anim {get;set;}
+	new string Anim {get;set;}
 
 	bool Animating {get;}
 	void PauseAnimation();
@@ -2149,10 +2353,10 @@ public partial interface IInventoryPanel : IGuiControl
 */	
 public partial interface ISlider : IGuiControl
 {
-	string Description {get;set;}
-	string Cursor {get;set;}
+	new string Description {get;set;}
+	new string Cursor {get;set;}
 	
-	string Text {get;set;}
+	new string Text {get;set;}
 
 	// How far along the bar the handle is. From 0 to 1
 	float Ratio { get; set; }
@@ -2167,7 +2371,7 @@ public partial interface ISlider : IGuiControl
 	string AnimHandleClick {get;set;}
 	string AnimHandleOff   {get;set;}
 	
-	Color Color	        {get;set;}
+	new Color Color	        {get;set;}
 	Color ColorHover    {get;set;}
 	Color ColorClick    {get;set;}
 	Color ColorOff {get;set;}
@@ -2184,10 +2388,10 @@ public partial interface ISlider : IGuiControl
 */
 public partial interface ITextField : IGuiControl
 {
-	string Description {get;set;}
-	string Cursor {get;set;}	
+	new string Description {get;set;}
+	new string Cursor {get;set;}	
 	
-	string Text				{get;set;}
+	new string Text				{get;set;}
 
 	void FocusKeyboard();
 
@@ -2207,13 +2411,6 @@ public partial interface ISpeechGui
 	void EndSay(Character character);
 }
 
-/* Future components
-/// 
-public partial interface ITextBox : IGuiControl
-{
-}
-
-*/
 
 #endregion
 }

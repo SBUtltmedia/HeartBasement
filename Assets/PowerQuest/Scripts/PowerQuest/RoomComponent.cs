@@ -21,6 +21,9 @@ public partial class RoomComponent : MonoBehaviour
 	[SerializeField] [HideInInspector] List<WalkableComponent> m_walkableAreas = new List<WalkableComponent>();
 	[SerializeField, ReadOnly, NonReorderable] List<AnimationClip> m_animations =  new List<AnimationClip>();
 	[SerializeField, ReadOnly, NonReorderable] List<Sprite> m_sprites = new List<Sprite>();	
+
+	// Used by editor when importing art, checks if variants should use their own art... very specific so should be turned temporarily when needed.
+	[SerializeField, HideInInspector] bool m_variantShouldOverrideArt = false; 
 	
 	Pathfinder m_pathfinder = new Pathfinder();
 
@@ -40,6 +43,8 @@ public partial class RoomComponent : MonoBehaviour
 	public List<Sprite> GetSprites() { return m_sprites; }
 
 	public string DebugStartFunction => m_debugStartFunction;
+		
+	public bool EditorVariantShouldOverrideArt => m_variantShouldOverrideArt;
 
 	// Called once room and everything in it has been created and PowerQuest has initialised references. After Start, Before OnEnterRoom.
 	public void OnLoadComplete()

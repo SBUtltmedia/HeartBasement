@@ -125,7 +125,7 @@ public partial class Slider : GuiControl, ISlider
 	/// How much to move the slider when arrow keys are pressed (ratio from 0 to 1. Default is 0.1f)
 	public float KeyboardIncrement { get { return m_keyboardIncrement; } set { m_keyboardIncrement = value; } }
 
-	public string Text 
+	public override string Text 
 	{
 		get
 		{
@@ -144,6 +144,7 @@ public partial class Slider : GuiControl, ISlider
 		}
 	}
 
+	public override string Anim    { get { return m_barAnim;} set { m_barAnim = value; OnAnimationChanged(); } }
 	public string AnimBar          { get { return m_barAnim;} set { m_barAnim = value; OnAnimationChanged(); } }
 	public string AnimBarHover     { get { return m_barAnimHover;} set { m_barAnimHover = value; OnAnimationChanged(); } }
 	public string AnimBarClick	   { get { return m_barAnimClick;} set { m_barAnimClick = value; OnAnimationChanged(); } }
@@ -154,7 +155,7 @@ public partial class Slider : GuiControl, ISlider
 	public string AnimHandleClick  { get { return m_handleAnimClick;} set { m_handleAnimClick = value; OnAnimationChanged(); } }
 	public string AnimHandleOff    { get { return m_handleAnimOff;} set { m_handleAnimOff = value; OnAnimationChanged(); } }
 	
-	public Color Color	       { get{return m_color;}      set { m_color = value; OnColorChanged(); } }
+	public override Color Color { get{return m_color;}      set { m_color = value; OnColorChanged(); } }
 	public Color ColorHover    { get{return m_colorHover;} set { m_colorHover = value; OnColorChanged(); } }
 	public Color ColorClick    { get{return m_colorClick;} set { m_colorClick = value; OnColorChanged(); } }
 	public Color ColorOff      { get{return m_colorOff;}   set { m_colorOff = value; OnColorChanged(); } }
@@ -305,15 +306,12 @@ public partial class Slider : GuiControl, ISlider
 		SetState(Clickable ? eState.Default : eState.Off);
 
 		StartStateAnimation();
-		//OnSetVisible();
 
 		if ( Ratio < 0 )
 			Ratio = 0;
 
-		//if ( m_sizeSetting == eSizeSetting.FitText || m_sizeSetting == eSizeSetting.Image )
-		{
-			UpdateHotspot();
-		}
+		UpdateHotspot();
+		
 	}	
 
 	void Update()
@@ -543,21 +541,7 @@ public partial class Slider : GuiControl, ISlider
 	
 	#endregion
 	#region Funcs: Private Internal
-	/* NB: This was never used
-	void OnSetVisible()
-	{
-		if ( gameObject.activeSelf == false && Visible)
-			gameObject.SetActive(true);
-		
-		if ( GetSprite() )
-			GetSprite().GetComponent<Renderer>().enabled = Visible;
 
-		Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
-		foreach( Renderer renderer in renderers )
-		{   
-			renderer.GetComponent<Renderer>().enabled = Visible;
-		}
-	}*/
 	#endregion
 }
 

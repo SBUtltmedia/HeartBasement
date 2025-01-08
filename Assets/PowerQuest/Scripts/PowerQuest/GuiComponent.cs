@@ -41,7 +41,7 @@ public class GuiScript<T> : QuestScript where T : QuestScript
 	public ILabel Label(string name) { return Data?.GetControl(name) as ILabel ?? null; }
 	
 	/// Gets an IImage from this script's gui.
-	/// eg. `Image.LockedIndicator.Image = "Unlocked";`
+	/// eg. `Image.LockedIndicator.Anim = "Unlocked";`
 	/// \sa Control \sa Label \sa Button
 	public IImage Image(string name) { return Data?.GetControl(name) as IImage ?? null; }
 	
@@ -199,7 +199,7 @@ public partial class Gui : IQuestClickable, IQuestScriptable, IGui
 
 	public bool Modal { get{ return m_modal;} set{m_modal = value;} }	
 	public bool PauseGame { get{ return m_pauseGame;} set{m_pauseGame = value;} }
-	public bool VisibleInCutscenes { get{ return m_visibleInCutscenes;} set{m_visibleInCutscenes = value;} }
+	public bool VisibleInCutscenes { get{ return m_visibleInCutscenes;} set{m_visibleInCutscenes = value; if ( HiddenBySystem && value==true ) {m_hiddenBySystem=false; OnVisibilityChanged();}} }
 	public bool HideObscuredGuis { get{ return m_hideObscuredGuis;} set{ m_hideObscuredGuis = value;} }
 	
 	// Returns true if the gui is under another modal gui

@@ -74,7 +74,7 @@ public partial class TextField : GuiControl, ITextField
 	
 	public IQuestClickable IClickable { get{ return this; } }
 	
-	public string Text 
+	public override string Text 
 	{
 		get
 		{
@@ -109,18 +109,18 @@ public partial class TextField : GuiControl, ITextField
 		}
 	}
 
-	public string Anim	       { get { return m_anim;} set { m_anim = value; OnAnimationChanged(); } }
+	public override string Anim{ get { return m_anim;} set { m_anim = value; OnAnimationChanged(); } }
 	public string AnimHover	   { get { return m_animHover;} set { m_animHover = value; OnAnimationChanged(); } }
 	public string AnimClick	   { get { return m_animClick;} set { m_animClick = value; OnAnimationChanged(); } }
 	public string AnimEdit	   { get { return m_animEdit;} set { m_animEdit = value; OnAnimationChanged(); } }
-	public string AnimOff { get { return m_animOff;} set { m_animOff = value; OnAnimationChanged(); } }
+	public string AnimOff      { get { return m_animOff;} set { m_animOff = value; OnAnimationChanged(); } }
 	
-	public Color Color	       { get{return m_color;} set { m_color = value; OnColorChanged(); } }
+	public override Color Color{ get{return m_color;} set { m_color = value; OnColorChanged(); } }
 	public Color ColorHover    { get{return m_colorHover;} set { m_colorHover = value; OnColorChanged(); } }
 	public Color ColorClick    { get{return m_colorClick;} set { m_colorClick = value; OnColorChanged(); } }
 	public Color ColorEdit     { get{return m_colorEdit;} set { m_colorEdit = value; OnColorChanged(); } }
-	public Color ColorOff { get{return m_colorOff;} set { m_colorOff = value; OnColorChanged(); } }
-
+	public Color ColorOff      { get{return m_colorOff;} set { m_colorOff = value; OnColorChanged(); } }
+	 
 	
 	public void FocusKeyboard()
 	{
@@ -555,6 +555,18 @@ public partial class TextField : GuiControl, ITextField
 	void AnimSound(string sound)
 	{
 		SystemAudio.Play(sound);	    
+	}
+	
+	void AnimSoundStop(Object obj)
+	{
+		if ( obj == null || (obj as GameObject) == null )
+			return;
+		SystemAudio.Stop((obj as GameObject).name,0.1f);
+	}
+
+	void AnimSoundStop(string sound)
+	{
+		SystemAudio.Stop(sound,0.1f);	
 	}
 		
 	// Listen for QuestAnimTrigger tags so can pass them up

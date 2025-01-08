@@ -28,17 +28,18 @@ public partial class Label : GuiControl, ILabel
 		return m_questText;
 	} }
 
-	public string Text 
+	public override string Text 
 	{
 		get { return TextComponent != null ? TextComponent.text : null; }
 		set { if ( TextComponent != null ) TextComponent.text = value; }
 	}
 	
-	public Color Color 
+	public override Color Color 
 	{
 		get { return TextComponent != null ? TextComponent.color : Color.white; }
 		set { if ( TextComponent != null ) TextComponent.color = value; }
 	}
+	
 
 	public IQuestClickable IClickable { get{ return this; } }
 

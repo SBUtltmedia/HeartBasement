@@ -236,7 +236,7 @@ public partial class PowerQuest
 			// Check for and call Debug Startup Function.
 			//
 			bool debugSkipEnter = false;
-			if ( firstRoomLoad && PowerQuest.Get.IsDebugBuild && room != null && room.GetScript() != null )
+			if ( firstRoomLoad && /*PowerQuest.Get.IsDebugBuild && */room != null && room.GetScript() != null )
 			{
 				// If 'has restarted' then use the restartPlayFrom function, not the one set in the editor. This is used when the E.Restart function is called with a PlayFrom function
 				string restartFunction = null;

@@ -221,7 +221,7 @@ public class GuiDropDownBar : MonoBehaviour
 			m_offset = Vector2.Lerp(m_offset, m_blendOffset, m_blendTimer/BLEND_TIME);
 		}
 
-		if ( m_hideDuringCutscenes && PowerQuest.Get.GetBlocked() ) 
+		if ( m_highlightPopupTimer <= 0 && m_hideDuringCutscenes && PowerQuest.Get.GetBlocked() ) 
 		{
 			m_offset.y += m_dropDownDistance*10.0f;
 		}

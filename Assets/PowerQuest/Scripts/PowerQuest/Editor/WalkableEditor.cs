@@ -19,7 +19,12 @@ public class WalkableComponentEditor : Editor
 	ReorderableList m_listHoles = null;
 	List<PolygonCollider2D> m_holes = new List<PolygonCollider2D>();
 	
+	PolygonCollider2D m_collider = null;
+	
+	/* Don't show automatically any more, its annoying /
 	bool m_first = false;
+	/**/
+
 	public void OnEnable()
 	{
 		UpdateHoleList();
@@ -29,7 +34,10 @@ public class WalkableComponentEditor : Editor
 		m_listHoles.onAddCallback = AddHole;
 		//m_listHoles.onSelectCallback = SelectHole;
 		m_listHoles.onRemoveCallback = DeleteHole;
-		m_first=true;
+		
+		/* Don't show automatically any more, its annoying /
+		m_first=true;		
+		/**/
 	}
 
 	void OnDestroy()
@@ -42,9 +50,26 @@ public class WalkableComponentEditor : Editor
 		//DrawDefaultInspector();
 		WalkableComponent component = (WalkableComponent)target;
 		if ( component == null ) return;
+		/* Don't show automatically any more, its annoying /
 		if ( m_first )
 			QuestPolyTool.Show(component);
 		m_first = false;
+		/**/
+		
+		if (m_collider == null )
+			m_collider = component.GetComponent<PolygonCollider2D>();
+					
+		if (m_collider != null )
+		{ 		
+			EditorGUI.BeginChangeCheck();
+			GUILayout.Toolbar(QuestPolyTool.Active(m_collider.gameObject)?0:-1, new string[]{"Edit Walkable Area"}, EditorStyles.miniButton);
+			if ( EditorGUI.EndChangeCheck())
+				QuestPolyTool.Toggle(m_collider.gameObject);
+
+			// Check 
+			if ( m_collider.pathCount > 1 )
+				EditorGUILayout.HelpBox("NB: Walkable areas currently only support a single polygon", MessageType.Warning);
+		}
 
 		GUILayout.Space(10);
 

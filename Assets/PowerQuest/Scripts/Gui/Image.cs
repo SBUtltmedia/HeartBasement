@@ -37,7 +37,7 @@ public partial class Image : GuiControl, IImage
 	#endregion
 	#region Funcs: IImage interface
 		
-	public string Anim 
+	public override string Anim 
 	{ 
 		get { return m_anim;} 
 		set 
@@ -326,6 +326,18 @@ public partial class Image : GuiControl, IImage
 	void AnimSound(string sound)
 	{
 		SystemAudio.Play(sound);	    
+	}
+	
+	void AnimSoundStop(Object obj)
+	{
+		if ( obj == null || (obj as GameObject) == null )
+			return;
+		SystemAudio.Stop((obj as GameObject).name,0.1f);
+	}
+
+	void AnimSoundStop(string sound)
+	{
+		SystemAudio.Stop(sound,0.1f);	
 	}
 
 	// Listen for QuestAnimTrigger tags

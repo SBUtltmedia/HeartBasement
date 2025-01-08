@@ -19,10 +19,8 @@ public partial class QuestCamera : ICamera
 	QuestCameraComponent m_instance = null;
 	string m_characterToFollow = null; // String so it will be saved
 	bool m_hasPositionOverride = false; // Flag is necessary to be reversable mid-transition
-	Vector2 m_positionOverride = new Vector2(float.MaxValue,float.MaxValue);
-	Vector2 m_positionOverridePrev = new Vector2(float.MaxValue,float.MaxValue);
-	float m_zoom = 1.0f;
-	float m_zoomPrev = 1.0f;
+	Vector2 m_positionOverride = new Vector2(float.MaxValue,float.MaxValue);	
+	float m_zoom = 1.0f;	
 	bool m_hasZoom = false; // Flag is necessary to be reversable mid-transition
 	Vector2 m_position = Vector2.zero;
 	Vector2 m_targetPosition = Vector2.zero;
@@ -83,8 +81,7 @@ public partial class QuestCamera : ICamera
 	public ICharacter GetCharacterToFollow() { return PowerQuest.Get.GetCharacter(m_characterToFollow); }
 	public bool GetHasPositionOverride() { return m_hasPositionOverride; }
 
-	public Vector2 GetPositionOverride() { return m_positionOverride; }
-	//public Vector2 GetPositionOverridePrev() { return m_positionOverridePrev; }
+	public Vector2 GetPositionOverride() { return m_positionOverride; }	
 
 	public bool GetHasPositionOverrideOrTransition() 
 	{ 
@@ -111,8 +108,6 @@ public partial class QuestCamera : ICamera
 	}
 	public void SetPositionOverride	(float x, float y = 0, float transitionTime = 0 ) 
 	{ 
-		//if ( m_hasPositionOverride )
-		//	m_positionOverridePrev = m_positionOverride;
 		m_hasPositionOverride = true; 
 		m_positionOverride = new Vector2(x,y);  
 		if ( m_instance != null )
@@ -120,8 +115,7 @@ public partial class QuestCamera : ICamera
 	}
 	public void SetPositionOverride	(Vector2 positionOverride, float transitionTime = 0 ) { SetPositionOverride(positionOverride.x, positionOverride.y, transitionTime); }
 	public void ResetPositionOverride(float transitionTime = 0)
-	{ 
-		//m_positionOverridePrev = new Vector2(float.MaxValue,float.MaxValue);
+	{ 		
 		m_hasPositionOverride = false;  
 		if ( m_instance != null) 
 			m_instance.OnOverridePosition(transitionTime); 
@@ -130,30 +124,26 @@ public partial class QuestCamera : ICamera
 	/// Gets the current camera zoom (mulitplier on default/room vertical height)
 	public float GetZoom() { return m_zoom > 0 ? m_zoom : 1; }
 	/// Returns true if the camera has a zoom override
-	public bool GetHasZoom() { return m_hasZoom; }
-	public float GetZoomPrev() { return m_zoomPrev > 0 ? m_zoomPrev : 1; }
+	public bool GetHasZoom() { return m_hasZoom; }	
 	/// Returns true if the camera's zoom is overriden, or if it's still transitioning back to default
 	public bool GetHasZoomOrTransition() { return ( m_instance != null ) ? m_instance.GetHasZoomOrTransitioning() : m_hasZoom; }
+
 	/// Sets a camera zoom (mulitplier on default/room vertical height)
 	public void SetZoom(float zoom, float transitionTime = 0)
-	{		
-		if ( m_hasZoom )
-			m_zoomPrev = m_zoom;
-		else 
-			m_zoomPrev = zoom; // if it's first zoom it'll be lerping from original camera, so snap this.
+	{
 		m_hasZoom = true;
 		m_zoom = zoom;
 		if ( m_instance != null ) 
 			m_instance.OnZoom(transitionTime); 
 	}
+
 	/// Removes any zoom override, returning to the default/room vertical height
 	public void ResetZoom(float transitionTime = 0)
 	{ 
-		//m_zoomPrev = 1;
 		m_hasZoom = false;
+		m_zoom = 1;
 		if ( m_instance != null ) 
 			m_instance.OnZoom(transitionTime);
-
 	}
 	
 	/// Gets or sets the camera zoom  (mulitplier on default/room vertical height). Use SetZoom() to set transition time.

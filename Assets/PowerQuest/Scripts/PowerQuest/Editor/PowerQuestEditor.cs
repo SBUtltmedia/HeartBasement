@@ -1234,6 +1234,11 @@ public partial class PowerQuestEditor : EditorWindow
 		{
 			m_animatorWindow.CallbackOnAnimEvent += OnAnimatorWindowEvent;
 		}
+				
+		if ( m_hotloadAssemblyOnUnblock != null )
+		{ 
+			HotloadAssemblyOnUnblock();
+		}
 	}
 
 	#endregion
@@ -1560,12 +1565,32 @@ public partial class PowerQuestEditor : EditorWindow
 		}
 	}
 
+	Assembly m_hotloadAssemblyOnUnblock = null;
+
+	// If recompiled while game was in blocking state, it waits until no longer blocking until now to swap stuff out
+	void HotloadAssemblyOnUnblock()
+	{ 		
+		if ( Application.isPlaying == false || PowerQuest.GetValid() == false || m_hotloadAssemblyOnUnblock == null || PowerQuest.Get.GetBlocked())
+			return;
+			
+		List<IQuestScriptable> scriptables = PowerQuest.Get.GetAllScriptables();
+		List<IQuestScriptable> hotloadedScriptables = scriptables;
+		
+		foreach ( IQuestScriptable scriptable in hotloadedScriptables )
+		{
+			// Call through to scriptables to set them 
+			scriptable.HotLoadScript(m_hotloadAssemblyOnUnblock);
+		}
+		PowerQuest.Get.EditorSetHotLoadAssembly(m_hotloadAssemblyOnUnblock);
+
+		m_hotloadAssemblyOnUnblock = null;
+	}
 
 	// Recompiles any scripts that have changed and hot-loads them. Returns true if anything changed.
 	bool HotloadScripts()
 	{
 		bool hotloadedSomething = false;
-		if ( Application.isPlaying == false || m_sourceModifiedTime == null || PowerQuest.GetValid() == false || PowerQuest.Get.GetBlocked() )
+		if ( Application.isPlaying == false || m_sourceModifiedTime == null || PowerQuest.GetValid() == false/* || PowerQuest.Get.GetBlocked() */)
 			return hotloadedSomething;
 	
 		System.DateTime sourceModifiedTime = m_sourceModifiedTime.Value;
@@ -1589,6 +1614,7 @@ public partial class PowerQuestEditor : EditorWindow
 			string path = AssetDatabase.GUIDToAssetPath(assets[i]);
 			if ( File.Exists(path) && File.GetLastWriteTime(path) > sourceModifiedTime )
 			{
+				//Debug.Log($"Rebuilding because of {path}. Changed at {sourceModifiedTime}");
 				needsCompile = true;
 				/* // We're now just compiling ALL scriptables */
 				break;
@@ -1625,13 +1651,21 @@ public partial class PowerQuestEditor : EditorWindow
 			EditorUtility.DisplayProgressBar("Compiling","Compiling Scripts",0.2f);//, (float)i/(float)scriptables.Count);
 			assembly = QuestEditorUtils.CompileFiles(hotLoadPaths.ToArray());
 
-			EditorUtility.DisplayProgressBar("Compiling","Hotloading Scripts",0.9f);//, (float)i/(float)scriptables.Count);
-			foreach ( IQuestScriptable scriptable in hotloadedScriptables )
-			{
-				// Call through to scriptables to set them 
-				scriptable.HotLoadScript(assembly);
+			if ( PowerQuest.Get.GetBlocked() )
+			{ 
+				m_hotloadAssemblyOnUnblock = assembly;
 			}
-			PowerQuest.Get.EditorSetHotLoadAssembly(assembly/*, hotloadedScriptables*/);
+			else 
+			{ 
+				EditorUtility.DisplayProgressBar("Compiling","Hotloading Scripts",0.9f);//, (float)i/(float)scriptables.Count);
+				foreach ( IQuestScriptable scriptable in hotloadedScriptables )
+				{
+					// Call through to scriptables to set them 
+					scriptable.HotLoadScript(assembly);
+				}
+
+				PowerQuest.Get.EditorSetHotLoadAssembly(assembly/*, hotloadedScriptables*/);
+			}
 			m_sourceModifiedTime = System.DateTime.Now; 
 			hotloadedSomething = true;
 		}
@@ -1985,7 +2019,7 @@ public partial class PowerQuestEditor : EditorWindow
 			{
 				foreach ( RoomComponent room in m_powerQuest.GetRoomPrefabs() )
 				{	
-					if ( PrefabUtility.GetCorrespondingObjectFromSource(room.gameObject) != null ) // Don't change animations for prefab variants, use their owner's
+					if ( PrefabUtility.GetCorrespondingObjectFromSource(room.gameObject) != null && room.EditorVariantShouldOverrideArt == false ) // Don't change animations for prefab variants, use their owner's
 						continue;
 
 					bool dirty = false;

@@ -22,7 +22,7 @@ public class SystemTextEditor : Editor
 	SystemText m_component = null;
 	List<string> m_processedFiles = new List<string>();
 	
-	
+	static bool m_skipExistingLipsyncData = true;
 	[SerializeField] bool m_foldoutSettings = false;
 	[SerializeField] bool m_foldoutProcess = false;
 	[SerializeField] bool m_foldoutScript = false;
@@ -34,7 +34,7 @@ public class SystemTextEditor : Editor
 		ProcessFromScript,
 		UpdateScript
 	}
-	eProcessTextMode m_processTextMode = eProcessTextMode.ProcessFromScript;
+	eProcessTextMode m_processTextMode = eProcessTextMode.ProcessFromScript;	
 
 	// Regex explanation:
 	//		- Finds things of format
@@ -99,9 +99,10 @@ public class SystemTextEditor : Editor
 			text-align: left;
 		}
 		li { font: 12px/14px Courier, fixed; }
+		.action {  font-style: italic; }
 		.sceneheader, .action, .character { padding-top: 1.5ex; }
 		.sceneheader  { font-weight: bold; text-transform:uppercase; }
-		.action { padding-right: 5%; }
+		.action { padding-right: 5%; font- }
 		.character {  margin-left: 40%; text-transform:uppercase;  }
 		.dialogue { margin-left: 25%; min-width: 320px; padding-right: 5%; }
 		.parenthetical { margin-left: 32%; padding-right: 10%; }
@@ -110,13 +111,15 @@ public class SystemTextEditor : Editor
 		.dialogue.recorded { color:#aaa; }
 		.transition { padding-top: 3ex; margin-left: 65%; padding-bottom: 1.5ex; }
 		.id { float:left; padding-right: 0; color:#aaa; text-align: right; width: 23%; }
-		</style>"+"\n<body><code><ul>";
+		a:hover {text-decoration: underline; cursor: pointer;}
+		</style>
+		<script> function play(name) {(new Audio('./Voice/'+name+'.wav')).play(); } </script>"+"\n</head>\n<body><code><ul>";
 	static readonly string SCRIPT_DIALOG_FILE_END = "</ul></code></body></html>";
 	static readonly string SCRIPT_DIALOG_CHARACTER = "\t\t\t<li class=\"character\"><b>{0}</b></li>\n";
 	static readonly string SCRIPT_DIALOG_CHARACTER_HIGHLIGHTED = "\t\t\t<li class=\"character\"><span style=\"background-color: #{0};\"><b>{1}</b></span></li>\n";
-	static readonly string SCRIPT_DIALOG_LINE = "\t\t\t<li class=\"id\">({0}{1})</li><li class=\"dialogue\">{2}</li>\n";
+	static readonly string SCRIPT_DIALOG_LINE = "\t\t\t<li class=\"id\">(<a onclick=\"play('{0}{1}')\">{0}{1}</a>)</li><li class=\"dialogue\">{2}</li>\n";
 	//static readonly string SCRIPT_DIALOG_LINE = "\t\t\t<li class=\"character\"><b>{0}</b> {1}</li><li class=\"dialogue\">{2}</li>\n";
-	static readonly string SCRIPT_DIALOG_RECORDED_LINE = "\t\t\t<li class=\"id\">({0}{1})</li><li class=\"dialogue recorded\">{2}</li>\n";
+	static readonly string SCRIPT_DIALOG_RECORDED_LINE = "\t\t\t<li class=\"id\">(<a onclick=\"play('{0}{1}')\">{0}{1}</a>)</li><li class=\"dialogue recorded\">{2}</li>\n";
 	static readonly string SCRIPT_FILE_LINE = "\n\t<li class=\"sceneheader\">{0}</li>\n\n";
 	static readonly string SCRIPT_FUNCTION_LINE = "\n\t\t<li class=\"action\">{0}</li>\n\n";
 
@@ -388,6 +391,8 @@ public class SystemTextEditor : Editor
 			if (lipSyncingProperty != null)
 			{
 				EditorGUILayout.PropertyField(lipSyncingProperty);
+				//Tooltip("If ticked, lipsync data is re-created even for lines that already have it.")
+				m_skipExistingLipsyncData = GUILayout.Toggle(m_skipExistingLipsyncData,"Skip existing lipsync data");
 			}
 		
 			if ( GUILayout.Button("Process Lip Sync Data") )
@@ -712,7 +717,7 @@ public class SystemTextEditor : Editor
 		}
 		else if ( string.IsNullOrEmpty(character) )
 		{
-			character = "Narr"; // Hack to set chracter to "Narr" when it's a display function
+			character = PowerQuest.STR_NARR; // Hack to set chracter to "Narr" when it's a display function
 		}
 		else if ( character == "Section" )
 		{
@@ -1556,24 +1561,23 @@ public class SystemTextEditor : Editor
 	}
 
 	/// Runs the rhubarb tool to generate lip-sync data for the specific data id
-	public static System.Diagnostics.Process StartRhubarb(SystemText systemText, int id)
+	public static System.Diagnostics.Process StartRhubarb(SystemText systemText, int id )
 	{
 		TextData data = systemText.EditorGetTextDataOrdered()[id];
+				
+		// Skip lines that have lip sync data already
+		if( m_skipExistingLipsyncData && data.m_phonesCharacter.Length > 0 )
+			return null;
 
 	    // Skip narrated lines
-		if ( string.IsNullOrEmpty(data.m_character) || data.m_character == "Narr" )
-		{
+		if ( string.IsNullOrEmpty(data.m_character) || string.Equals( data.m_character, PowerQuest.STR_NARR, StringComparison.OrdinalIgnoreCase ) )
 			return null;
-		}
 
 		// Skip lines that don't have dialog wav
 		string fullFileName =  data.m_character	+ data.m_id.ToString();			
-		AudioClip clip = Resources.Load("Voice/"+fullFileName) as AudioClip;
-		
+		AudioClip clip = Resources.Load("Voice/"+fullFileName) as AudioClip;		
 		if ( clip == null )
-		{
-			return null;
-		}		    			
+			return null;	
 
 		File.WriteAllText("RhubarbInput.txt", data.m_string);
 

@@ -43,6 +43,14 @@ public class CharacterComponentEditor : Editor
 			AssetDatabase.OpenAsset(QuestEditorUtils.GetPrefabParent(component.gameObject,true));
 		}	
 		
+		if ( editingPrefab == false && GUILayout.Button("Preview In Room") ) // edit prefab if not already editing one
+		{ 
+			GameObject gameObject = new GameObject($"Preview-{data.ScriptName}", typeof(CharacterPreview), typeof(Sortable), typeof(SpriteRenderer), typeof(PowerSprite) ) as GameObject;
+			gameObject.transform.position = Vector3.zero;
+			gameObject.GetComponent<CharacterPreview>().Character = component;
+			Selection.activeObject = gameObject;			
+		}	
+		
 		EditorGUILayout.LabelField("Setup", EditorStyles.boldLabel);	
 
 

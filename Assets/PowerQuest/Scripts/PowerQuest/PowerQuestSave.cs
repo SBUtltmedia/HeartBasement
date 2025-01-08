@@ -204,6 +204,11 @@ public partial class PowerQuest
 			m_restoring = true;
 
 			//
+			// Reset quest objects to prefab state
+			// 
+			InitialiseQuestObjects();
+
+			//
 			// Load quest objects
 			//
 			for( int i = 0; i < m_characters.Count; ++i )
@@ -211,7 +216,7 @@ public partial class PowerQuest
 				Character value = m_characters[i];
 				string name = "Char"+value.GetScriptName();
 				if ( data.ContainsKey(name ) )
-					m_characters[i] = data[name] as Character;				
+					m_characters[i] = data[name] as Character;
 			}
 			m_player = m_characters[0];
 
@@ -317,6 +322,7 @@ public partial class PowerQuest
 			// Call post-restore functions
 			//
 
+			ExOnPostRestore(restoredVersion);
 			
 			// Call post restore on quest objects
 			{

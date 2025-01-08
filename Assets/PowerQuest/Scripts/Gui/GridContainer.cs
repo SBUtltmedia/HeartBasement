@@ -204,6 +204,24 @@ public class GridContainer : MonoBehaviour
 		return pos;
 	}
 	
+	/// Retrieves the index of the item
+	public int GetItemIndex( Transform item )
+	{
+		return Items.FindIndex(gridItem=>gridItem == item); 
+	}
+	/// Retrieves the index of the item (or its monobehaviour)
+	public int GetItemIndex( IGuiControl item )
+	{
+		Transform itemTransform = item.Instance.transform;
+		return Items.FindIndex(gridItem=>gridItem == itemTransform); 
+	}
+	/// Retrieves the index of the item (or its monobehaviour)
+	public int GetItemIndex<T>( T item ) where T : MonoBehaviour
+	{
+		Transform itemTransform = item.transform;
+		return Items.FindIndex(gridItem=>gridItem == itemTransform); 
+	}
+	
 	/// Columns before wrapping around to next row 0 if no limit
 	public int ColumnsPerRow { get => m_columnsPerRow; set { m_columnsPerRow = Mathf.Max(0,value); DoLayout(); } }
 

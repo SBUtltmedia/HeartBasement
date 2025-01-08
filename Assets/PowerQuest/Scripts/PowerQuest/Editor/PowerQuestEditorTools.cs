@@ -279,18 +279,22 @@ public partial class PowerQuestEditor
 				// Read rhubarb data
 				if ( m_rhubarbProcess != null )
 					SystemTextEditor.ReadRhubarbData(m_systemText, m_rhubarbLineId);
+				m_rhubarbProcess = null;
 
-				// start next rhubarb process
-				m_rhubarbLineId++;
-				if ( m_rhubarbLineId < m_systemText.EditorGetTextDataOrdered().Count )
+				// start next rhubarb process- skipping up to 50 in one frame if nothing processed. (could skip all but then hard to tell if anything happened!)
+				for ( int i = 0; i < 50 && ( m_runningRhubarb && m_rhubarbProcess == null ); ++i )
 				{
-					m_rhubarbProcess = SystemTextEditor.StartRhubarb(m_systemText, m_rhubarbLineId);
-				}
-				else 
-				{
-					// Finished!
-					m_runningRhubarb = false;
-					EditorUtility.SetDirty(m_systemText);	
+					m_rhubarbLineId++;
+					if ( m_rhubarbLineId < m_systemText.EditorGetTextDataOrdered().Count )
+					{
+						m_rhubarbProcess = SystemTextEditor.StartRhubarb(m_systemText, m_rhubarbLineId);
+					}
+					else 
+					{
+						// Finished!
+						m_runningRhubarb = false;
+						EditorUtility.SetDirty(m_systemText);	
+					}
 				}
 
 				Repaint();

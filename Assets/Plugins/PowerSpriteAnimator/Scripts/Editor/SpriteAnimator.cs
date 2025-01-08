@@ -1268,7 +1268,7 @@ public partial class SpriteAnimator : EditorWindow
 		{
 			if ( animEvent.m_functionName.Length > 2
 				&& m_selectedEvents.Contains(animEvent) == false 
-				&& m_acListAll.Exists(item=>item.m_functionName==animEvent.m_functionName) == false )
+				&& m_acListAll.Exists(item=> string.Equals(item.m_functionName, animEvent.m_functionName, System.StringComparison.OrdinalIgnoreCase)) == false )
 			{
 				m_acListAll.Add(animEvent);
 			}

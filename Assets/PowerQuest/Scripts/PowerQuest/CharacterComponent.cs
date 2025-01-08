@@ -1442,6 +1442,7 @@ public partial class CharacterComponent : MonoBehaviour
 	void OnAnimationReset()
 	{
 		AnimWalkSpeedReset();
+		AnimShadowReset();
 	}
 	
 	bool HasAnimation(string animName)
@@ -2135,25 +2136,25 @@ public partial class CharacterComponent : MonoBehaviour
 
 			SpriteAnim talkAnimator = useMouth ? m_mouth : m_spriteAnimator;
 
-	        // Update frames for lip sync
+			// Update frames for lip sync
 			TextData data = SystemText.FindTextData( m_currLineId, m_data.ScriptName );
-	        // get time from audio source
-	        float time = 0; 
-	        if ( m_data.GetDialogAudioSource() != null )
-					time = m_data.GetDialogAudioSource().time-0.1f; // added a bit for latency
+			// get time from audio source
+			float time = 0; 
+			if ( m_data.GetDialogAudioSource() != null )
+					time = m_data.GetDialogAudioSource().time;//-0.1f; - previously had an offset for latency. But better without in recent testing
 
 			// Get character from time
 			int index = -1;
 			if ( data != null )
 				index = System.Array.FindIndex( data.m_phonesTime, item => item > time );
-	        index--;
+			index--;
 
 			char character = SystemText.Get.GetLipsyncUsesXShape() ? 'X' : 'A'; // default is mouth closed
 			if ( index >= 0 && index < data.m_phonesCharacter.Length )
-	            character = data.m_phonesCharacter[index];
+				character = data.m_phonesCharacter[index];
 
 
-	        // map character to frame
+			// map character to frame
 			int finalLipSyncFrames = NUM_LIP_SYNC_FRAMES + SystemText.Get.GetLipsyncExtendedMouthShapes().Length;
 			int characterId = Mathf.Min(character-'A', finalLipSyncFrames-1);
 
@@ -2206,8 +2207,8 @@ public partial class CharacterComponent : MonoBehaviour
 			// Else, hide mouth (if there is one)
 			if ( m_mouth != null )
 				m_mouth.gameObject.SetActive(false);
-		}  
-	}  
+		}
+	}
 }
 
 #endregion

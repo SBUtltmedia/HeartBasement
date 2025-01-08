@@ -88,7 +88,7 @@ public partial class Button : GuiControl, IButton
 	
 	public IQuestClickable IClickable { get{ return this; } }
 	
-	public string Text 
+	public override string Text 
 	{
 		get
 		{
@@ -107,12 +107,12 @@ public partial class Button : GuiControl, IButton
 		}
 	}
 
-	public string Anim	       { get { return m_anim;} set { m_anim = value; OnAnimationChanged(); } }
+	public override string Anim	       { get { return m_anim;} set { m_anim = value; OnAnimationChanged(); } }
 	public string AnimHover	   { get { return m_animHover;} set { m_animHover = value; OnAnimationChanged(); } }
 	public string AnimClick	   { get { return m_animClick;} set { m_animClick = value; OnAnimationChanged(); } }
 	public string AnimOff { get { return m_animOff;} set { m_animOff = value; OnAnimationChanged(); } }
 	
-	public Color Color	        { get{return m_color;} set { m_color = value; OnColorChanged(); } }
+	public override Color Color	        { get{return m_color;} set { m_color = value; OnColorChanged(); } }
 	public Color ColorHover    { get{return m_colorHover;} set { m_colorHover = value; OnColorChanged(); } }
 	public Color ColorClick    { get{return m_colorClick;} set { m_colorClick = value; OnColorChanged(); } }
 	public Color ColorOff { get{return m_colorOff;} set { m_colorOff = value; OnColorChanged(); } }
@@ -176,6 +176,15 @@ public partial class Button : GuiControl, IButton
 
 	public Coroutine WaitForAnimTrigger(string triggerName) { return PowerQuest.Get.StartCoroutine(CoroutineWaitForAnimTrigger(triggerName)); }
 	
+	public override bool Visible { set 
+	{
+		// Override visible property to update hotspot when made visible
+		bool old = m_visible; 
+		base.Visible = value;
+		if ( old != m_visible && m_visible && (m_sizeSetting == eSizeSetting.FitText || m_sizeSetting == eSizeSetting.Image) )
+			UpdateHotspot();
+	}}
+
 	#endregion
 	#region Functions: Public (Non interface)
 
@@ -185,12 +194,16 @@ public partial class Button : GuiControl, IButton
 
 	public void UpdateHotspot()
 	{
+		// Don't update hotspot if inactive
+		if ( gameObject.activeInHierarchy == false )	
+			return;
+
 		if ( m_boxCollider2D == null )
 		{
 			m_boxCollider2D = GetComponent<BoxCollider2D>();
 			if ( m_boxCollider2D == null )
 			{
-				Debug.LogWarning("Buttons need a BoxCollider2D to Auto-Scale their Hotspot");
+				Debug.LogWarning("Buttons need a BoxCollider2D to Auto-Scale their Hotspot. Change Button Type to Custom if using other collider types.");
 				m_sizeSetting = eSizeSetting.Custom;
 			}
 		}
@@ -307,15 +320,11 @@ public partial class Button : GuiControl, IButton
 		SetState(Clickable ? eState.Default : eState.Off);
 	}
 
-	protected override void Start()
-	{		
-		base.Start();
-
-		InitComponentReferences();
-
-		StartStateAnimation();
-
-		if ( m_sizeSetting == eSizeSetting.FitText )
+	void OnEnable()
+	{ 
+		// May have changed hotspot or text while disabled, so update the hotspot here		
+				
+		if ( m_sizeSetting == eSizeSetting.FitText && m_cachedText != Text )
 		{
 			// Update stretched image first			
 			if ( m_stretchComponent == null )
@@ -324,10 +333,18 @@ public partial class Button : GuiControl, IButton
 				m_stretchComponent.UpdateSize();
 			m_cachedText = Text;
 		}
-		if ( m_sizeSetting == eSizeSetting.FitText || m_sizeSetting == eSizeSetting.Image )
-		{
+
+		if ( m_visible && ( m_sizeSetting == eSizeSetting.FitText || m_sizeSetting == eSizeSetting.Image) )
 			UpdateHotspot();
-		}
+	}
+
+	protected override void Start()
+	{		
+		base.Start();
+
+		InitComponentReferences();
+
+		StartStateAnimation();
 	}	
 
 	void Update()
@@ -410,7 +427,7 @@ public partial class Button : GuiControl, IButton
 			UpdateHotspot();
 			m_cachedText = Text;
 		}
-	}	
+	}
 
 	#endregion
 	#region Funcs: Private Internal
@@ -610,21 +627,6 @@ public partial class Button : GuiControl, IButton
 	{
 		return m_overrideAnimPlaying && m_spriteAnimator.Playing;
 	}
-	/* NB: This was never used
-	void OnSetVisible()
-	{
-		if ( gameObject.activeSelf == false && Visible)
-			gameObject.SetActive(true);
-		
-		if ( GetSprite() )
-			GetSprite().GetComponent<Renderer>().enabled = Visible;
-
-		Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
-		foreach( Renderer renderer in renderers )
-		{   
-			renderer.GetComponent<Renderer>().enabled = Visible;
-		}
-	}*/
 
 	// Handles setting up defaults incase items have been added or removed since last loading a save file
 	/*[System.Runtime.Serialization.OnDeserializing]
@@ -647,6 +649,18 @@ public partial class Button : GuiControl, IButton
 	void AnimSound(string sound)
 	{
 		SystemAudio.Play(sound);	    
+	}
+	
+	void AnimSoundStop(Object obj)
+	{
+		if ( obj == null || (obj as GameObject) == null )
+			return;
+		SystemAudio.Stop((obj as GameObject).name,0.1f);
+	}
+
+	void AnimSoundStop(string sound)
+	{
+		SystemAudio.Stop(sound,0.1f);	
 	}
 		
 	// Listen for QuestAnimTrigger tags so can pass them up

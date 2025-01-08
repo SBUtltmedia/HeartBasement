@@ -10,12 +10,22 @@ namespace PowerTools.Quest
 
 [ExecuteInEditMode]
 /// The PowerQuest Audio System. Provides convenient, 2d specific audio functionality, using audio cues.
-/**
- * Functions are accessable from Quest Scripts using 'Audio.'
- * From other scripts, use the static functions from 'SystemAudio.'
+/** 
+ * Audio Functions are accessable from QuestScripts using `Audio.`, or from other scripts from using the static class `SystemAudio.`
  * 
- * Features:
- * - This is an audio cue based system. You create an AudioCue in your project, set up which clips it plays and data like volume, pitch, etc. Then you play that "Cue". 
+ * __Examples:__
+ *	~~~
+ *		Audio.Play("Explosion");
+ *		Audio.PlayMusic("WikkidBeats");
+ *		Audio.Play("BeachAmbience").FadeIn(3.0f); // start a looping sound and fade it in
+ *		....
+ *		Audio.PlayMusic("ChillBeats", 2.0f); // crossfade to new track
+ *		Audio.Stop("BeachAmbience",0.5f); // stop the loopsing sound, fading over 0.5 sec.
+ *	~~~
+ * 
+ * __Features:__
+ * - This is an audio cue based system. You create an AudioCue in your project, set up which clips it plays and data like volume, pitch, etc. Then you play that "Cue".  
+ * - See the [Audio manual](@ref Audio) for info on Sound Cues
  * - Cues can be added to SystemAudio so that you can play them by name. Then it's as simple as calling `Audio.Play("gunshot");`
  * - Cues have a lot of controls for randomisation so common sounds don't get repetive: set min/max pitch, a list of clips to randomly choose from, and even string multiple cues together with random delays
  * - Type based volume control: Flag cues with a type (eg SoundEffect, Music, Dialog), and then set those volumes seperately
@@ -125,59 +135,12 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 	#endregion
 	#region Public Static Functions
 	
+	/// The AudioHandle for the currently playing Music track \sa PlayMusic \sa StopMusic
 	public static AudioHandle MusicHandle => SystemAudio.Get.GetActiveMusicHandle();
 
 	/// A multiplier on the falloff distance for volume/panning. Useful when you want to bring it in close, or expand it outwards temporarily
 	public static float FalloffDistanceMultiplier { get{ return m_instance.m_falloffDistanceMultiplier; } set{ m_instance.m_falloffDistanceMultiplier = value; } }
 
-	/// Sets the volume (from 0.0 to 1.0) for audio of a particular type (eg: Sound effects, Music, Dialog) 
-	public static void SetVolume( AudioCue.eAudioType type, float volume )
-	{		
-		SystemAudio self = SystemAudio.Get;
-		if ( self == null )
-		{
-			Debug.LogWarning("Failed to set AudioSystem volume. It hasn't been initialised");
-			return;
-		}
-
-		float oldVolume = 1.0f;
-		bool exists = false;
-
-		if ( volume <= 0 ) // If volume goes to zero we lose the scale information. So make it -1 instead... mathyhack!
-			volume = -1;
-
-		for ( int i = 0; i < self.m_volumeByType.Count; ++i )
-		{
-			if ( self.m_volumeByType[i].m_type == type )
-			{
-				oldVolume = self.m_volumeByType[i].m_volume;
-				self.m_volumeByType[i].m_volume = volume;
-				exists = true;
-				break;
-			}
-		}
-
-		if ( exists == false )
-		{
-			// Doesn't exist yet, so add
-			self.m_volumeByType.Add( new AudioTypeVolume() { m_type = type, m_volume = volume } );
-		}
-
-		float volChange = volume / oldVolume;
-		// Update active audio volumes
-		for ( int i = 0; i < self.m_activeAudio.Count; ++i )
-		{
-			ClipInfo info = self.m_activeAudio[i];
-			if ( info != null && (info.type & (int)type) != 0)
-			{					
-				if ( info.handle.source != null )
-					info.handle.source.volume *= volChange;	
-				info.defaultVolume *= volChange;
-				info.targetVolume *= volChange; 
-			}
-		}
-
-	}
 
 	/// Retrieves the volume for audio of a particular type (eg: Sound effects, Music, Dialog) 
 	public static float GetVolume( AudioCue.eAudioType type )
@@ -193,51 +156,8 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 		return 1.0f;
 	}
 
-	/// Gets the base volume of a particular sound effect (usually use the AudioHandle for this)
-	public float GetVolume( AudioHandle source )
-	{
-		ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == source);
-		if ( clipInfo != null )
-			return clipInfo.defaultVolume;
-		return 0;
-	}
-
-	/// Sets the base volume of a particular sound effect (usually use the AudioHandle for this)
-	public void SetVolume( AudioHandle source, float volume )
-	{
-		ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == source);
-		if ( clipInfo != null && clipInfo.stopAfterFade == false ) // NB: once stop after fade is called, don't allow volume changes through this function			
-		{
-			clipInfo.defaultVolume = volume;
-			clipInfo.targetVolume = volume;
-			// Set the volume immediately (Added 04/03/2024)- otherwise waits for next game update, which could be too late if changing rooms
-			UpdateActiveAudioClip(clipInfo);
-		}
-	}
-
-	
-	/// Gets the base pan of a particular sound effect (usually use the AudioHandle for this)
-	public float GetPan( AudioHandle source )
-	{
-		ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == source);
-		if ( clipInfo != null )
-			return clipInfo.defaultPan;
-		return 0;
-	}
-
-	/// Sets the base pan of a particular sound effect (usually use the AudioHandle for this)
-	public void SetPan( AudioHandle source, float pan )
-	{
-		ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == source);
-		if ( clipInfo != null )
-		{
-			clipInfo.defaultPan = pan;
-			source.source.panStereo = pan;
-		}
-	}
-
 	/// Retrieves a sound cue by name
-	static public AudioCue GetCue(string cueName)
+	public static AudioCue GetCue(string cueName)
 	{
 		return m_instance.m_audioCues.Find(item=>string.Equals(cueName, item.name, System.StringComparison.OrdinalIgnoreCase) );
 	}
@@ -247,10 +167,12 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 
 	/// Play a cue by name. This is the main way to play sounds. If emmitter is set, the sound will falloff/pan as it goes off camera. 
 	/**
-	 * Eg: `Audio.Play("DoorKnock");`
-	 * Eg: `Audio.Play("Gunshot", C.Gunman.Instance);`
+	 Eg:
+			Audio.Play("DoorKnock");
+			Audio.Play("Gunshot", C.Gunman.Instance);
+			Audio.Play("SeasideAmbience").FadeIn(2.0f);
 	 */
-	static public AudioHandle Play( string cueName, Transform emmitter = null )
+	public static AudioHandle Play( string cueName, Transform emmitter = null )
 	{
 		SystemAudio self = SystemAudio.Get;
 		AudioCue cue = self.m_audioCues.Find(item=>item != null && string.Equals(cueName, item.name, System.StringComparison.OrdinalIgnoreCase));
@@ -723,7 +645,7 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 			handle.Stop(overTime, afterDelay);			
 	}
 
-	// Called from handle to cleanup sounds when they're stopped. Returns true if stopped immediately so handle can remove its source (since they're pooled)
+	// Called from handle to cleanup sounds when they're stopped. Returns true if stopped immediately so handle can remove its source (since they're pooled) @private
 	public bool StopHandleInternal( AudioHandle handle, float overTime = 0, float afterDelay = 0)
 	{				
 		if ( handle == null || handle.source == null )
@@ -916,6 +838,102 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 	#endregion
 	#region Public, advanced Functions
 	
+	
+
+	/// @cond IGNORE
+
+	/// Gets the base volume of a particular sound effect (usually use the AudioHandle for this) \noop
+	public float GetVolume( AudioHandle source )
+	{
+		ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == source);
+		if ( clipInfo != null )
+			return clipInfo.defaultVolume;
+		return 0;
+	}
+
+	/// Sets the base volume of a particular sound effect (usually use the AudioHandle for this)
+	public void SetVolume( AudioHandle source, float volume )
+	{
+		ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == source);
+		if ( clipInfo != null && clipInfo.stopAfterFade == false ) // NB: once stop after fade is called, don't allow volume changes through this function			
+		{
+			clipInfo.defaultVolume = volume;
+			clipInfo.targetVolume = volume;
+			// Set the volume immediately (Added 04/03/2024)- otherwise waits for next game update, which could be too late if changing rooms
+			UpdateActiveAudioClip(clipInfo);
+		}
+	}
+
+	
+	/// Gets the base pan of a particular sound effect (usually use the AudioHandle for this) \private
+	public float GetPan( AudioHandle source )
+	{
+		ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == source);
+		if ( clipInfo != null )
+			return clipInfo.defaultPan;
+		return 0;
+	}
+
+	/// Sets the base pan of a particular sound effect (usually use the AudioHandle for this) \private
+	public void SetPan( AudioHandle source, float pan )
+	{
+		ClipInfo clipInfo = m_instance.m_activeAudio.Find(item=>item.handle == source);
+		if ( clipInfo != null )
+		{
+			clipInfo.defaultPan = pan;
+			source.source.panStereo = pan;
+		}
+	}
+	
+	/// Sets the volume (from 0.0 to 1.0) for audio of a particular type (eg: Sound effects, Music, Dialog). 
+	public void SetVolume( AudioCue.eAudioType type, float volume )
+	{		
+		SystemAudio self = SystemAudio.Get;
+		if ( self == null )
+		{
+			Debug.LogWarning("Failed to set AudioSystem volume. It hasn't been initialised");
+			return;
+		}
+
+		float oldVolume = 1.0f;
+		bool exists = false;
+
+		if ( volume <= 0 ) // If volume goes to zero we lose the scale information. So make it -1 instead... mathyhack!
+			volume = -1;
+
+		for ( int i = 0; i < self.m_volumeByType.Count; ++i )
+		{
+			if ( self.m_volumeByType[i].m_type == type )
+			{
+				oldVolume = self.m_volumeByType[i].m_volume;
+				self.m_volumeByType[i].m_volume = volume;
+				exists = true;
+				break;
+			}
+		}
+
+		if ( exists == false )
+		{
+			// Doesn't exist yet, so add
+			self.m_volumeByType.Add( new AudioTypeVolume() { m_type = type, m_volume = volume } );
+		}
+
+		float volChange = volume / oldVolume;
+		// Update active audio volumes
+		for ( int i = 0; i < self.m_activeAudio.Count; ++i )
+		{
+			ClipInfo info = self.m_activeAudio[i];
+			if ( info != null && (info.type & (int)type) != 0)
+			{					
+				if ( info.handle.source != null )
+					info.handle.source.volume *= volChange;	
+				info.defaultVolume *= volChange;
+				info.targetVolume *= volChange; 
+			}
+		}
+
+	}
+
 	public AudioMixerGroup NarratorMixerGroup => m_narratorMixerGroup;
 
 	public bool GetAnyMusicPlaying() 
@@ -1615,6 +1633,9 @@ public partial class SystemAudio : SingletonAuto<SystemAudio>
 		}
 	}
 	
+	
+	// @endcond
+
 	// From linear volume (0 to 1) to DB (-144 to 0);
 	public static float ToDecibel(float linear)
 	{
@@ -1680,7 +1701,7 @@ public class AudioHandle
 	}
 
 
-	/// Makes the clip start after the passed in time (if called immediately after play)
+	/// Makes the clip start after the passed in time (if called immediately after play) eg. `Audio.Play("GunshotEcho").AfterDelay(1.0f);
 	public void AfterDelay(float time)
 	{
 		if ( m_source == null )
@@ -1693,7 +1714,7 @@ public class AudioHandle
 		m_source.PlayDelayed(time);
 	}
 
-	/// Fades in the sound from zero, call directly after playing the sound to fade it in. eg `Audio.Play("FireCrackling").FadeIn(1);`
+	/// Fades in the sound from zero, call directly after playing the sound to fade it in. eg `Audio.Play("MoodyAmbience").FadeIn(1);`
 	public AudioHandle FadeIn(float overTime)
 	{
 		SystemAudio.Get.StartFadeIn(this,overTime);
@@ -1713,11 +1734,11 @@ public class AudioHandle
 }
 #endregion
 
-
+/// @cond IGNORE
 // Attribute used to mark string fields that should be added to the text system to support localization. Eg: [QuestLocalize, SerializeField] string m_description;
 public class QuestAudioCueName : PropertyAttribute
 {
 	public QuestAudioCueName(){}
 }
-
+/// @endcond
 }

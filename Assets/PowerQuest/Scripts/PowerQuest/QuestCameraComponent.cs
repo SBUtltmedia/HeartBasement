@@ -17,8 +17,9 @@ public partial class QuestCameraComponent : MonoBehaviour
 		public Vector2 position = Vector2.zero;		
 		public Vector2 targetPosition = Vector2.zero; // Position without any smoothing
 
-		// The current amount we're zoomed from the default set in PowerQuest
+		// The current amount we're zoomed from the default set in PowerQuest		
 		public float zoom = 1;
+		public bool first = false;
 		
 		public bool followPlayer = true;
 		public Vector2 playerDragged = Vector2.zero;
@@ -58,18 +59,21 @@ public partial class QuestCameraComponent : MonoBehaviour
 	GameObject m_pixelCam = null;
 	
 	// Working state data for the camera, and the camera it was transitioning from
-	StateData m_state = new StateData();
-	StateData m_statePrev = new StateData();
+	StateData m_stateTo = new StateData();
+	StateData m_stateFrom = new StateData();
 	
 	// Working state data, without the zoom. This is done because changing zoom also changes position, since you can get closer to screen edge
-	StateData m_stateParallax = new StateData();
-	StateData m_stateParallaxPrev = new StateData();	
+	StateData m_stateParallaxTo = new StateData();
+	StateData m_stateParallaxFrom = new StateData();	
 			
 	eFace m_playerFaceLast = eFace.Down;
 
 	// Hack to ensure can check if snapped last update
 	bool m_snappedSinceUpdate = true;
 	bool m_snappedLastUpdate = true;
+
+	// Cached zoom
+	float m_zoom = 1;
 
 	// Cached positions for parallax
 	Vector2 m_parallaxPos = Vector2.zero;
@@ -91,8 +95,8 @@ public partial class QuestCameraComponent : MonoBehaviour
 
 	public void Snap()
 	{		
-		ResetPlayerDragPos(m_stateParallax);
-		ResetPlayerDragPos(m_state);
+		ResetPlayerDragPos(m_stateParallaxTo);
+		ResetPlayerDragPos(m_stateTo);
 		UpdatePos(true);
 	}
 
@@ -100,8 +104,19 @@ public partial class QuestCameraComponent : MonoBehaviour
 	
 	public void OnOverridePosition(float transitionTime)
 	{	
+		// Check if nothing's changed, and if so, do nothing.
+		//   Note: Changing time won't do anything on its own unless set to snap.
+		//   It' s abit weird since you can set position lerp and zoom lerp independently but they share a timer. So really it expects both to be set at same time... but its close enough.
+		bool changed = transitionTime <= 0;
+		changed |= m_data.GetHasPositionOverride() && (m_stateTo.position != m_data.GetPositionOverride());
+		changed |= m_stateTo.zoom != m_data.GetZoom();
+		changed |= m_stateTo.followPlayer == m_data.GetHasPositionOverride();
+		if ( changed == false )
+			return;
+
 		m_lerpTime = transitionTime;
 		m_lerpTimer = transitionTime;
+
 		m_onLerpChange = true;
 		
 		// Snap if there's no transition
@@ -347,7 +362,6 @@ public partial class QuestCameraComponent : MonoBehaviour
 			m_parallaxOffsetLimits = CalcOffsetLimits(1);
 		} 
 	}
-
 	
 	void UpdatePos(bool snap)
 	{
@@ -359,64 +373,61 @@ public partial class QuestCameraComponent : MonoBehaviour
 
 		if ( m_data.Enabled == false || Time.deltaTime == 0 )
 			return;
-
+			
+		float zoom = m_zoom;
 		Vector2 position = m_data.GetPosition();
-		Vector2 oldPosition = position;
-		Vector2 targetPosition = position;				
-		Vector2 parallaxTargetPos = position;
-		float zoomMultiplier = 1;
-		float orthoSize = PowerQuest.Get.VerticalResolution*0.5f;
-		if ( snap )
-			m_velocity = Vector2.zero;
-		else 
-			m_velocity = (position-oldPosition) / Time.deltaTime;
-		
+		Vector2 oldPosition = position; // used for calculating velocity
+				
 		m_targetPositionChanged = false; // this gets set true again 
-
+				
 		if ( m_onLerpChange )
 		{
+			//
+			// Changed position and/or zoom amount. Set up the "from" and "to" state ready for lerping
+			//
 			m_onLerpChange = false;
 
 			// Copy camera current state to 'prev' states
-			QuestUtils.CopyFields(m_stateParallaxPrev,m_stateParallax);
-			QuestUtils.CopyFields(m_statePrev,m_state);
+			float prevZoom = m_stateFrom.zoom;
+			QuestUtils.CopyFields(m_stateParallaxFrom,m_stateParallaxTo);
+			QuestUtils.CopyFields(m_stateFrom,m_stateTo);
 			
-			m_state.zoom = m_data.GetHasZoom() ? m_data.GetZoom() : 1;
+			bool followPlayer = !m_data.GetHasPositionOverride();
+					
+			// Set previous state position/zoom to actual current position/zoom
+			m_stateFrom.position = position; 
+			m_stateFrom.targetPosition = position;
+			m_stateFrom.zoom = zoom;
+			
+			m_stateParallaxFrom.position = m_parallaxPos;
+			m_stateParallaxFrom.targetPosition = m_parallaxPos;
 
-			// Set up new state data			
-			if ( m_data.GetHasPositionOverride() )
+			// Set new (target) state's data
+			m_stateTo.position = ClampPositionToRoomBounds(m_stateTo.zoom, m_data.GetPositionOverride());
+			m_stateTo.targetPosition = m_stateTo.position;
+			m_stateTo.zoom = m_data.GetZoom();
+			m_stateTo.followPlayer = followPlayer;
+
+			m_stateParallaxTo.position = ClampPositionToRoomBounds(1, m_data.GetPositionOverride());	
+			m_stateParallaxTo.targetPosition = m_stateParallaxTo.position;		
+			m_stateParallaxTo.followPlayer = followPlayer;
+
+			// Stops camera smoothing to its first position.
+			m_stateTo.first = true;
+			m_stateParallaxTo.first = true;	
+
+			m_targetPositionChanged = true;		
+			
+			if ( followPlayer ) 
 			{
-				if ( m_statePrev.followPlayer == false )
-				{
-					// Chaining position overrides, so use the current camera position as the previous target pos
-					m_statePrev.position = position;
-					m_statePrev.targetPosition = position;
-					m_stateParallaxPrev.position = position;
-					m_stateParallaxPrev.targetPosition = position;
-				}
-
-				m_stateParallax.followPlayer = false;
-				m_stateParallax.position = ClampPositionToRoomBounds(1, m_data.GetPositionOverride());
-				m_stateParallax.targetPosition = m_stateParallax.position;
-				m_state.followPlayer = false;
-				m_state.position = ClampPositionToRoomBounds(m_state.zoom, m_data.GetPositionOverride());;
-				m_state.targetPosition = m_state.position;
-				
-				m_targetPositionChanged = true;
-			}
-			else 
-			{
-				m_stateParallax.followPlayer = true;
-				m_state.followPlayer = true;
-
-				// Reset dragpos when tranitioning back
-				ResetPlayerDragPos(m_stateParallax);
-				ResetPlayerDragPos(m_state);
-			}
+				// Reset dragpos when tranitioning back				
+				ResetPlayerDragPos(m_stateParallaxTo); // todo: dragpos calc includes zoom, check that's ok?
+				ResetPlayerDragPos(m_stateTo);
+			}		
 			
 			// Update
-			m_posLerpActive = m_stateParallax.followPlayer != m_stateParallaxPrev.followPlayer || (m_stateParallax.followPlayer == false && m_stateParallax.position != m_stateParallaxPrev.position);
-			m_zoomLerpActive = m_state.zoom != m_statePrev.zoom;
+			m_posLerpActive = m_stateParallaxTo.followPlayer != m_stateParallaxFrom.followPlayer || (m_stateParallaxTo.followPlayer == false && m_stateParallaxTo.position != m_stateParallaxFrom.position);
+			m_zoomLerpActive = m_stateTo.zoom != m_stateFrom.zoom;
 		}
 		
 		// Update lerp ratio
@@ -440,34 +451,39 @@ public partial class QuestCameraComponent : MonoBehaviour
 			}
 		}		
 		
-		// Update non-zoomed state
-		UpdateCameraState(m_stateParallax,snap,false);
+		// Update non-zoomed state (for parralaz)
+		UpdateCameraState(m_stateParallaxTo,snap,false);
 		if ( m_posLerpActive )			
-			UpdateCameraState(m_stateParallaxPrev,snap,false);
+			UpdateCameraState(m_stateParallaxFrom,snap,false);
 
 		// Update zoomed state
-		UpdateCameraState(m_state,snap,true);
+		UpdateCameraState(m_stateTo,snap,true);
 		if ( m_posLerpActive || m_zoomLerpActive )
-			UpdateCameraState(m_statePrev,snap,true);
+			UpdateCameraState(m_stateFrom,snap,true);
 
 		// Lerp for transitions
-		targetPosition = Vector2.Lerp( m_statePrev.targetPosition, m_state.targetPosition, ratio);
+		Vector2 targetPosition = Vector2.Lerp( m_stateFrom.targetPosition, m_stateTo.targetPosition, ratio);
 
 		// Change to bounds, so can lerp linearly with zoom		
-		RectCentered boundsFrom =  new RectCentered(m_statePrev.position.x,m_statePrev.position.y,GetHalfCamSize(m_statePrev.zoom).x,GetHalfCamSize(m_statePrev.zoom).y);		
-		RectCentered boundsTo =    new RectCentered(m_state.position.x,m_state.position.y,GetHalfCamSize(m_state.zoom).x,GetHalfCamSize(m_state.zoom).y);		
+		RectCentered boundsFrom =  new RectCentered(m_stateFrom.position.x,m_stateFrom.position.y,GetHalfCamSize(m_stateFrom.zoom).x,GetHalfCamSize(m_stateFrom.zoom).y);		
+		RectCentered boundsTo =    new RectCentered(m_stateTo.position.x,m_stateTo.position.y,GetHalfCamSize(m_stateTo.zoom).x,GetHalfCamSize(m_stateTo.zoom).y);		
 		RectCentered boundsFinal = new RectCentered( Vector2.Lerp(boundsFrom.Min,boundsTo.Min,ratio), Vector2.Lerp(boundsFrom.Max,boundsTo.Max,ratio) );		
 		position = boundsFinal.Center;
-		orthoSize = boundsFinal.Height;
-		zoomMultiplier = PowerQuest.Get.VerticalResolution * 0.5f/orthoSize;
-		position = ClampPositionToRoomBounds(zoomMultiplier,position);
+		float orthoSize = boundsFinal.Height;
+		zoom = PowerQuest.Get.VerticalResolution * 0.5f/orthoSize;
+		position = ClampPositionToRoomBounds(zoom,position);
 
-		m_parallaxPos = Vector2.Lerp( m_stateParallaxPrev.position, m_stateParallax.position, ratio);
-		m_parallaxTargetPos = m_stateParallax.targetPosition;//Vector2.Lerp( m_stateParallaxPrev.targetPosition, m_stateParallax.targetPosition, ratio);
+		// Update velocity- used for prop parralax
+		if ( snap )
+			m_velocity = Vector2.zero;
+		else 
+			m_velocity = (position-oldPosition) / Time.deltaTime;
+
+		m_parallaxPos = Vector2.Lerp( m_stateParallaxFrom.position, m_stateParallaxTo.position, ratio);
+		m_parallaxTargetPos = m_stateParallaxTo.targetPosition;
 		if ( LockParallaxAlignment == false )
 			m_parallaxOffsetLimits = CalcOffsetLimits(1);
 		
-
 		//
 		// Screenshake
 		//
@@ -475,7 +491,7 @@ public partial class QuestCameraComponent : MonoBehaviour
 		{	
 			if ( m_shakeIntensity > 0 )
 			{
-				m_screenShakeOffset = (((new Vector2( Mathf.PerlinNoise(m_shakeSpeed * Time.time, 0), Mathf.PerlinNoise(1, m_shakeSpeed * Time.time) )) * 2) - Vector2.one) * m_shakeIntensity * m_shakeIntensityMult / zoomMultiplier;			
+				m_screenShakeOffset = (((new Vector2( Mathf.PerlinNoise(m_shakeSpeed * Time.time, 0), Mathf.PerlinNoise(1, m_shakeSpeed * Time.time) )) * 2) - Vector2.one) * m_shakeIntensity * m_shakeIntensityMult / zoom;			
 				
 				if ( m_shakeDurationTimer > 0 )
 				{
@@ -502,12 +518,18 @@ public partial class QuestCameraComponent : MonoBehaviour
 		}
 
 		//
-		// Apply position
-		//	
-		m_data.SetPosition(position); // Store in data
+		// Store new pos/zoom in data
+		//
+		m_data.SetPosition(position);
 		m_data.SetTargetPosition(targetPosition);
-		transform.position = (m_screenShakeOffset + position).WithZ(transform.position.z); 		
+		m_zoom = zoom;
+
+		//
+		// Apply position to camera
+		//	
+		transform.position = (m_screenShakeOffset + position).WithZ(transform.position.z); 				
 		m_camera.orthographicSize = orthoSize;
+		
 	}
 	
 	
@@ -524,7 +546,7 @@ public partial class QuestCameraComponent : MonoBehaviour
 			s.targetPosition = s.position;
 			targetPositionNoPixelSnap = GetCameraFollowTargetPosition(s,true);
 			
-			if ( s == m_stateParallax ) // only do this for the parallax camera
+			if ( allowZoom ) // parralax camera ignores zoom
 			{
 				// Update whether targetposition changed. this ignores snapping, otherwise gives wrong results when checking if it changed last update.
 				m_targetPositionChanged = ( targetPositionNoPixelSnap != m_cachedTargetNoPixelSnap );
@@ -535,7 +557,7 @@ public partial class QuestCameraComponent : MonoBehaviour
 		//
 		// Smooth camera movement
 		//
-		if ( snap == false && s.followPlayer ) // Only smoothing when following the player
+		if ( snap == false && s.followPlayer && s.first == false) // Only smoothing when following the player, after first update
 		{
 			Vector2 diff = s.position - oldPosition;
 			float dist = diff.magnitude;
@@ -543,6 +565,7 @@ public partial class QuestCameraComponent : MonoBehaviour
 			if ( dist > smoothDist ) // don't overshoot
 				s.position = oldPosition + (smoothDist*diff.normalized);
 		}
+		s.first=false;
 		
 	}
 

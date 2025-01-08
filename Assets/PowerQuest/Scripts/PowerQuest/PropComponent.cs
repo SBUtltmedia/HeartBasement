@@ -238,7 +238,7 @@ public partial class PropComponent : MonoBehaviour
 		// Check if it has a collider, and if not, ensure it's non-clickable
 		m_hasCollider = GetComponent<Collider2D>() != null;
 		if ( m_data != null && m_hasCollider == false && m_data.Clickable )
- 			m_data.Clickable=false; // Props shouldn't be clickable if have no collider
+			m_data.Clickable=false; // Props shouldn't be clickable if have no collider
 
 		// Get Room pos
 		//RoomComponent room = GetComponentInParent<RoomComponent>();
@@ -304,16 +304,17 @@ public partial class PropComponent : MonoBehaviour
 					else 				
 					{
 						 // Move an offset towards the target snapped offset smoothly.
-						m_snapOffset.x = Mathf.MoveTowards(m_snapOffset.x, snapOffsetTarget.x, Mathf.Max(1.0f,Mathf.Abs(camera.Velocity.x*1.8f)) * Time.deltaTime );
-						m_snapOffset.y = Mathf.MoveTowards(m_snapOffset.y, snapOffsetTarget.y, Mathf.Max(1.0f,Mathf.Abs(camera.Velocity.y*1.8f)) * Time.deltaTime );
+						m_snapOffset.x = Mathf.MoveTowards(m_snapOffset.x, snapOffsetTarget.x, Mathf.Max(1.0f,Mathf.Abs(camera.Velocity.x*1.8f*m_parallaxDepth)) * Time.deltaTime );
+						m_snapOffset.y = Mathf.MoveTowards(m_snapOffset.y, snapOffsetTarget.y, Mathf.Max(1.0f,Mathf.Abs(camera.Velocity.y*1.8f*m_parallaxDepth)) * Time.deltaTime );
 					}
 				}
 				else
 				{
-					// While camera target's moving, lerp backwards slowly to zero offeset slowly to reduce cases of overshooting then settling backwards
-					m_snapOffset.x = Mathf.MoveTowards(m_snapOffset.x, -Mathf.Sign(camera.Velocity.x), Mathf.Abs(camera.Velocity.x) * Time.deltaTime * 2.5f );
-					m_snapOffset.y = Mathf.MoveTowards(m_snapOffset.y, -Mathf.Sign(camera.Velocity.y), Mathf.Abs(camera.Velocity.y) * Time.deltaTime * 2.5f );
+					// While camera target's moving, lerp to zero offeset slowly to reduce cases of overshooting then settling backwards
+					m_snapOffset.x = Mathf.MoveTowards(m_snapOffset.x, 0, Mathf.Abs(camera.Velocity.x*m_parallaxDepth) * Time.deltaTime * 1.0f);
+					m_snapOffset.y = Mathf.MoveTowards(m_snapOffset.y, 0, Mathf.Abs(camera.Velocity.y*m_parallaxDepth) * Time.deltaTime * 1.0f);
 				}
+
 			}
 			else 
 			{
@@ -418,6 +419,18 @@ public partial class PropComponent : MonoBehaviour
 		SystemAudio.Play(sound);	    
 	}
 	
+	void AnimSoundStop(Object obj)
+	{
+		if ( obj == null || (obj as GameObject) == null )
+			return;
+		SystemAudio.Stop((obj as GameObject).name,0.1f);
+	}
+
+	void AnimSoundStop(string sound)
+	{
+		SystemAudio.Stop(sound,0.1f);	
+	}
+	
 	// Listen for QuestAnimTrigger tags so can pass them up to Gui
 	QuestAnimationTriggers m_animTriggerComponent = null;
 	void _Anim(string function)
@@ -465,7 +478,7 @@ public partial class Prop : IQuestClickable, IProp, IQuestScriptable, IQuestSave
 	[Tooltip("Move the transform around to change this (unlike characters!)")]
 	[ReadOnly][SerializeField] Vector2 m_position = Vector2.zero; // This is taken from the instance position in the scene first time it's
 	[SerializeField] float m_baseline = 0;	
-    [SerializeField, Tooltip("If true, the baseline will be in world position, instead of local to the object. So y position of the sortable is ignored")] bool m_baselineFixed = false;
+	[SerializeField, Tooltip("If true, the baseline will be in world position, instead of local to the object. So y position of the sortable is ignored")] bool m_baselineFixed = false;
 	[SerializeField] Vector2 m_walkToPoint = Vector2.zero;
 	[SerializeField] Vector2 m_lookAtPoint = Vector2.zero;	
 	[ReadOnly,SerializeField] string m_scriptName = "PropNew";
@@ -532,6 +545,7 @@ public partial class Prop : IQuestClickable, IProp, IQuestScriptable, IQuestSave
 		} 
 	} }
 	public void SetPosition(float x, float y) { Position = new Vector2(x,y); }
+	public void SetPosition(Vector2 pos) { Position = pos; }
 	public float Baseline { get{ return m_baseline;} set{m_baseline = value; if ( m_instance != null ) m_instance.UpdateBaseline(); } }
 	public bool BaselineFixed { get { return m_baselineFixed; } set { m_baselineFixed=value; if ( m_instance != null ) m_instance.UpdateBaseline(); } }
 	public int SortOrder => -Mathf.RoundToInt(((m_baselineFixed ? 0.0f: Position.y) + Baseline)*10.0f);

@@ -1059,6 +1059,100 @@ public class ShuffledIndex
 	}*/
 }
 
+// Quick hacked up class for shuffled list of particular items. Use Put to add items and then Draw.
+public class BagOf<T>
+{		
+	List<T> m_items = new List<T>();
+	List<int> m_weights = new List<int>();
+	
+	public float m_totalWeight = 0;	
+	float m_maxWeightInv = 0;
+	ShuffledIndex m_shuffledIndex = null;
+
+	public int Length { get{ return m_weights != null ? m_weights.Count : 0; } }
+	public int Count { get{ return m_weights != null ? m_weights.Count: 0; } }
+	public void Clear()
+	{
+		m_items.Clear();
+		m_weights.Clear();
+		
+		m_totalWeight = 0;	
+		m_maxWeightInv = 0;
+		m_shuffledIndex = null;
+	}
+
+	public void Put(T item, int count = 1)
+	{
+		m_items.Add(item);
+		m_weights.Add(count);
+
+		// Reset so will update weights
+		m_totalWeight = 0;
+		m_maxWeightInv = 0;
+	}
+
+	public T Draw()
+	{
+		if ( m_items.Count <= 0 )
+			return default(T);
+
+		if ( m_totalWeight <= 0 )
+			UpdateWeights();
+
+		return m_items[DrawIndex()];
+	}
+
+	float GetTotalWeight() { return m_totalWeight; }
+	float GetMaxWeight() { return ( m_maxWeightInv <= 0 ) ? 1.0f : 1.0f/m_maxWeightInv; }
+	
+	
+	void UpdateWeights()
+	{
+		m_shuffledIndex = new ShuffledIndex(m_items.Count);
+
+		m_totalWeight = 0;
+		m_maxWeightInv = 0;
+
+		float maxWeight = 0;
+		foreach ( float weight in m_weights )
+		{
+			m_totalWeight += weight;
+			if ( weight > maxWeight )
+				maxWeight = weight;
+		}
+
+		if ( maxWeight > 0 )
+			m_maxWeightInv = 1.0f/maxWeight;
+
+		if ( m_totalWeight <= 0 )
+		{
+			m_totalWeight = 1;
+		}	
+	}
+	
+	int DrawIndex()
+	{
+		if ( m_maxWeightInv <= 0 )
+			UpdateWeights();
+
+		if ( m_maxWeightInv <= 0 )
+			return -1;
+
+		int result = -1;
+		while (result == -1)
+		{
+			int newIndex = m_shuffledIndex.Next();
+			// Break if item found that passes "chance" test. Eg: if weight = 5, and max = 10, have 50% chance of selecting.
+			if ( m_weights[newIndex] > 0.0f && UnityEngine.Random.value <= m_weights[newIndex] * m_maxWeightInv )
+			{
+				result = newIndex;
+			}
+		}
+		return result;
+	}
+
+}
+
 // Creates a shuffled list of indexes that have weights
 public class WeightedShuffledIndex
 {

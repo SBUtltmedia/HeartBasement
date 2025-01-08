@@ -17,6 +17,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	static readonly System.Type TYPE_COMPILERGENERATED = typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute);
 	static readonly string FUNC_UPDATE = "Update";
 	static readonly string FUNC_UPDATE_NOPAUSE = "UpdateNoPause";
+	public static readonly string STR_NARR = "Narr";
 	public static readonly string SPRITE_NUM_POSTFIX_0 = "_0";
 
 	private static readonly int MaxColliderInteractions = 256;
@@ -334,7 +335,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	// Wait for time (or default 0.5 sec). Pressing button will skip the waiting
 	public Coroutine WaitSkip(float time = 0.5f)	{	return StartQuestCoroutine(CoroutineWaitForTime(time, true)); }
 	// Wait for a timer to expire (use the name used with E.SetTimer()). Will remove the timer on complete
-	public Coroutine WaitForTimer(string timerName, bool skippable = false)	{ return StartQuestCoroutine(CoroutineWaitForTimer(timerName, true)); }
+	public Coroutine WaitForTimer(string timerName, bool skippable = false)	{ return StartQuestCoroutine(CoroutineWaitForTimer(timerName, skippable)); }
 
 	/// Invokes the specified function after the specified time has elapsed (non-blocking). EG: `E.DelayedInvoke(1, ()=/>{ C.Plr.FaceLeft(); } );`
 	public void DelayedInvoke( float time, System.Action functionToInvoke ) { StartQuestCoroutine(CoroutineDelayedInvoke(time, functionToInvoke)); }
@@ -342,6 +343,8 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	/// <summary>
 	/// Use this when you want to yield to another function that returns an IEnumerator
 	/// Usage: yield return E.WaitFor( SimpleExampleFunction ); or yield return E.WaitFor( ()=>ExampleFunctionWithParams(C.Dave, "lol") );
+	/// 
+	/// NB: Currently this cannot be used from a sequence started by E.StartBackgroundSequence(). It'll cause problems. If needed, tell Dave!
 	/// </summary>
 	/// 
 	/// <param name="functionToWaitFor">A function that returns IEnumerator. Eg: "SimpleExampleFunction" or, "()=/>ExampleFunctionWithParams(C.Dave, 69)" if it has params</param>
@@ -361,9 +364,10 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 				//if ( functionToWaitFor.Method.IsSpecialName == false && functionToWaitFor.Method.Name[0] != '<') // check it's not dynamic lambda expression method. Can't auto-load these.
 				if ( System.Attribute.IsDefined(functionToWaitFor.Method, TYPE_COMPILERGENERATED) == false )
 					SetAutoLoadScript( scriptable, functionToWaitFor.Method.Name, true, true ); // Note that if the calling function hasn't yielded yet, the auto-load script will be set by the calling function AFTER this call :(
-				
 			}	
 		}		
+
+		// Note: If started from a background sequence, we don't want to start a "skippable" coroutine... otherwise we do... But no way of knowing afaik..
 		return StartQuestCoroutine(functionToWaitFor(),true); 
 	}
 	public Coroutine WaitWhile( System.Func<bool> condition, bool skippable = false ) { return StartQuestCoroutine(CoroutineWaitWhile(condition, skippable)); }
@@ -1406,6 +1410,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 		return ShuffledIndex.Random(max);
 	}
 	
+	//! Returns a random int from min up to and including the "max". The id will not repeat until all ids have been used, and will not be repeated twice in a row.
+	public int Shuffle(int min, int max, string source = null) { return Shuffle(max-min,source)+min; }
+	
 	public bool FirstOption(int count, string source = null)
 	{
 		m_nextOption = Shuffle(count-1, source);
@@ -1830,7 +1837,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 
 	public void StartDialog(string dialogName)
-	{			
+	{
 		DialogTree dialog = GetDialogTree(dialogName);		
 		if ( dialog == null )
 		{
@@ -2067,7 +2074,6 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	//
 	// Misc utilities
 	//
-
 
 	/// Starts a coroutine, adding it to the list of current cancelable sequences
 	public Coroutine StartQuestCoroutine( IEnumerator routine, bool cancelable = false )
@@ -2347,7 +2353,6 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			Settings.Language = Settings.Language;
 
 
-
 		//
 		// initialise Data classes ( rooms, characters, etc.
 		//		- Copies the default data from their prefabs into permanent data that's kept between scenes.
@@ -2377,47 +2382,12 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			QuestUtils.CopyFields(m_cameraData,m_cameraPrefab.GetData());
 		}
 
-		// Initialise Rooms
-		foreach (RoomComponent prefab in m_roomPrefabs) 
-		{
-			Room data = new Room();
-			QuestUtils.CopyFields(data, prefab.GetData());
-			m_rooms.Add(data);
-			data.Initialise( prefab.gameObject );
-		}
+		// Initialise quest objects (which can be-reset before restoring a game)
+		InitialiseQuestObjects();		
 
 
-		// Initialise inventory
-		foreach (InventoryComponent prefab in m_inventoryPrefabs) 
-		{
-			Inventory data = new Inventory();
-			QuestUtils.CopyFields(data, prefab.GetData());
-			m_inventoryItems.Add(data);
-			data.Initialise( prefab.gameObject );
-		}
-
-		// Initialise Characters
-		foreach (CharacterComponent prefab in m_characterPrefabs) 
-		{
-			Character data = new Character();
-			QuestUtils.CopyFields(data, prefab.GetData());
-			m_characters.Add(data);
-			data.Initialise( prefab.gameObject );
-		}
-
-		// Initialise Dialogs
-		foreach (DialogTreeComponent prefab in m_dialogTreePrefabs) 
-		{
-			DialogTree data = new DialogTree();
-			QuestUtils.CopyFields(data, prefab.GetData());
-			m_dialogTrees.Add(data);
-			data.Initialise( prefab.gameObject );
-		}
-
-
-		// TODO: Give ability to change which character is the player. for now it's always the first
+		// Set first character in list as default player character
 		m_player = m_characters[0];
-
 
 		// Initialise Guis
 		foreach (GuiComponent prefab in m_guiPrefabs) 
@@ -2428,6 +2398,50 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			data.Initialise( prefab.gameObject );
 		}
 
+	}
+
+	// Clears and initialises quest objects from initial prefab state. Done on game start and again on Restore
+	void InitialiseQuestObjects()
+	{	
+		// Initialise Rooms
+		m_rooms.Clear();
+		foreach (RoomComponent prefab in m_roomPrefabs) 
+		{
+			Room data = new Room();
+			QuestUtils.CopyFields(data, prefab.GetData());
+			m_rooms.Add(data);
+			data.Initialise( prefab.gameObject );
+		}
+
+		// Initialise inventory
+		m_inventoryItems.Clear();
+		foreach (InventoryComponent prefab in m_inventoryPrefabs) 
+		{
+			Inventory data = new Inventory();
+			QuestUtils.CopyFields(data, prefab.GetData());
+			m_inventoryItems.Add(data);
+			data.Initialise( prefab.gameObject );
+		}
+
+		// Initialise Characters
+		m_characters.Clear();
+		foreach (CharacterComponent prefab in m_characterPrefabs) 
+		{
+			Character data = new Character();
+			QuestUtils.CopyFields(data, prefab.GetData());
+			m_characters.Add(data);
+			data.Initialise( prefab.gameObject );
+		}
+
+		// Initialise Dialogs
+		m_dialogTrees.Clear();
+		foreach (DialogTreeComponent prefab in m_dialogTreePrefabs) 
+		{
+			DialogTree data = new DialogTree();
+			QuestUtils.CopyFields(data, prefab.GetData());
+			m_dialogTrees.Add(data);
+			data.Initialise( prefab.gameObject );
+		}
 	}
 
 	// Use this for initialization
@@ -2441,6 +2455,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 		// Test hack for save/restoring menu manager.. wasn't working though, maybe try again later
 		//m_saveManager.AddSaveData("MenuMan",m_menuManager);
+		AddSaveData("BgSeq", m_bgSequenceData, OnPostRestoreBgSequence);
 
 		ExOnGameStart();
 		ExtentionOnGameStart(); // For back compatability
@@ -2449,7 +2464,6 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 		// Register for OnSceneLoaded AFTER loading the scene first time (So we don't get things out of order. We want to call OnGameStart first)
 		SceneManager.sceneLoaded += OnSceneLoaded;
-
 	}
 
 	void OnSceneLoaded( Scene scene, LoadSceneMode loadSceneMode ) { OnSceneLoaded(); }
@@ -2586,22 +2600,6 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 					System.Reflection.MethodInfo method = m_globalScript.GetType().GetMethod( FUNC_UPDATE, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance );
 					if ( method != null ) method.Invoke(m_globalScript,null);
 				}
-				/* Gui should update even when paused
-				//
-				// Gui Update (non blocking)
-				//
-				foreach ( Gui gui in m_guis )
-				{
-					if ( gui.Instance != null && gui.Instance.isActiveAndEnabled && gui.GetScript() != null )
-					{
-						System.Reflection.MethodInfo method = gui.GetScript().GetType().GetMethod( FUNC_UPDATE, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance );
-						if ( method != null )
-						{							
-							method.Invoke(gui.GetScript(),null);
-						}						
-					}
-				}
-				*/
 
 				//
 				// Room Update (non blocking)
@@ -2725,6 +2723,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 	partial void ExProcessClick(eQuestVerb verb, IQuestClickable clickable, Vector2 mousePosition, bool interactionFound);
 	partial void ExOnEndCutscene();
 	partial void ExOnRoomLoad(); // room scene loaded, before first Update and any script functions are called
+	partial void ExOnPostRestore(int version); // When post restore called
 
 	partial void ExOnCharacterEnterRegion(Character character, RegionComponent region);
 	partial void ExOnCharacterExitRegion(Character character, RegionComponent region);
@@ -2759,13 +2758,13 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 		m_displayActive = true;
 		// Get tranlated string
-		text = SystemText.GetDisplayText(text, id, "Narr");
+		text = SystemText.GetDisplayText(text, id, PowerQuest.STR_NARR);
 
 		// Start audio
 		SystemAudio.Stop(m_dialogAudioSource);
 		m_dialogAudioSource = null;
 		if ( Settings.DialogDisplay != QuestSettings.eDialogDisplay.TextOnly )
-			m_dialogAudioSource = SystemText.PlayAudio(id, "Narr",null, SystemAudio.Get.NarratorMixerGroup);
+			m_dialogAudioSource = SystemText.PlayAudio(id, PowerQuest.STR_NARR, null, SystemAudio.Get.NarratorMixerGroup);
 		
 		if ( Settings.DialogDisplay != QuestSettings.eDialogDisplay.SpeechOnly || PowerQuest.Get.AlwaysShowDisplayText )
 		{
@@ -2996,6 +2995,7 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 			for ( int i = 0; i < overlapCount; ++i )
 			{
 				IQuestClickable clickable = null;
+				bool baselineFixed = false;
 				GameObject pickedObj = m_tempPicked[i].gameObject;
 				{
 					GuiDialogOption component = pickedObj.GetComponent<GuiDialogOption>();
@@ -3024,7 +3024,11 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 				if ( clickable == null )
 				{
 					PropComponent component = pickedObj.GetComponent<PropComponent>();
-					if ( component != null ) clickable = component.GetData() as IQuestClickable;
+					if ( component != null ) 
+					{
+						clickable = component.GetData() as IQuestClickable;
+						baselineFixed = component.GetData().BaselineFixed;
+					}
 				}
 				if ( clickable == null )
 				{
@@ -3036,7 +3040,9 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 					if ( clickable.Clickable )
 					{
 						// Default baseline is the clickable baseline + the vertical offset of the object
-						float baseline = clickable.Baseline + pickedObj.transform.position.y; // + baselineOffset;
+						float baseline = clickable.Baseline;
+						if ( baselineFixed == false )
+							baseline += pickedObj.transform.position.y;
 
 						if ( clickable.ClickableType == eQuestClickableType.Gui || clickable.ClickableType == eQuestClickableType.Inventory )
 						{
@@ -3324,12 +3330,12 @@ public partial class PowerQuest : Singleton<PowerQuest>, ISerializationCallbackR
 
 	static IEnumerator CoroutineWaitForTime(float time, bool skippable)
 	{		
-		bool first = true; // first frame the mouse will always be down, so don't skip until 2nd. When time starts as 0, we still want to pause for a single frame.
-		while ( (time > 0.0f || first)
+		int frame = 0; // first frame the mouse will always be down, so don't skip until 2nd. When time starts as 0, we still want to pause for a single frame.
+		while ( (time > 0.0f || frame<2)
 			&& PowerQuest.Get.GetSkippingCutscene() == false
-			&& ( skippable == false || PowerQuest.Get.HandleSkipDialogKeyPressed() == false || first ) )
+			&& ( skippable == false || PowerQuest.Get.HandleSkipDialogKeyPressed() == false || frame<1 ) )
 		{
-			first = false;
+			++frame;
 			yield return new WaitForEndOfFrame();
 			if ( SystemTime.Paused == false )
 			{

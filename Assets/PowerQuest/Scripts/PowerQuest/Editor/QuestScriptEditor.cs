@@ -58,6 +58,9 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 
 	static readonly string REGEX_FUNCTION_START_PREFIX = @"\b(?<=\w+\s+)"; // Checks for word boundary with a string and space, like "void "
 	static readonly string REGEX_FUNCTION_START = @"\s*\(.+\n*.*\{.*\n\r?";	
+
+	// For finding extra fucntions when not compiled- Not exhaustive and very explicit since we dont' want false matches
+	static readonly Regex REGEX_FUNCTION = new Regex(@"(?:void|bool|IEnumerator)\s(\w+)"+REGEX_FUNCTION_START, RegexOptions.Compiled);	
 	
 	static readonly string REGEX_CLASS_START = @"public (?:partial )?class \w*.+\n*.*\{.*\n\r?";
 	static readonly Regex REGEX_EMPTY_FUNC = new Regex(@"^\s*(End)?\s*$", RegexOptions.Compiled);
@@ -134,7 +137,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			new Regex(@"(?<=^|\W)GlobalScript\.Script\.", RegexOptions.Compiled), 	// GlobalScript.Script. -> Globals. No longer needed, but left to cleanup old scripts that might still be using GlobalScript.Script
 			new Regex(@"(?<=^|\W)(R|C|I|G|D)(?:oom|haracter|nventory|ui|ialog)(\w*)\.Script\.", RegexOptions.Compiled), 	// RoomKitchen.Script. => R.Kitchen.Script. (or CharacterDave => C.Dave, or InventoryBucket => I.Bucket, GuiBlah => G.GuiBlah, DialogBlah...)
 			
-			new Regex(@"(\s*)E\.WaitFor\(\s*(\w+)\s*\)\;", RegexOptions.Compiled),                   // => Blah -> E.WaitFor(Blah);
+			new Regex(@"(\s*)E\.WaitFor\(\s*(\w*\.?\w+)\s*\)\;", RegexOptions.Compiled),                   // => Blah -> E.WaitFor(Blah);
 			new Regex(@"(\s*)E\.WaitFor\(\(\)\s*\=\>\s*(.*)\s*\)\s*\;?\)\;", RegexOptions.Compiled), // => Blah(what) -> E.WaitFor(()=>Blah(what));
 			
 		};
@@ -236,7 +239,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			
 			new Regex(@"^(\s*)\=\>\s*(.*)\)\;?", RegexOptions.Compiled),
 
-			new Regex(@"^(\s*)\=\>\s*(\w+)\;?", RegexOptions.Compiled),
+			new Regex(@"^(\s*)\=\>\s*(\w*\.?\w+)\;?", RegexOptions.Compiled),
 			
 
 
@@ -424,7 +427,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 		public Color m_cursor = Color.black;		
 	}
 
-	class Contents
+	public static class Contents
 	{
 		public static readonly GUIContent PLAY = EditorGUIUtility.IconContent("PlayButton");
 		public static readonly GUIContent PAUSE = EditorGUIUtility.IconContent("PauseButton");
@@ -1112,6 +1115,12 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 						Debug.Log("Creating: "+item.GetFunction());
 						QuestEditorUtils.CreateScriptFunction(m_path, item.GetFunction(), item.m_coroutine );
 						Open(m_path,m_scriptClass,m_scriptType,item.m_name,item.m_coroutine);
+												
+						if ( m_functionNames.Contains(m_function) == false )
+						{
+							m_functionNames.Add(m_function);
+							m_functionNamesNice.Add(ObjectNames.NicifyVariableName(m_function));
+						}
 					}
 				));
 				
@@ -1693,7 +1702,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 	}
 
 
-	void ReadAllFunctionNames(string path)
+	void ReadAllFunctionNames(string path, string allText = null)
 	{
 		if ( PowerQuestEditor.IsOpen() == false )
 			return;
@@ -1709,6 +1718,8 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			assembly = typeof(PowerQuest).Assembly;
 		System.Type t = System.Type.GetType(string.Format("{0}, {1}", fileName,  assembly.FullName ) );
 		
+		HashSet<string> ignored = new HashSet<string>();
+
 		if ( t != null )
 		{
 			MethodInfo[] methods = t.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
@@ -1718,12 +1729,49 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 				// checking for '<' is cheaper and does the same thing. comp-generated classes are named like "<CallingClass>_d__02"				
 				if ( method.IsSpecialName == false && method.Name[0] != '<' && System.Attribute.IsDefined(method, TYPE_SCRIPTIGNOREATTRIB) == false ) 
 					m_functionNames.Add(method.Name);
+				else 
+					ignored.Add(method.Name);
 			}
 		}
 		else 
 		{
-			// NB: This doesn't matter- Just means there's no thing yet
+			// NB: This doesn't matter- Just means the file is new and not compiled
 			// Debug.LogWarning("Couldn't find class "+fileName);
+		}
+
+		// If waiting on compile, open the file and find names from regex (could be too slow?)
+		if ( t == null || PowerQuestEditor.Get.GetSmartCompileRequired() )
+		{ 
+			// Script probably not compiled, so do slow way of finding functions
+			if ( allText == null )
+			{ 
+				try	
+				{ 
+					allText = File.ReadAllText(path);
+				}
+				catch (System.Exception e)
+				{ 
+					Debug.LogError("Failed to load from "+m_path+": "+e.Message);
+				}
+			}
+
+			if ( allText != null )
+			{ 
+				MatchCollection mcol = REGEX_FUNCTION.Matches(allText);			
+				//string dbgLog = "";
+				foreach ( Match match in mcol )
+				{ 
+					string func = match.Groups[1].Value;
+					if ( ignored.Contains(func) == false && m_functionNames.Contains(func) == false )
+					{ 
+						//dbgLog+=func+"\n";
+						m_functionNames.Add(func);
+					}
+				}
+				//if ( IsString.Valid(dbgLog))
+				//	Debug.Log("Adding uncompiled functions to list: "+dbgLog);
+			}
+
 		}
 
 		// Sort function names
@@ -2010,7 +2058,7 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 			Debug.LogError("Failed to load from "+m_path+": "+e.Message);
 		}
 
-		ReadAllFunctionNames(m_path);
+		ReadAllFunctionNames(m_path, m_text);
 		if ( m_functionNames.Contains(m_function) == false )
 		{
 			m_functionNames.Add(m_function);
@@ -2446,9 +2494,12 @@ public partial class QuestScriptEditor : EditorWindow, IHasCustomMenu
 
 		// Check if need to reload functions. TODO: (should also check if should reload file text too)
 		//if ( File.Exists(m_path) && File.GetLastWriteTime(m_path) > m_sourceModifiedTime ) - can't check source modified time cause it might not be compiled yet
+
+		/* Not sure why we were doing this here? It's done on load anyway/
 		{
 			ReadAllFunctionNames(m_path);		
 		}
+		/**/
 
 		/*// Go back to last scrolling cursor pos on focus (Doesn't seem to work). Try again some time later
 		TextEditor tEditor = FindTextEditor();		
@@ -2661,8 +2712,7 @@ public class NewFunctionWindow : PopupWindowContent
 		{
 			m_returnString = RETURN_TYPE_NAMES[(int)m_returnType];
 		}
-		m_name = EditorGUILayout.TextField(m_name).Trim();
-
+		m_name = Regex.Replace(EditorGUILayout.TextField(m_name),@"\W+",""); // Remove non function characters
 		
 		/*/
 		if ( m_coroutine )

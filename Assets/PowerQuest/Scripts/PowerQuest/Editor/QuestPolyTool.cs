@@ -654,7 +654,10 @@ class QuestPolyTool : EditorTool, IDrawSelectedHandles
 	
 	// Grabs polygon data from the collider into m_paths and m_offset
 	void SetupPathsFromCollider()
-	{ 
+	{
+		if ( m_collider == null )
+			m_collider = ((PolygonCollider2D)target);
+		
 		m_useSpriteConfirm = false;
 		m_offset = m_collider.offset;
 		if ( m_paths == null )

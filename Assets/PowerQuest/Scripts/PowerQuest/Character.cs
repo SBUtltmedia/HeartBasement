@@ -967,7 +967,8 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 		//Debug.Log(GetDescription() + " Walking to "+pos.ToString());	
 			
 		// This stops the sequence being cancellable,  since 'Walking' property is used to check if it's possible to cancel, and BG walking shouldn't be cancelable
-		PowerQuest.Get.DisableCancel();
+		if ( IsPlayer )
+			PowerQuest.Get.DisableCancel();
 
 		if ( Moveable == false )
 			return;
@@ -1041,7 +1042,8 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 		m_faceAfterWalk = eFace.None;			
 		m_waypoints.Clear();
 		// This stops the sequence being cancellable,  since 'Walking' property is used to check if it's possible to cancel, and BG walking shouldn't be cancelable
-		PowerQuest.Get.DisableCancel();
+		if ( IsPlayer )
+			PowerQuest.Get.DisableCancel();
 
 		if ( Moveable == false )
 			return;
@@ -1083,7 +1085,8 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 		//Debug.Log(GetDescription() + " Walking to "+pos.ToString());	
 			
 		// This stops the sequence being cancellable,  since 'Walking' property is used to check if it's possible to cancel, and BG walking shouldn't be cancelable
-		PowerQuest.Get.DisableCancel();
+		if ( IsPlayer )
+			PowerQuest.Get.DisableCancel();
 		
 		if ( Moveable == false )
 			return;
@@ -1520,8 +1523,11 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 			}
 		}
 
-		// After first walk, sequences are no longer cancelable. Note, ANY characters walk will stop the sequence being cancelable (It was buggy when it was just the player...)
-		PowerQuest.Get.OnPlayerWalkComplete();
+		// After first walk, sequences are no longer cancelable. 
+		// Note, Previously ANY characters walk wouldstop the sequence being cancelable (It was buggy back on Coatrack when it was just the player... )
+		// Trying it with player only again now, after having issues with following players breaking cancellable stuff.
+		if ( IsPlayer )
+			PowerQuest.Get.OnPlayerWalkComplete();
 		
 		yield break;
 	}
@@ -1534,15 +1540,15 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 		if ( PowerQuest.Get.GetSkippingCutscene() )
 			yield break;
 		
-		StartSay( text, id );
-		yield return PowerQuest.Get.WaitForDialog(PowerQuest.Get.GetTextDisplayTime(text), m_dialogAudioSource, PowerQuest.Get.GetShouldSayTextAutoAdvance(), true, m_dialogText);		
+		QuestText sayText = StartSay( text, id );
+		yield return PowerQuest.Get.WaitForDialog(PowerQuest.Get.GetTextDisplayTime(text), m_dialogAudioSource, PowerQuest.Get.GetShouldSayTextAutoAdvance(), true, sayText);		
 		EndSay();
 	}
 
 	IEnumerator CoroutineSayBG(string text, int id = -1)
 	{			
-		StartSay( text, id,true );
-		yield return PowerQuest.Get.WaitForDialog(PowerQuest.Get.GetTextDisplayTime(text), m_dialogAudioSource, true, false, m_dialogText);
+		QuestText sayText = StartSay( text, id,true );
+		yield return PowerQuest.Get.WaitForDialog(PowerQuest.Get.GetTextDisplayTime(text), m_dialogAudioSource, true, false, sayText);
 		EndSay();
 	}	
 	
@@ -1668,7 +1674,7 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 
 	bool m_startSayCalled = false;
 
-	void StartSay(string line, int id = -1, bool background = false )
+	QuestText StartSay(string line, int id = -1, bool background = false )
 	{		
 		//Debug.Log($"StartSay- {ScriptName}: {line}");	
 		m_startSayCalled=true;
@@ -1749,10 +1755,20 @@ public partial class Character : IQuestClickable, ICharacter, IQuestScriptable, 
 				speechObj = dialogGui.Instance.gameObject;
 		}
 
+		QuestText resultText = m_dialogText;
 		if ( speechObj != null )
-		{		
+		{				
 			System.Array.ForEach(speechObj.GetComponents<ISpeechGui>(), iSpeechGui=>iSpeechGui.StartSay(this, line, id, background));
+			// Find the quest text that is used for the text. (This is currently only used for skipping "typing" text. Would be neater as ISpeechGui function, but that'd break for people updating.
+			System.Array.ForEach(speechObj.GetComponentsInChildren<QuestText>(), item=>
+			{
+				if ( resultText == null || (item != null && item.text == line) )
+					resultText = item;
+			});
 		}
+
+		// Return a text component- this is so speech guis can have their text skipped. NB: would be neater for ISpeechGui.StartSay to return this, but it would break for people updating :(
+		return resultText;
 	}
 
 	void EndSay()

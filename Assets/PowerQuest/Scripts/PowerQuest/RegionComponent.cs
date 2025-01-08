@@ -56,7 +56,7 @@ public partial class Region : IRegion, IQuestScriptable, IQuestSaveCachable
 	public string ScriptName { get{ return m_scriptName;} }
 	public MonoBehaviour Instance { get{ return m_instance; } }
 	public Region Data {get {return this;} }
-	public bool Enabled { get{ return m_enabled;} set{m_enabled = value;} }
+	public bool Enabled { get{ return m_enabled;} set{m_enabled = value; if ( m_instance != null && m_enabled ) m_instance.gameObject.SetActive(true); } }
 	public bool Walkable 
 	{ 
 		get { return m_walkable; } 
@@ -78,7 +78,7 @@ public partial class Region : IRegion, IQuestScriptable, IQuestSaveCachable
 	public bool ContainsCharacter(ICharacter character = null) { return GetCharacterOnRegion(character); }
 
 	public bool GetCharacterOnRegion(ICharacter character = null)
-	{ 
+	{
 		if ( m_instance == null || m_characterOnRegionMask == null ) 
 			return false;  // If instance is null, don't used cached data, it won't be accurate
 
@@ -246,15 +246,16 @@ public class RegionComponent : MonoBehaviour
 			return 1;
 		if ( m_polygonCollider == null )
 			return 1;
-       
-        return Mathf.Clamp01(GetDistanceIntoRegion(point)/GetData().FadeDistance);
+	
+		return Mathf.Clamp01(GetDistanceIntoRegion(point)/GetData().FadeDistance);
 	}
 
 	// Updates and returns whether the character entered/exited/stayed in the region. this is used in non-blocking situations
 	public eTriggerResult UpdateCharacterOnRegionState( int index, bool background )
 	{
 		eTriggerResult result = eTriggerResult.None;
-
+		if ( index >= m_data.GetCharacterOnRegionMask().Count )
+			return result; // In case of load game with different regions
 		bool inside = m_data.GetCharacterOnRegionMask().Get(index);
 		bool wasInside = m_data.GetCharacterOnRegionMaskOld(background).Get(index);
 		
@@ -292,6 +293,14 @@ public class RegionComponent : MonoBehaviour
 		m_data.GetCharacterOnRegionMask().Length = PowerQuest.Get.GetCharacters_SaveFlagNotDirtied().Count; // kind of hacky way to get this info :/
 		m_data.GetCharacterOnRegionMaskOld(true).Length = m_data.GetCharacterOnRegionMask().Length;
 		m_data.GetCharacterOnRegionMaskOld(false).Length = m_data.GetCharacterOnRegionMask().Length;
+		InitializeCollider();
+	}
+
+	// Sets up min and max points on the collider
+	public void InitializeCollider()
+	{ 
+		if ( m_polygonCollider == null )
+			m_polygonCollider = GetComponent<PolygonCollider2D>();		
 
 		// Find min and max points of collider
 		if ( m_polygonCollider != null )

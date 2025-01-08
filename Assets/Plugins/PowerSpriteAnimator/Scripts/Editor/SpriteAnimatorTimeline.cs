@@ -107,7 +107,7 @@ public partial class SpriteAnimator
 					// Remove selected autocomplete line
 					if ( m_acSelectedIndex >=0 && m_acSelectedIndex < m_acList.Count )
 					{
-						m_acListAll.RemoveAll(item=>item.m_functionName == m_acList[m_acSelectedIndex].m_functionName);
+						m_acListAll.RemoveAll(item=>string.Equals(item.m_functionName, m_acList[m_acSelectedIndex].m_functionName, System.StringComparison.OrdinalIgnoreCase));
 						ClearAutoComplete();
 					}
 					e.Use();

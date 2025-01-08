@@ -377,13 +377,18 @@ public class HotspotComponentEditor : Editor
 [CustomEditor(typeof(RegionComponent))]
 public class RegionComponentEditor : Editor 
 {
-	bool m_first = false;
+	
 	PolygonCollider2D m_collider = null;
-
+	
+	/* Don't show automatically any more, its annoying /
+	bool m_first = false;
 	public void OnEnable()
 	{	
 		m_first = true;
 	}
+	/**/
+
+
 
 	public override void OnInspectorGUI()
 	{
@@ -391,9 +396,11 @@ public class RegionComponentEditor : Editor
 		RegionComponent component = (RegionComponent)target;
 		if ( component == null )
 			return;
+		/* Don't show automatically any more, its annoying /
 		if ( m_first )
-			QuestPolyTool.Show(component);
+			QuestPolyTool.Show(component);		
 		m_first = false;
+		/**/
 		
 		if (m_collider == null )
 			m_collider = component.GetComponent<PolygonCollider2D>();
@@ -466,6 +473,10 @@ public class RegionComponentEditor : Editor
 		// REgion doesn't have clickable utils (baseline, walkto, etc)	
 		//RegionComponent component = (RegionComponent)target;
 		//QuestClickableEditorUtils.OnSceneGUI( component.transform, component.GetData() );
+
+		// Draw walkable area (maybe just rely on polygon collider for that...)
+		QuestPolyTool.DrawCollider((target as MonoBehaviour).gameObject);
+
 	}
 
 }

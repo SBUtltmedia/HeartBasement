@@ -457,23 +457,13 @@ public class QuestEditorUtils
 		//Debug.Log("Prefab Path: "+path);
 		bool foundFile = false;
 
+		string[] lines = null;
 		try 
 		{		
-			int lineNum = 0;			
-			foreach ( string line in File.ReadAllLines(path) )
-			{
-				if ( line.Contains(functionName+"(") )
-				{
-					foundLineNum = lineNum+2;
-					break;
-				}
-				lineNum++;
-			}
+			lines = File.ReadAllLines(path);
 			foundFile = true;			
 		} 
-		catch 
-		{ 
-		}
+		catch { }
 		
 		if ( foundFile == false )
 		{
@@ -481,12 +471,28 @@ public class QuestEditorUtils
 			try 
 			{
 				File.WriteAllText(path, fileTemplateText);
+				lines = File.ReadAllLines(path);
 				foundFile = true;
 				PowerQuestEditor.GetPowerQuestEditor().RequestAssetRefresh(); //AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
 			}
 			catch (System.Exception ex)
 			{ 
 				Debug.Log("Failed to create file: " + ex.ToString() ); 
+			}
+		}
+		
+		// find the line
+		if  ( foundFile && lines != null)
+		{ 
+			int lineNum = 0;			
+			foreach ( string line in lines )
+			{
+				if ( line.Contains(functionName+"(") )
+				{
+					foundLineNum = lineNum+2;
+					break;
+				}
+				lineNum++;
 			}
 		}
 
@@ -904,6 +910,7 @@ public class QuestEditorUtils
 		// Compile the source		
 		EditorUtility.DisplayProgressBar("Compiling","Compiling Files",0.4f); // Takes about 3 sec (of 6 total)
 		//var result = provider.CompileAssemblyFromFile(param,paths);
+		
 		var result = provider.CompileAssemblyFromSource(param,sources);
 
 		if (result.Errors.Count > 0)
@@ -1393,6 +1400,37 @@ public class PowerQuestAssetPostProcessor : AssetPostprocessor
 			}
 			*/
 		}
+	}
+	
+	void OnPreprocessAudio()
+	{
+		// If clip is in music folder, add music label, if in sfx folder, add sfx label. used for searching		
+		
+		if ( assetPath.Contains("Music") )
+		{
+			// Music default to streaming
+			AudioImporter audioImporter = (AudioImporter)assetImporter;
+			AudioImporterSampleSettings settings = audioImporter.defaultSampleSettings;
+			settings.loadType = AudioClipLoadType.Streaming;
+			audioImporter.defaultSampleSettings = settings;
+		}
+		else if ( assetPath.Contains("Voice") )
+		{
+			// VO default to compressed in memory 64bit compressed, optimized and not pre-loaded
+			AudioImporter audioImporter = (AudioImporter)assetImporter;			
+			
+			AudioImporterSampleSettings settings = audioImporter.defaultSampleSettings;
+			settings.loadType = AudioClipLoadType.CompressedInMemory;
+			settings.sampleRateSetting = AudioSampleRateSetting.OptimizeSampleRate;
+			settings.compressionFormat = AudioCompressionFormat.Vorbis;
+			settings.quality = 0.64f;
+			audioImporter.defaultSampleSettings = settings;
+			
+			audioImporter.preloadAudioData = false;
+			audioImporter.loadInBackground = false;
+			
+		}
+		// else if ( assetPath.Contains("SFX") ) {}
 	}
 	
 	void OnPostprocessAudio(AudioClip clip)

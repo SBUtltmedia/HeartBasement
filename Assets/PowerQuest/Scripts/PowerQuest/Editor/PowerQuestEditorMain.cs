@@ -315,6 +315,13 @@ public partial class PowerQuestEditor
 						index++;
 					}
 				}
+				else if ( m_listRooms.list[i] is RoomComponent ) 
+				{ 
+					// ungrouped
+					if ( index == m_quickSelectRoomIndex )
+						return m_listRooms.list[i] as RoomComponent;
+					index++;
+				}
 			}				
 		}
 
@@ -344,7 +351,7 @@ public partial class PowerQuestEditor
 			if ( Event.current.keyCode == KeyCode.Return )
 			{ 
 				m_doQuickSelectRoom = true;
-		}
+			}
 			else if ( Event.current.keyCode == KeyCode.DownArrow )
 			{ 
 				m_quickSelectRoomIndex++;

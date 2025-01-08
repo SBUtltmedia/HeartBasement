@@ -109,9 +109,23 @@ public partial class GuiControl : MonoBehaviour, IQuestClickable, IQuestScriptab
 	{
 		return false;
 	}
+		
+	/// Duplicates the control. Useful for adding elements dynamically to a gui. You can optionally specify a new name for the control, and a parent object (such as a grid container)
+	public virtual GuiControl DuplicateControl(string name = null, IGuiControl parent = null)
+	{
+		GuiControl control = null;
+		if ( parent != null )
+			control = GameObject.Instantiate( gameObject, parent.Instance.transform ).GetComponent<GuiControl>();		
+		else 
+			control = GameObject.Instantiate( gameObject ).GetComponent<GuiControl>();		
+		control.name = name == null ? ScriptName : name;
+		control.SetGui(m_gui);		
+		return control;
+	}
 
 	#endregion
 	#region Funcs: Public
+
 
 	protected virtual void Start()
 	{	
@@ -124,7 +138,7 @@ public partial class GuiControl : MonoBehaviour, IQuestClickable, IQuestScriptab
 		ExStart();
 	}
 
-	public bool Visible 
+	public virtual bool Visible 
 	{ 
 		get { return gameObject.activeSelf;} 
 		set	
@@ -272,7 +286,6 @@ public partial class GuiControl : MonoBehaviour, IQuestClickable, IQuestScriptab
 			
 		}
 	}
-
 	
 	/// Fade the sprite's alpha
 	public Coroutine Fade(float start, float end, float duration, eEaseCurve curve = eEaseCurve.Smooth ) { return PowerQuest.Get.StartCoroutine(CoroutineFade(start, end, duration,curve)); }
@@ -348,6 +361,11 @@ public partial class GuiControl : MonoBehaviour, IQuestClickable, IQuestScriptab
 	public virtual bool Clickable { get { return false; }  set{} }
 	public virtual string Description { get { return null; } set{} }
 	public virtual string Cursor { get { return null; } set{} }
+			
+	public virtual string Text { get { return null; } set{} }
+	public virtual string Anim { get { return null; } set{} }
+	public virtual Color Color { get { return Color.white; } set{} }
+
 
 	public eQuestClickableType ClickableType { get {return eQuestClickableType.Gui; } }
 	public MonoBehaviour Instance { get{ return this; } }

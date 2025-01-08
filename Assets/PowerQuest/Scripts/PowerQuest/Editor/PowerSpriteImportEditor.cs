@@ -31,6 +31,19 @@ public class PowerSpriteImportEditor : Editor
 	static readonly string PATH_POSTFIX_FULLRECT = "-FullRect";
 
 	static readonly char SLASH = Path.DirectorySeparatorChar; // Platform agnostic directory seperator
+	
+	static class Icons
+	{ 
+		public static readonly GUIContent Refresh = EditorGUIUtility.IconContent("d_RotateTool");		
+		public static readonly GUIContent LoopOff = EditorGUIUtility.IconContent("d_preAudioLoopOff");
+		public static readonly GUIContent LoopOn = EditorGUIUtility.IconContent("d_preAudioLoopOn");	
+		
+		public static readonly GUIContent Play = EditorGUIUtility.IconContent("PlayButton");
+		public static readonly GUIContent Hamburger = EditorGUIUtility.IconContent("pane options");
+				
+		public static readonly GUIContent Exposure = EditorGUIUtility.IconContent("Exposure");
+		public static readonly GUIContent Progress = EditorGUIUtility.IconContent("Progress");
+	}
 
 	string m_console = string.Empty;
 
@@ -64,6 +77,7 @@ public class PowerSpriteImportEditor : Editor
 	#region Variables: Private
 
 	[SerializeField] bool m_showSpriteImporterSettings = false;
+	[SerializeField] bool m_showReimportSpritesButton = false;
 
 	PowerSpriteImport m_component;
 	List<AnimImportData> m_items;
@@ -151,8 +165,6 @@ public class PowerSpriteImportEditor : Editor
 	#endregion
 	#region Functions: Init
 
-	[System.NonSerialized]
-	GUIContent m_openAnimIcon = null;
 
 	void OnEnable()
 	{
@@ -169,7 +181,7 @@ public class PowerSpriteImportEditor : Editor
 		m_list.drawHeaderCallback = (Rect rect) => {
 			EditorGUI.LabelField(new Rect(rect) {width = rect.width}, "Animation Name");
 			#if SHOW_LOOP_TICKBOX
-			EditorGUI.LabelField(new Rect(rect) {x = rect.width-107, width=107}, "1st Frame/Loop");
+			EditorGUI.LabelField(new Rect(rect) {x = rect.width-100, width=100}, "1st Frame/Loop");
 			#else
 			EditorGUI.LabelField(new Rect(rect) {x = rect.width-90, width=90}, "First Frame");
 			#endif
@@ -179,33 +191,36 @@ public class PowerSpriteImportEditor : Editor
 		{
 			if ( Event.current.isMouse && Event.current.button == 1 && rect.Contains(Event.current.mousePosition) )
 				LayoutContextMenu(rect, index);
-							
+
 			#if SHOW_LOOP_TICKBOX
-				float[] widths = {5,35,3,15,2,25,0,25};
+				float[] widths = {5,35,3,15,2,25,0,20,0,20};
 			#else			
 				float[] widths = {5,35,2,25,0,25}; // Element widths, including spaces
 			#endif
-							
-			int widthIndex = 0;
-			System.Array.ForEach( widths, elementWidth=> rect.width -= elementWidth ); // Get width minus right-aligned stuff
+
 			rect.height = EditorGUIUtility.singleLineHeight;
 			rect.y += 2;
 
+			EditorLayouter layout = new EditorLayouter(rect);
+			layout.Stretched.Space.Fixed(35).Space.Fixed(15).Space.Fixed(25);		
+			#if SHOW_LOOP_TICKBOX
+				layout.Fixed(20);
+			#endif
+			if ( m_showReimportSpritesButton )
+				layout.Fixed(20);
+							
 			// Name
 			
 			SerializedProperty listItem = m_list.serializedProperty.GetArrayElementAtIndex(index);
 			EditorGUI.BeginChangeCheck();
-			EditorGUI.PropertyField( rect, listItem.FindPropertyRelative("m_name"), GUIContent.none);
+			EditorGUI.PropertyField( layout, listItem.FindPropertyRelative("m_name"), GUIContent.none);
 			if ( EditorGUI.EndChangeCheck() )
 					m_list.index = index;
-			
-			rect.xMin += rect.width + widths[widthIndex++];
-			rect.width = widths[widthIndex++];
-			
+
 			// First Frame
 
 			EditorGUI.BeginChangeCheck();
-			m_items[index].m_firstFrame = EditorGUI.DelayedIntField( rect, m_items[index].m_firstFrame);
+			m_items[index].m_firstFrame = EditorGUI.DelayedIntField( layout, m_items[index].m_firstFrame);
 			if ( EditorGUI.EndChangeCheck() )
 			{
 				// Recalc previous length since it will have changed
@@ -218,36 +233,40 @@ public class PowerSpriteImportEditor : Editor
 			if ( string.IsNullOrEmpty(m_items[index].m_name ) )
 				GUI.enabled = false;
 			
-			rect.y -= 2;			
-			rect.xMin += rect.width + widths[widthIndex++];
-			rect.width = widths[widthIndex++];
+			
+			rect.y -= 2;
 				
 			#if SHOW_LOOP_TICKBOX	
 			
 			// Loop			
-			bool newLoop = EditorGUI.Toggle(rect, m_items[index].m_loop);
+			//bool newLoop = EditorGUI.Toggle(rect, m_items[index].m_loop ? Icons.LoopOn: Icons.LoopOff, m_items[index].m_loop);
+			bool newLoop = EditorGUI.Toggle(layout, m_items[index].m_loop);
 			if ( newLoop != m_items[index].m_loop )
 				ToggleLooping(m_items[index]);
 
-			rect.xMin += rect.width + widths[widthIndex++];
-			rect.width = widths[widthIndex++];	
 			#endif			
 
 			// Play
 
-			if ( m_openAnimIcon == null )
-				m_openAnimIcon = EditorGUIUtility.IconContent("PlayButton");
-			if ( GUI.Button(rect, m_openAnimIcon, EditorStyles.miniButtonLeft) )
+			if ( GUI.Button(layout, Icons.Play, EditorStyles.miniButtonLeft) )
 			{
 				LocateAnim(m_items[index]);
 				OpenAnim(m_items[index]);
 			}
 
-			rect.xMin += rect.width + widths[widthIndex++];
-			rect.width = widths[widthIndex++];
+			
+			if ( m_showReimportSpritesButton )
+			{
+				// Refresh sprites			
+				Icons.LoopOff.tooltip = "Reimport sprites";
+				if ( GUI.Button(layout, Icons.LoopOff, new GUIStyle(EditorStyles.miniButtonMid) ) )
+					ImportSprites(index);
+			}
+
 			
 			// '...'
-			if ( GUI.Button(rect, "...", EditorStyles.miniButtonRight) )
+			rect = layout;
+			if ( GUI.Button(rect, Icons.Hamburger, EditorStyles.miniButtonRight) )
 			{
 				LayoutContextMenu(rect, index);
 			}
@@ -421,11 +440,20 @@ public class PowerSpriteImportEditor : Editor
 		m_showSpriteImporterSettings = EditorGUILayout.Foldout(m_showSpriteImporterSettings, "Advanced Settings",true);
 		if ( m_showSpriteImporterSettings )
 		{
-			EditorGUILayout.LabelField("Notes:");
+			EditorGUILayout.LabelField("Notes:", EditorStyles.miniBoldLabel);
 			m_component.m_notes= EditorGUILayout.TextArea(m_component.m_notes);			
-			//EditorGUILayout.Space();
-
-			importTags |= GUILayout.Button( "Import Aseprite Tags" );
+			EditorGUILayout.Space();
+			
+			EditorGUILayout.LabelField("Layers:", EditorStyles.miniBoldLabel);			
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_importLayers"));
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_ignoreLayers"));
+			EditorGUILayout.Space();
+			EditorGUILayout.LabelField("Importer config:", EditorStyles.miniBoldLabel);			
+			m_showReimportSpritesButton = GUILayout.Toggle(m_showReimportSpritesButton, "Show Reimport Sprites button");
+			m_asepritePath = EditorGUILayout.TextField("Aseprite Path", m_asepritePath);			
+			EditorGUILayout.Space();
+			//importTags |= GUILayout.Button( "Import Aseprite Tags" );
+			EditorGUILayout.LabelField("Sprite settings:", EditorStyles.miniBoldLabel);
 			m_component.m_spriteDirectory = EditorGUILayout.TextField("Sprite Folder", m_component.m_spriteDirectory );
 			m_component.m_createSingleSpriteAnims = EditorGUILayout.Toggle("Create single sprite animations", m_component.m_createSingleSpriteAnims);
 			m_component.m_trimSprites = EditorGUILayout.Toggle("Trim Sprites (Aseprite only)", m_component.m_trimSprites);
@@ -436,10 +464,7 @@ public class PowerSpriteImportEditor : Editor
 			m_component.m_compression = (PowerSpriteImport.eTextureCompression)EditorGUILayout.EnumPopup("Compression", (System.Enum)m_component.m_compression);
 			m_component.m_crunchedCompression = EditorGUILayout.Toggle("Crunched Compression", m_component.m_crunchedCompression);
 			
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_importLayers"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_ignoreLayers"));
 
-			m_asepritePath = EditorGUILayout.TextField("Aseprite Path", m_asepritePath);
 		}
 
 		GUILayout.Space(20);
@@ -561,6 +586,7 @@ public class PowerSpriteImportEditor : Editor
 			
 			// Check if we can add options to add props (only if this importer is for the selected room, prop doesn't exist, etc
 			bool createProp = Quest.PowerQuestEditor.IsOpen();
+			createProp &= Application.isPlaying == false;
 			createProp &= Quest.PowerQuestEditor.Get.GetSelectedRoom() != null;
 			if ( createProp )
 			{	
@@ -783,6 +809,8 @@ public class PowerSpriteImportEditor : Editor
 		// Wait up to 20 seconds for exit
 		process.WaitForExit(20000);
 
+		List<AnimImportData> oldList = new List<AnimImportData>(m_items);
+
 		// import the json
 		string jsonString = File.ReadAllText($"{jsonFile}");
 		AsepriteJsonData tagData = UnityEngine.JsonUtility.FromJson<AsepriteJsonData>(jsonString);
@@ -799,7 +827,14 @@ public class PowerSpriteImportEditor : Editor
 					// Add empty tag where necessary
 					m_items.Add( new AnimImportData(){m_name = null, m_firstFrame = last+1} );
 				}
-				m_items.Add( new AnimImportData(){m_name = tag.name, m_firstFrame = tag.from+1} );
+
+				AnimImportData data = oldList.Find(item=> item.m_name == tag.name );				
+				if ( data != null )
+					data.m_firstFrame = tag.from+1;
+				else 
+					data = new AnimImportData(){m_name = tag.name, m_firstFrame = tag.from+1};
+				
+				m_items.Add( data );
 				last = tag.to+1;
 			}
 			// find frame count, and ignore last frame if it's not tagged
@@ -991,6 +1026,7 @@ public class PowerSpriteImportEditor : Editor
 				if ( File.Exists(m_component.m_sourceDirectory+".meta") )
 					File.Delete(m_component.m_sourceDirectory+".meta");
 			}
+
 			catch
 			{
 			}

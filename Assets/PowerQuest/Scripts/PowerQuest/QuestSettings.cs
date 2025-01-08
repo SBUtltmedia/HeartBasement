@@ -39,7 +39,7 @@ public partial class QuestSettings
 		set
 		{ 
 			m_musicVolume = value; 
-			SystemAudio.SetVolume(AudioCue.eAudioType.Music, value);
+			SystemAudio.Get.SetVolume(AudioCue.eAudioType.Music, value);
 		} 
 	}
 
@@ -50,7 +50,7 @@ public partial class QuestSettings
 		set
 		{ 
 			m_sfxVolume = value; 
-			SystemAudio.SetVolume(AudioCue.eAudioType.Sound, value);
+			SystemAudio.Get.SetVolume(AudioCue.eAudioType.Sound, value);
 		} 
 	}
 
@@ -61,11 +61,11 @@ public partial class QuestSettings
 		set
 		{ 			
 			m_dialogVolume = value;
-			SystemAudio.SetVolume(AudioCue.eAudioType.Dialog, value);
+			SystemAudio.Get.SetVolume(AudioCue.eAudioType.Dialog, value);
 		} 
 	}
 
-	// Gets/Sets the speed of text in the game
+	/// Gets/Sets the speed of text in the game
 	public float TextSpeedMultiplier
 	{
 		get => m_textSpeedMultiplier;
@@ -80,6 +80,7 @@ public partial class QuestSettings
 	}
 	
 	public CursorLockMode m_lockCursor = CursorLockMode.Confined;
+	/// Gets or sets whether the cursor is locked to the screen.  Note, in editor it's always unlocked.
 	public CursorLockMode LockCursor 
 	{ 
 		get => m_lockCursor; 
@@ -95,9 +96,9 @@ public partial class QuestSettings
 	public void OnInitialise()
 	{
 		AudioListener.volume = m_masterVolume;
-		SystemAudio.SetVolume(AudioCue.eAudioType.Music, m_musicVolume);
-		SystemAudio.SetVolume(AudioCue.eAudioType.Sound, m_sfxVolume);
-		SystemAudio.SetVolume(AudioCue.eAudioType.Dialog, m_dialogVolume);
+		SystemAudio.Get.SetVolume(AudioCue.eAudioType.Music, m_musicVolume);
+		SystemAudio.Get.SetVolume(AudioCue.eAudioType.Sound, m_sfxVolume);
+		SystemAudio.Get.SetVolume(AudioCue.eAudioType.Dialog, m_dialogVolume);
 		LockCursor = m_lockCursor;
 		Language = m_languageCode;
 		ExOnInitialise();
