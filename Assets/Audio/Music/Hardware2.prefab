@@ -73,9 +73,11 @@ MonoBehaviour:
     m_max: 0
     m_hasMax: 0
     m_hasValue: 1
+  m_fadeInTime: 0
   m_noDuplicateTime: -1
   m_mixerGroup: {fileID: 0}
   m_reverbPreset: 0
+  m_reverbLevel: 0
   m_distortionLevel: 0
   m_lowPass: 0
   m_lowPassQ: 1
@@ -86,7 +88,7 @@ MonoBehaviour:
   m_highPassFilter: {fileID: 0}
   m_chorusFilter: {fileID: 0}
   m_sounds:
-  - m_sound: {fileID: 8300000, guid: 773f26dbbea6c9c40ab9a3388930ec75, type: 3}
+  - m_sound: {fileID: 8300000, guid: 23543bc119c73b34e86d2cb1aea5656e, type: 3}
     m_weight: 1.2
     m_loop: 0
     m_volume:
