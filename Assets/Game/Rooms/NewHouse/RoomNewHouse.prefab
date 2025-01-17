@@ -173,6 +173,7 @@ MonoBehaviour:
   m_animations: []
   m_sprites:
   - {fileID: 21300000, guid: 8f17a3393d5484b56bcaa7ca5c166c20, type: 3}
+  m_variantShouldOverrideArt: 0
 --- !u!1 &6613513375846957266
 GameObject:
   m_ObjectHideFlags: 0
