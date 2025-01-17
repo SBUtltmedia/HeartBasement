@@ -133,7 +133,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f0f11138c9e9ce14fb23c5f295280cd9, type: 3}
   - {fileID: 21300000, guid: 7a785040b5041074f82f5bc8e6000f89, type: 3}
   - {fileID: 21300000, guid: f91541f0cac0aab4bbc83cdc29dcaf4d, type: 3}
-  - {fileID: 21300000, guid: fbe2501dec7194b488f544437167acda, type: 3}
   m_variantShouldOverrideArt: 0
 --- !u!1 &1188119584316416
 GameObject:
