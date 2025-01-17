@@ -29,7 +29,7 @@ public class RoomMap : RoomScript<RoomMap>
 			Prop("Back").Animation = "HeartBasementMapFlooded";
 		} else {
 			R.Map.ActiveWalkableArea = 0;
-			Prop("Back").Animation = "HeartBasementMapNew";
+			Prop("Back").Animation = "HeartBasementMap";
 		}
 		
 		

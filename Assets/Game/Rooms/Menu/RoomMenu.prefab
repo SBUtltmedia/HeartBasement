@@ -146,6 +146,7 @@ MonoBehaviour:
   - {fileID: 7400000, guid: 6345a6288d5d17d4a9f448997fc2040a, type: 2}
   m_sprites:
   - {fileID: 21300000, guid: dd6e28f3a372a5c4086576ce8e15ef90, type: 3}
+  m_variantShouldOverrideArt: 0
 --- !u!1 &8162297620575944087
 GameObject:
   m_ObjectHideFlags: 0
