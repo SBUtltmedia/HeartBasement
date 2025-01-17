@@ -55,6 +55,7 @@ SpriteAtlas:
   - {fileID: 4620599527784502767, guid: e9a7c009e8bd944db9e08546972d9fef, type: 3}
   - {fileID: -7672687199303312756, guid: e9a7c009e8bd944db9e08546972d9fef, type: 3}
   - {fileID: 5203703017128292093, guid: e9a7c009e8bd944db9e08546972d9fef, type: 3}
+  - {fileID: 21300000, guid: 0e38e90a7fdaa4ef5a82a79764b82637, type: 3}
   - {fileID: 21300000, guid: ce74a75ac981648bf985be47cd60afec, type: 3}
   - {fileID: 21300000, guid: 91107fbd5a7d7498e8f2ec46890dd137, type: 3}
   m_PackedSpriteNamesToIndex:
@@ -63,6 +64,7 @@ SpriteAtlas:
   - sign
   - HeartBasementMap2
   - Layer 2
+  - HeartBasementMapEnd
   - HeartBasementMapNew
   - HeartBasementMapFlooded
   m_RenderDataMap: {}
