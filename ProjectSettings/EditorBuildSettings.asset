@@ -9,9 +9,6 @@ EditorBuildSettings:
     path: Assets/Game/Rooms/Menu/SceneRoomMenu.unity
     guid: 1cba98e3ad9925245ac0b9fef42e09d1
   - enabled: 1
-    path: Assets/Game/Rooms/Cutscene/SceneRoomCutscene.unity
-    guid: 08659064ecd544e4ab6b722f71057e99
-  - enabled: 1
     path: Assets/Game/Rooms/Home/SceneRoomHome.unity
     guid: 1121794b7ab7e6f44a29b3e8be8fbb08
   - enabled: 1
