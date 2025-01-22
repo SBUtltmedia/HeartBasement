@@ -43,12 +43,14 @@ public class DialogUsePhone : DialogTreeScript<DialogUsePhone>
 		
 		yield return E.FadeOut(1);
 		
+		yield return C.Dave.ChangeRoom(R.Home);
+		
 		C.Tony.Enable();
-		C.Tony.ChangeRoom(R.Home);
+		yield return C.Tony.ChangeRoom(R.Home);
 		C.Tony.SetPosition(Point("HomeDoorPosition"));
 		
 		yield return C.Dave.Face(eFace.Right);
-		if (C.Dave.Position == Point("HomeDoorPosition"))
+		//if (C.Dave.Position == Point("HomeDoorPosition"))
 			C.Dave.SetPosition(new Vector2(Point("HomeDoorPosition")[0] - 250, Point("HomeDoorPosition")[1]));
 		
 		yield return E.FadeIn(1);

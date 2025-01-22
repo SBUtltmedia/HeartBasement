@@ -48,7 +48,8 @@ public partial class GlobalScript : GlobalScriptBase<GlobalScript>
 	
 	public bool rained = false;
 	
-	public bool testflag = false;
+	// public bool testflag = false;
+	public bool testflag = true;
 	
 	public bool conciseflag = false;
 	
