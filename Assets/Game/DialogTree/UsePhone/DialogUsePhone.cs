@@ -204,7 +204,7 @@ public class DialogUsePhone : DialogTreeScript<DialogUsePhone>
 
 	IEnumerator Option6( IDialogOption option )
 	{
-		yield return C.Dave.Say(" Hello, I'm Dave, I'm interested in the property on 11 Hill Lane.", 140);
+		yield return C.Dave.Say(" Hello, I'm interested in the property on 11 Hill Lane.", 140);
 		yield return C.Dave.Say(" Is it still available?", 141);
 		yield return C.Display(" Yes it is!", 67);
 		yield return C.Display(" It's a beautiful hilltop property with a stunning view of the entire island, and-", 68);
@@ -216,7 +216,7 @@ public class DialogUsePhone : DialogTreeScript<DialogUsePhone>
 		yield return C.Display(" Great! This is the easiest sale I've ever had!", 71);
 		
 		yield return E.WaitForGui(G.Explanation);
-
+		
 		yield return C.Display(" The house will be ready for you in three months.", 72);
 		yield return C.Dave.Say(" THREE MONTHS?!", 145);
 		yield return C.Dave.Say(" I'm standing here in a water up to my neck, and no matter what I do, it keeps coming back!", 146);
@@ -230,7 +230,7 @@ public class DialogUsePhone : DialogTreeScript<DialogUsePhone>
 		
 		yield return E.FadeOut(1);
 		if (R.Current != R.Home){
-			C.Dave.ChangeRoom(R.Home);
+			yield return C.Dave.ChangeRoom(R.Home);
 		}
 		yield return C.Display("3 minutes later", 59);
 		Prop("Box").Enable();
