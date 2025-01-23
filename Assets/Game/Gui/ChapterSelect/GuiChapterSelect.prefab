@@ -127,7 +127,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 58
+      value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.y
@@ -147,7 +147,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '0: Tutorial'
+      value: '1: Tutorial'
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Anchor
@@ -163,7 +163,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '0: Tutorial'
+      value: '1: Tutorial'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -171,7 +171,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '0: Tutorial'
+      value: '1: Tutorial'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
@@ -259,7 +259,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -328,11 +328,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '6: Repair Bilge Pump'
+      value: '7: Repair Bilge Pump'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '6: Repair Bilge Pump'
+      value: '7: Repair Bilge Pump'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -340,7 +340,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '6: Repair Bilge Pump'
+      value: '7: Repair Bilge Pump'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
@@ -716,11 +716,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 100
+      value: 85
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.x
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.y
@@ -728,7 +728,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 100
+      value: 85
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.y
@@ -752,11 +752,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '7: Use Electric Pump'
+      value: '8: Buy New House'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '7: Use Electric Pump'
+      value: '8: Buy New House'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -764,7 +764,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '7: Use Electric Pump'
+      value: '8: Buy New House'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
@@ -820,7 +820,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1044,11 +1044,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 113
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.x
-      value: -0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.y
@@ -1056,7 +1056,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 85
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.y
@@ -1080,11 +1080,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '8: Buy New House'
+      value: '9: Use Electric Pump'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '8: Buy New House'
+      value: '9: Use Electric Pump'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -1092,7 +1092,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '8: Buy New House'
+      value: '9: Use Electric Pump'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
@@ -1152,7 +1152,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1221,7 +1221,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '3: Recruit Muscle'
+      value: '4: Recruit Muscle'
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Anchor
@@ -1233,7 +1233,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '3: Recruit Muscle'
+      value: '4: Recruit Muscle'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -1241,7 +1241,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '3: Recruit Muscle'
+      value: '4: Recruit Muscle'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
@@ -1330,7 +1330,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 113
+      value: 85
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.x
@@ -1366,7 +1366,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '2: Try New Parts'
+      value: '3: Try New Parts'
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Anchor
@@ -1378,7 +1378,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '2: Try New Parts'
+      value: '3: Try New Parts'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -1386,7 +1386,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '2: Try New Parts'
+      value: '3: Try New Parts'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
@@ -1475,7 +1475,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 113
+      value: 73
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.x
@@ -1511,11 +1511,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '4: Order Pizza'
+      value: '5: Order Pizza'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '4: Order Pizza'
+      value: '5: Order Pizza'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -1523,7 +1523,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '4: Order Pizza'
+      value: '5: Order Pizza'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
@@ -1616,11 +1616,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 113
+      value: 67
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.x
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.y
@@ -1628,7 +1628,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 62
+      value: 67
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.y
@@ -1652,11 +1652,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '9: Game Won'
+      value: '10: Game Won'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '9: Game Won'
+      value: '10: Game Won'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -1664,7 +1664,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '9: Game Won'
+      value: '10: Game Won'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
@@ -1724,7 +1724,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1895,7 +1895,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 113
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.x
@@ -1907,7 +1907,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 62
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 1268325468812323407, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.y
@@ -1931,7 +1931,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '1:  Get Pump'
+      value: '2:  Get Pump'
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Anchor
@@ -1943,7 +1943,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '1:  Get Pump'
+      value: '2:  Get Pump'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -1951,7 +1951,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '1:  Get Pump'
+      value: '2:  Get Pump'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
@@ -2007,7 +2007,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9182457610012064376, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2040,7 +2040,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Size.x
-      value: 113
+      value: 78
       objectReference: {fileID: 0}
     - target: {fileID: 391928789686469833, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Offset.x
@@ -2076,11 +2076,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3486361324765900567, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_Text
-      value: '5: Second Flood'
+      value: '6: Second Flood'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_text
-      value: '5: Second Flood'
+      value: '6: Second Flood'
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_orderInLayer
@@ -2088,7 +2088,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5375699406641876803, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_unlocalizedText
-      value: '5: Second Flood'
+      value: '6: Second Flood'
       objectReference: {fileID: 0}
     - target: {fileID: 5566757491112813032, guid: e9c95fe066d3fef45a012e8deb308df2, type: 3}
       propertyPath: m_SortingOrder
