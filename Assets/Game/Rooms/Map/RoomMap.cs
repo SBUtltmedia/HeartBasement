@@ -193,12 +193,13 @@ public class RoomMap : RoomScript<RoomMap>
 
 	IEnumerator OnEnterRegionByhouse( IRegion region, ICharacter character )
 	{
+		C.Dave.Facing = eFace.Down;
 		yield return C.Dave.Say(" What's this?", 84);
 		yield return C.Dave.Say(" The house on the hill is for sale!", 86);
 		yield return C.Dave.Say(" I'm sure whoever lives there doesn't have to deal with any flooding.", 88);
 		yield return C.Dave.Say(" Better save the real estate agent's number.", 90);
 		yield return C.Dave.WalkTo(Point("HardwarePoint"));
-		C.Dave.ChangeRoom(R.Hardware);
+		yield return C.Dave.ChangeRoom(R.Hardware);
 		Region("Byhouse").Enabled = false;
 		yield return E.Break;
 	}
