@@ -1478,7 +1478,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: NewHouse
+    m_description: New House
     m_cursor: 
     m_visible: 1
     m_clickable: 0
