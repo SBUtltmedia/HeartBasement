@@ -7,7 +7,8 @@ using static GlobalScript;
 public class RoomHome : RoomScript<RoomHome>
 {
 	// This area is where you can put variables you want to use for game logic in your room
-	
+	bool beenSprayed = false;
+
 	// Pump Part variables
 	public enum handleType
 	{
@@ -332,7 +333,8 @@ public class RoomHome : RoomScript<RoomHome>
 
     IEnumerator OnExitRoom(IRoom oldRoom, IRoom newRoom)
     {
-		
+		if (Globals.rained)
+			Audio.Stop("Rain");
 		yield return E.Break;
 		
  }
@@ -398,7 +400,7 @@ public class RoomHome : RoomScript<RoomHome>
 			yield break;
 		}
 		
-		bool beenSprayed = false;
+		//bool beenSprayed = false;
 		
 		yield return C.Dave.WalkTo(Point("PumpPosition"));
 		Prop("Pump").Visible = false;
@@ -428,7 +430,7 @@ public class RoomHome : RoomScript<RoomHome>
 		}
 		else if (Globals.gameStage >= gameProgress.SecondFlood){
 		
-			if (Globals.gameStage == gameProgress.FixedPump){
+			if (Globals.gameStage == gameProgress.FixedPump){  
 		
 				bool firstTime = true;
 				if (pumpRepairs == 3){
@@ -443,11 +445,17 @@ public class RoomHome : RoomScript<RoomHome>
 						yield return E.WaitSkip();
 					yield return C.Dave.Say(" Phew!", 115);
 					yield return E.WaitSkip();
-		
-					Audio.Play("Rain");
+					
+					//RainAudio.volume  = 1.0f;
+					AudioHandle RainAudio = Audio.Play("Rain");
+
 					yield return E.WaitSkip();
 		
 					yield return FloodBasement();
+		
+					RainAudio.Fade(0.1f,1.0f);
+
+
 		
 					yield return C.Dave.Say(" Are you kidding me?!", 31);
 		
@@ -460,9 +468,8 @@ public class RoomHome : RoomScript<RoomHome>
 					yield return C.Dave.Say("I bet that house up there on the hill has a basement dryer than a desert!", 100);
 		
 					yield return C.Dave.Say(" I oughtta give that real estate agent a call.", 103);
-
-					
-
+		
+		
 		
 				} else {
 						yield return E.WaitSkip(1.5f);
@@ -486,7 +493,7 @@ public class RoomHome : RoomScript<RoomHome>
 					}
 				}
 			}
-		
+		 
 		 else if (!beenSprayed){
 				yield return E.Wait(1f);
 				 Audio.Play("WaterHose");
@@ -1083,7 +1090,8 @@ public class RoomHome : RoomScript<RoomHome>
 
 	IEnumerator OnUseInvHotspotWashingMachine( IHotspot hotspot, IInventory item )
 	{
-		if (item == I.Bucket || item == I.BilgePump) {
+
+		if (item == I.Bucket || item == I.BilgePump) {
 		
 		}
 		yield return E.Break;
@@ -1114,8 +1122,8 @@ public class RoomHome : RoomScript<RoomHome>
 		}
 		
 		
-		
-		
+		 
+		/*
 		if (Globals.gameStage == gameProgress.SecondFlood){
 		
 		Audio.Play("Motor");
@@ -1133,7 +1141,9 @@ public class RoomHome : RoomScript<RoomHome>
 		yield return E.WaitSkip();
 		yield return C.Dave.Say("Nothing my Pump-o-matic 5000 can't handle!", 114);
 		//LowerWater(4);
-		} else if (Globals.gameStage == gameProgress.FixedPump){
+		} 
+		else if (Globals.gameStage == gameProgress.FixedPump){
+		
 		
 		  bool firstTime = true;
 		  if (pumpRepairs == 3){
@@ -1165,6 +1175,7 @@ public class RoomHome : RoomScript<RoomHome>
 			  }
 		  }
 		}
+		*/
 		yield return E.Break;
 	}
 

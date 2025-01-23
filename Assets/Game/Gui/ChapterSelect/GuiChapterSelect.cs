@@ -14,7 +14,7 @@ public class GuiChapterSelect : GuiScript<GuiChapterSelect>
 			Globals.rained = false;
 		}
 		Globals.SetInventory();
-		//E.Restart(R.Home);
+		
 		C.Dave.ChangeRoom(R.Home);
 	}
 

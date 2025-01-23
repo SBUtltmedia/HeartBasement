@@ -161,7 +161,9 @@ public class RoomMap : RoomScript<RoomMap>
 		rain.SetActive(false);
 		
 		//C.Dave.Visible = true;
-		RainAudio.volume = 0.1f;
+		//RainAudio.volume = 0.1f;
+		RainAudio.Fade(0.1f,1.0f);
+
 		C.Dave.ChangeRoom(R.Home);
 		
 		E.FadeInBG(1);
@@ -199,19 +201,22 @@ public class RoomMap : RoomScript<RoomMap>
 		yield return C.Dave.Say(" I'm sure whoever lives there doesn't have to deal with any flooding.", 88);
 		yield return C.Dave.Say(" Better save the real estate agent's number.", 90);
 		yield return C.Dave.WalkTo(Point("HardwarePoint"));
-		yield return C.Dave.ChangeRoom(R.Hardware);
 		Region("Byhouse").Enabled = false;
+		yield return C.Dave.ChangeRoom(R.Hardware);
 		yield return E.Break;
 	}
-
+ 
 	IEnumerator OnInteractPropNewHouse( IProp prop )
 	{
-		if (Globals.gameStage > gameProgress.BoughtHouse){
+		if (Globals.gameStage == gameProgress.UsedElectricPump){
 			yield return C.Dave.WalkTo(Point("NewHousePoint"));
-			C.Dave.ChangeRoom(R.NewHouse);
-		} else {
+			yield return C.Dave.ChangeRoom(R.NewHouse);
+		} else if (Globals.gameStage == gameProgress.BoughtHouse){
 			yield return C.Dave.Say(" There's my new house", 132);
 			yield return C.Dave.Say(" I can't wait to move in!", 133);
+		} else {
+			yield return C.Dave.Say(" If I lived up there I wouldn't have to deal with any more floods.");
+			yield return C.Dave.Say(" Better give that real estate agent a call.");
 		}
 		yield return E.Break;
 	}
