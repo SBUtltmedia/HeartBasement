@@ -18,10 +18,23 @@ public class GuiTitleMenu : GuiScript<GuiTitleMenu>
 	IEnumerator OnClickStartGame( IGuiControl control )
 	{
 		G.TitleMenu.Hide();
+		
 		if (!E.RestoreSave(1)){
-			C.Dave.ChangeRoomBG(R.Home);
+			yield return C.Dave.ChangeRoom(R.Home);
+		} else {
+			Debug.Log("save restored");
 		}
+		
 		IButton startButton = (IButton) G.TitleMenu.GetControl("StartGame");
+		
+		/*
+		if (startButton.Text == "Start Game"){
+			 yield return C.Dave.ChangeRoom(R.Home);
+		} else {
+			yield return C.Dave.ChangeRoom(R.Previous);
+			C.Dave.Position = Globals.continue_pos;
+		}
+		*/
 		startButton.Text = "Continue";
 		
 		

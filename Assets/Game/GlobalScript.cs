@@ -55,6 +55,8 @@ public partial class GlobalScript : GlobalScriptBase<GlobalScript>
 	
 	public string urlQuery = "";
 	
+	public Vector2 continue_pos;
+	
 	/// Just an example of using a global variable that can be accessed in any room with `Globals.m_spokeToBarney`.
 	/// All variables like this in Quest Scripts are automatically saved
 	// public bool
@@ -117,6 +119,21 @@ public partial class GlobalScript : GlobalScriptBase<GlobalScript>
 	/// Called after restoring a game. Use this if you need to update any references based on saved data.
 	public void OnPostRestore(int version)
 	{
+		
+		Debug.Log("on post restore");
+		
+		GameObject restore_rain = GameObject.Find("Rain");
+		if (restore_rain)
+			restore_rain.SetActive(false);
+		
+		GameObject restore_fountain = GameObject.Find("Fountain");
+		if (restore_fountain)
+			restore_fountain.SetActive(false);
+
+		if (R.Current != R.Home){
+		   LowerWaterShader(0,"CharacterDave");	   
+		}
+		
 	}
 
 	/// Blocking script called whenever you enter a room, before fading in. Non-blocking functions only

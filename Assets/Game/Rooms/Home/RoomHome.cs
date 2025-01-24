@@ -977,8 +977,13 @@ public class RoomHome : RoomScript<RoomHome>
 			LowerWaterShader(i, "PropPumpProp");
 			LowerWaterShader(i, "PropHose");
 		
+			LowerWaterShader(i, "PropElectricPump");
+			LowerWaterShader(i, "PropBox");
+		
+		
 			yield return new WaitForSeconds(interval);
-		}
+		
+	}
 	}
 
 	public  IEnumerator ChangeWaterStage(int stageNum, bool animate = true, bool full = false)
@@ -1018,6 +1023,7 @@ public class RoomHome : RoomScript<RoomHome>
 			LowerWaterShader(i, "CharacterTony");
 			LowerWaterShader(i, "PropPumpProp");
 			LowerWaterShader(i, "PropElectricPump");
+			LowerWaterShader(i, "PropBox");
 			LowerWaterShader(i, "PropHose");
 		
 			yield return new WaitForSeconds((float)0.1);
