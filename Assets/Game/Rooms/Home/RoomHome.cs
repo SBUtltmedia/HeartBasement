@@ -432,7 +432,7 @@ public class RoomHome : RoomScript<RoomHome>
 		
 			if (Globals.gameStage == gameProgress.FixedPump){  
 		
-				bool firstTime = true;
+				//bool firstTime = true;
 				if (pumpRepairs == 3){
 					//Audio.Play("Motor");
 					yield return UnfloodBasement();
@@ -455,8 +455,6 @@ public class RoomHome : RoomScript<RoomHome>
 		
 					RainAudio.Fade(0.1f,1.0f);
 
-
-		
 					yield return C.Dave.Say(" Are you kidding me?!", 31);
 		
 					yield return C.Dave.Say("That's it.", 33);
@@ -467,9 +465,7 @@ public class RoomHome : RoomScript<RoomHome>
 		
 					yield return C.Dave.Say("I bet that house up there on the hill has a basement dryer than a desert!", 100);
 		
-					yield return C.Dave.Say(" I oughtta give that real estate agent a call.", 103);
-		
-		
+					yield return C.Dave.Say(" I oughtta give that real estate agent a call.", 103);	
 		
 				} else {
 						yield return E.WaitSkip(1.5f);
