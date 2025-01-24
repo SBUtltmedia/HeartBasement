@@ -211,7 +211,7 @@ public class RoomMap : RoomScript<RoomMap>
 		if (Globals.gameStage == gameProgress.UsedElectricPump){
 			yield return C.Dave.WalkTo(Point("NewHousePoint"));
 			yield return C.Dave.ChangeRoom(R.NewHouse);
-		} else if (D.UsePhone.GetOptionUsed("6"){
+		} else if (D.UsePhone.GetOptionUsed("6")){
 			yield return C.Dave.Say(" There's my new house", 132);
 			yield return C.Dave.Say(" I can't wait to move in!", 133);
 		} else {

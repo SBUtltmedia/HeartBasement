@@ -400,8 +400,6 @@ public class RoomHome : RoomScript<RoomHome>
 			yield break;
 		}
 		
-		//bool beenSprayed = false;
-		
 		yield return C.Dave.WalkTo(Point("PumpPosition"));
 		Prop("Pump").Visible = false;
 		Prop("Handle").Visible = false;
@@ -429,8 +427,16 @@ public class RoomHome : RoomScript<RoomHome>
 			yield return C.Dave.FaceDown();
 		}
 		else if (Globals.gameStage >= gameProgress.SecondFlood){
-		
-			if (Globals.gameStage == gameProgress.FixedPump){  
+			if (Globals.gameStage > gameProgress.FixedPump){
+				C.Dave.StopAnimation();
+				Prop("Pump").Visible = true;
+				Prop("Handle").Visible = true;
+
+				yield return C.Dave.Say(" This dang thang just ain't enough for the major floodage I get here.");
+				yield return C.Dave.Say(" At this point, I just want to leave this house.");
+				yield return C.Dave.Say(" I should call the realtor for the house up on the hill.");
+			}
+			else if (Globals.gameStage == gameProgress.FixedPump){
 		
 				//bool firstTime = true;
 				if (pumpRepairs == 3){
@@ -445,16 +451,16 @@ public class RoomHome : RoomScript<RoomHome>
 						yield return E.WaitSkip();
 					yield return C.Dave.Say(" Phew!", 115);
 					yield return E.WaitSkip();
-					
+		
 					//RainAudio.volume  = 1.0f;
 					AudioHandle RainAudio = Audio.Play("Rain");
-
+		
 					yield return E.WaitSkip();
 		
 					yield return FloodBasement();
 		
 					RainAudio.Fade(0.1f,1.0f);
-
+		
 					yield return C.Dave.Say(" Are you kidding me?!", 31);
 		
 					yield return C.Dave.Say("That's it.", 33);
@@ -465,7 +471,7 @@ public class RoomHome : RoomScript<RoomHome>
 		
 					yield return C.Dave.Say("I bet that house up there on the hill has a basement dryer than a desert!", 100);
 		
-					yield return C.Dave.Say(" I oughtta give that real estate agent a call.", 103);	
+					yield return C.Dave.Say(" I oughtta give that real estate agent a call.", 103);
 		
 				} else {
 						yield return E.WaitSkip(1.5f);
@@ -474,8 +480,6 @@ public class RoomHome : RoomScript<RoomHome>
 						Prop("Handle").Visible = true;
 					//Audio.Play("MotorFailure");
 					if (pumpRepairs == 0){
-		
-		
 		
 						yield return C.Dave.Say("It's broken!", 118);
 							yield return E.WaitSkip(1.0f);
@@ -489,7 +493,7 @@ public class RoomHome : RoomScript<RoomHome>
 					}
 				}
 			}
-		 
+		
 		 else if (!beenSprayed){
 				yield return E.Wait(1f);
 				 Audio.Play("WaterHose");
