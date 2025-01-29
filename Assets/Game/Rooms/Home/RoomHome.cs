@@ -662,9 +662,10 @@ public class RoomHome : RoomScript<RoomHome>
 		IEnumerator OnUseInvPropHose(IProp prop, IInventory item)
 		{
 			yield return OnUseInvPropPump(prop, item);
-			prop.Clickable = false;
+			// prop.Clickable = false;
 			yield return E.Break;
-		}
+		
+	}
 	
 
     private void returnHandleToInv()

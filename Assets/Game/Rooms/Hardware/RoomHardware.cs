@@ -34,22 +34,10 @@ public class RoomHardware : RoomScript<RoomHardware>
 		C.Dave.Face(eFace.Right, true);
 		C.HardwareClerk.ChangeRoomBG(R.Hardware);
 		C.HardwareClerk.Position = Point("HWClerkPosition");
-		
-		// Globals.gameStage = gameProgress.TriedPump1;
-		
+				
 		Audio.PlayMusic("Hardware1", 2);
 		
-		if( Globals.gameStage >= gameProgress.RightParts)
-		{
-			C.Tony.Enable();
-		}
-		else {
-			C.Tony.Disable();
-		}
-		
-		
-		
-		//E.SetPlayer(C.Tony);
+
 	}
 
 	IEnumerator OnEnterRoomAfterFade()
