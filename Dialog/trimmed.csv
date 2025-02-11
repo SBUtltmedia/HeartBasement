@@ -1,0 +1,186 @@
+Character	ID	English
+Dave	0	Gosh Durnit! My basement flooded again!
+Dave	41	I think I have a bucket 'round here somewhere...
+Narr	30	Your bucket is over on the shelf. Click on it to add it to your toolbox.
+Dave	3	 Not again!
+Dave	2	 It's a door to the outside.
+Dave	12	 I'm not goin nowhere yet
+Dave	44	Oh man... this is going to take forever.
+Dave	45	Maybe there's something at Doc's hardware store that can help.
+Narr	28	Click on the door to the right to leave your basement.
+Dave	6	 This bucket ain't gonna cut it...
+Dave	5	That's a lot of water!
+Narr	36	Click the door to leave your basement.
+Dave	46	 Finally! We got that dang water outta my dang basement!
+Dave	47	 I sure hope that never happens again!
+Narr	53	 Two weeks later...
+Narr	2	"Congratulations! The water level has decreased. However, it is not enough..."
+Dave	4	 This is too hard!
+Dave	15	I'd better head back to the hardware store.
+Dave	13	 This dang thang just ain't enough for the major floodage I get here.
+Dave	14	" At this point, I just want to leave this house."
+Dave	16	 I should call the realtor for the house up on the hill.
+Dave	115	 Phew!
+Dave	31	 Are you kidding me?!
+Dave	33	That's it.
+Dave	60	 I'm done.
+Dave	92	 I ain't puttin up with this dang basement any longer!
+Dave	100	I bet that house up there on the hill has a basement dryer than a desert!
+Dave	103	 I oughtta give that real estate agent a call.
+Dave	118	It's broken!
+Dave	119	 It's that rusty washer.
+Dave	120	 I'd better put the new washer on.
+Dave	121	" Whoops, forgot to tighten the washer!"
+Dave	50	 This pump is busted!
+Dave	56	" The valve is leaking, it looks like there's a rusty washer."
+Dave	57	" I don't have the tools to replace it, I need to go to Doc's."
+Dave	58	" The valve is leaking, it looks like there's a rusty washer."
+Dave	59	" I don't have the tools to replace it, I need to go to Doc's."
+Dave	25	I'm pooped! I need some extra muscle.
+Dave	26	"I bet my friend Tony could help out, I should give him a call."
+Narr	3	You've chosen the correct parts for the pump and the water level has decreased.
+Dave	7	Still not enough... I could use some extra hands.
+Dave	8	 This isn't any better. I should try different parts.
+Narr	62	 Rusty washer removed.
+Dave	122	 Where's that new washer?
+Dave	123	 That should do it!
+Dave	124	" Whoop, gotta take that rusty old washer off before I can put this shiny new one on."
+Narr	63	 New washer placed on pump.
+Tony	0	Here goes nothing!
+Narr	4	 The recruited muscle has helped bring the water level down.
+Tony	4	 Phew... I'm wiped out. Got any grub?
+Dave	34	" Gee Tony, I haven't got any food"
+Tony	2	 Why don't you give that pizza place a call?
+Tony	7	 I could eat an entire pie
+Narr	34	Bucket added to your toolbox.
+Dave	42	 There it is! Now I can scoop up some of this water.
+Narr	32	 Click on the bucket icon in your toolbox at the bottom left to select it.
+Narr	60	"You also have a cell phone, which you can use to call the Hint Hotline."
+Dave	43	 There's my bucket! I can use that to scoop out the water.
+Dave	44	Oh man... this is going to take forever.
+Dave	45	Maybe there's something at Doc's hardware store that can help.
+Narr	37	Click on a space in the room to walk to it.
+Dave	30	 This bucket aint going to cut it...
+Dave	48	 It's a window. Yup.
+Dave	49	"It's bleach, fer cleanin' yer clothes."
+Dave	51	It's a can of Mach brand orange spray paint.
+Dave	52	 It's my trusty old washing machine.
+Dave	35	 Although at this point I probably could just throw some detergent in the water and make my whole basement the washing machine.
+Dave	53	This clunker of a boiler is from the 1940's.
+Dave	36	"  It works, but it makes the worst darn noises you've ever dun heard."
+Dave	54	Haven't used this in a while.
+Dave	37	"For all you kids out there, this is what TV's looked like in the stone age."
+Dave	55	 I can't believe I thought this looked good.
+Tony	5	Pizza AND beer?!
+Tony	6	Just what I needed!
+Dave	38	 It's beautiful!
+Dave	40	Like a charm!
+Narr	65	 3 months later
+Dave	104	Hello?
+Narr	66	" Hi Dave, your new home is ready!"
+Dave	131	Finally!
+Dave	40	Like a charm!
+Narr	61	6 months later...
+Dave	113	 Another flood?
+Dave	114	Nothing my Pump-o-matic 5000 can't handle!
+Dave	115	 Phew!
+Dave	116	 The pump works again!
+Dave	117	Seriously?!
+Dave	118	It's broken!
+Dave	119	 It looks like there's a rusty washer.
+Dave	120	 I'd better put the new washer on.
+Dave	121	" Whoops, forgot to tighten the washer!"
+Narr	62	 Rusty washer removed.
+Dave	122	 Where's that new washer?
+Dave	123	 That should do it!
+Dave	124	" Whoop, gotta take that rusty old washer off before I can put this shiny new one on."
+Narr	63	 New washer placed on pump.
+Dave	125	 Ain't she a beauty?
+	0	Water
+	1	Pump
+	2	Handle
+	3	Bucket
+	4	Hose
+	5	Electric Pump
+	6	Box
+	7	Door
+	8	Window
+	9	Bleach
+	10	Spray Paint
+	11	Washing Machine
+	12	Boiler
+	13	TV
+	14	Couch
+Dave	32	 What a trip!
+Narr	7	 The Hardware Store
+Narr	8	 Home
+Narr	9	 Jim's House
+Dave	78	The road is flooded!
+Dave	80	 The only other way to Doc's is over that huge hill...
+Dave	82	Better get moving.
+Dave	84	 What's this?
+Dave	86	 The house on the hill is for sale!
+Dave	88	 I'm sure whoever lives there doesn't have to deal with any flooding.
+Dave	90	 Better save the real estate agent's number.
+Dave	132	 There's my new house
+Dave	133	 I can't wait to move in!
+Dave	94	 If I lived up there I wouldn't have to deal with any more floods.
+Dave	96	 Better give that real estate agent a call.
+	15	Doc's Hardware
+	16	Home
+	17	New House
+Dave	10	Let's take this back home and see how it works!
+Dave	11	I ain't leavin' til I've got somethin' to get that water outta my basement!
+Narr	11	 Beer has been added to your toolbolx.
+Dave	61	Used paint?! For only a dollar?! What a steal!
+Dave	62	I wonder what's in there.
+Dave	63	Poke a man? Now why would I do that?
+Dave	64	Poke a man? Now why would I do that?
+Dave	65	I wonder what's in there.
+Dave	66	Used paint?! For only a dollar?! What a steal!
+Dave	67	 Looks POWerful.
+Dave	68	 Looks POWerful.
+Dave	69	Blue rodent not included.
+Dave	70	Blue rodent not included.
+Dave	71	Oh. That's a pipe bomb.
+Dave	72	Oh. That's a pipe bomb.
+Dave	73	Lugging that hunk of iron around would be a work out in itself.
+Dave	74	Lugging that hunk of iron around would be a work out in itself.
+Dave	75	"Why so glum, chum?"
+Dave	76	"Why so glum, chum?"
+Dave	77	"A box of peanuts, walnuts, and pistachios."
+Dave	79	It's filled to the brim with lightning bolts.
+Dave	81	It's filled with banjos and kazoos. My favorite instruments!
+Dave	83	A can of red paint. Definitely my favorite color.
+Dave	85	A can of orange paint. Definitely my favorite color.
+Dave	87	A can of yellow paint. Definitely my favorite color.
+Dave	89	A can of green paint. Definitely my favorite color.
+Dave	91	A can of blue paint. Definitely my favorite color.
+Dave	93	A can of purple paint. Definitely my favorite color.
+Dave	95	Lamp Oil.
+Dave	97	It's rope. What did you expect?
+Dave	99	I hope he has the correct permits to sell these.
+Dave	101	Hey! I'm no chump...
+Dave	102	Am I?
+	18	Door
+	19	Used Paint
+	20	Question Box
+	21	Pokeball
+	22	POW Block
+	23	Gold Ring
+	24	Pipe Bomb
+	25	Buster Sword
+	26	Ghost
+	27	Box of Nuts
+	28	Box of Bolts
+	29	Box of Banjos & Kazoos
+	30	Red Paint
+	31	Orange Paint
+	32	Yellow Paint
+	33	Green Paint
+	34	Blue Paint
+	35	Purple Paint
+	36	Lamp Oil
+	37	Rope
+	38	Bombs
+	39	Sign
