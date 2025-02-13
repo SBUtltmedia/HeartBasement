@@ -408,7 +408,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Electric Pump
+    m_description: '&5 Electric Pump'
     m_cursor: 
     m_visible: 1
     m_clickable: 1
@@ -676,7 +676,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Pump
+    m_description: '&1 Pump'
     m_cursor: 
     m_visible: 1
     m_clickable: 1
@@ -850,7 +850,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Bleach
+    m_description: '&9 Bleach'
     m_cursor: 
     m_clickable: 1
     m_baseline: 0
@@ -932,7 +932,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Spray Paint
+    m_description: '&10 Spray Paint'
     m_cursor: 
     m_clickable: 1
     m_baseline: 0
@@ -1014,7 +1014,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: TV
+    m_description: '&13 TV'
     m_cursor: 
     m_clickable: 1
     m_baseline: 0
@@ -1101,7 +1101,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Washing Machine
+    m_description: '&11 Washing Machine'
     m_cursor: 
     m_clickable: 1
     m_baseline: 0
@@ -1186,7 +1186,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Window
+    m_description: '&8 Window'
     m_cursor: 
     m_clickable: 1
     m_baseline: 0
@@ -1268,7 +1268,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Couch
+    m_description: '&14 Couch'
     m_cursor: 
     m_clickable: 1
     m_baseline: 0
@@ -1355,7 +1355,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Water
+    m_description: '&0 Water'
     m_cursor: 
     m_visible: 0
     m_clickable: 0
@@ -1537,7 +1537,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Box
+    m_description: '&6 Box'
     m_cursor: 
     m_visible: 1
     m_clickable: 1
@@ -1716,7 +1716,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Hose
+    m_description: '&4 Hose'
     m_cursor: 
     m_visible: 1
     m_clickable: 0
@@ -1948,7 +1948,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Door
+    m_description: '&7 Door'
     m_cursor: Right
     m_clickable: 1
     m_baseline: 0
@@ -2030,7 +2030,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Boiler
+    m_description: '&12 Boiler'
     m_cursor: 
     m_clickable: 1
     m_baseline: 0
@@ -2120,7 +2120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Handle
+    m_description: '&2 Handle'
     m_cursor: 
     m_visible: 1
     m_clickable: 0
@@ -2299,7 +2299,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_data:
-    m_description: Bucket
+    m_description: '&3 Bucket'
     m_cursor: 
     m_visible: 1
     m_clickable: 1

@@ -215,8 +215,8 @@ public class RoomMap : RoomScript<RoomMap>
 			yield return C.Dave.Say(" There's my new house", 132);
 			yield return C.Dave.Say(" I can't wait to move in!", 133);
 		} else {
-			yield return C.Dave.Say(" If I lived up there I wouldn't have to deal with any more floods.");
-			yield return C.Dave.Say(" Better give that real estate agent a call.");
+			yield return C.Dave.Say(" If I lived up there I wouldn't have to deal with any more floods.", 94);
+			yield return C.Dave.Say(" Better give that real estate agent a call.", 96);
 		}
 		yield return E.Break;
 	}

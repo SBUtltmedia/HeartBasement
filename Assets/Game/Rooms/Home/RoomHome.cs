@@ -244,7 +244,7 @@ public class RoomHome : RoomScript<RoomHome>
     IEnumerator OnInteractHotspotDoor(IHotspot hotspot)
     {
 		if (Globals.gameStage < gameProgress.UsedBucket) {
-			yield return C.Dave.Say(" I'm not goin nowhere yet");
+			yield return C.Dave.Say(" I'm not goin nowhere yet", 12);
 		} else {
 		
 			yield return C.Dave.WalkTo(Point("HomeDoorPosition"));
@@ -432,9 +432,9 @@ public class RoomHome : RoomScript<RoomHome>
 				Prop("Pump").Visible = true;
 				Prop("Handle").Visible = true;
 
-				yield return C.Dave.Say(" This dang thang just ain't enough for the major floodage I get here.");
-				yield return C.Dave.Say(" At this point, I just want to leave this house.");
-				yield return C.Dave.Say(" I should call the realtor for the house up on the hill.");
+				yield return C.Dave.Say(" This dang thang just ain't enough for the major floodage I get here.", 13);
+				yield return C.Dave.Say(" At this point, I just want to leave this house.", 14);
+				yield return C.Dave.Say(" I should call the realtor for the house up on the hill.", 16);
 			}
 			else if (Globals.gameStage == gameProgress.FixedPump){
 		
